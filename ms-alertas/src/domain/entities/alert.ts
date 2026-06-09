@@ -15,5 +15,4 @@ export class Alert extends BaseAuditableEntity {
   status: AlertStatus;
   alertDate: Date;
   attendedAt?: Date;
-  active: boolean;
 }

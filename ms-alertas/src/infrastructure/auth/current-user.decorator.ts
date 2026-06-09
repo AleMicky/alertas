@@ -1,10 +1,10 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
-import { KeycloakUser } from './keycloak-user.type';
+import { AuthUser } from './auth-user.type';
 
 export const CurrentUser = createParamDecorator(
-  (_data: unknown, context: ExecutionContext): KeycloakUser | undefined => {
-    const request = context.switchToHttp().getRequest<{ user?: KeycloakUser }>();
+  (_data: unknown, context: ExecutionContext): AuthUser | undefined => {
+    const request = context.switchToHttp().getRequest<{ user?: AuthUser }>();
     return request.user;
   },
 );

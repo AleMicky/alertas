@@ -24,7 +24,4 @@ export class NotificationChannelEntity extends BaseAuditColumns {
 
   @Column({ nullable: true, length: 500 })
   description?: string;
-
-  @Column({ default: true })
-  active: boolean;
 }

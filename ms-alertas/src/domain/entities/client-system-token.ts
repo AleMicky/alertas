@@ -8,6 +8,5 @@ export class ClientSystemToken extends BaseAuditableEntity {
   description?: string;
   expiresAt?: Date | null;
   lastUsedAt?: Date | null;
-  active: boolean;
   clientSystem: ClientSystem;
 }

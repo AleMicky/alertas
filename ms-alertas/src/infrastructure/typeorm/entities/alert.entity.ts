@@ -65,9 +65,4 @@ export class AlertEntity extends BaseAuditColumns {
     nullable: true,
   })
   attendedAt?: Date;
-
-  @Column({
-    default: true,
-  })
-  active: boolean;
 }

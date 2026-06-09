@@ -28,4 +28,7 @@ export abstract class BaseAuditColumns {
     type: 'timestamp',
   })
   updatedAt!: Date;
+
+  @Column({ default: true })
+  active!: boolean;
 }

@@ -24,7 +24,4 @@ export class SeverityLevelEntity extends BaseAuditColumns {
     nullable: true,
   })
   attentionTimeMinutes?: number;
-
-  @Column({ default: true })
-  active: boolean;
 }

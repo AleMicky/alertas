@@ -1,6 +1,7 @@
 export abstract class BaseAuditableEntity {
   createdBy!: string | null;
-  createdAt!: Date | null;
+  createdAt!: Date;
   updatedBy!: string | null;
-  updatedAt!: Date | null;
+  updatedAt!: Date;
+  active!: boolean;
 }

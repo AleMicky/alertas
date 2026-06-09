@@ -7,5 +7,4 @@ export class SeverityLevel extends BaseAuditableEntity {
   description?: string;
   priority: number;
   attentionTimeMinutes?: number;
-  active: boolean;
 }

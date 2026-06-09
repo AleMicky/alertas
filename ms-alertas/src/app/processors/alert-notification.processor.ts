@@ -58,8 +58,7 @@ export class AlertNotificationProcessor extends WorkerHost {
 
       const channelCode = notification.notificationChannel.code;
       const channelKind = getNotificationChannelKind(channelCode);
-      const n8nChannel =
-        channelKind === 'GENERIC' ? channelCode : channelKind;
+      const n8nChannel = channelKind === 'GENERIC' ? channelCode : channelKind;
 
       const response = await this.n8nClient.sendNotification(webhookUrl, {
         notificationId: notification.id,

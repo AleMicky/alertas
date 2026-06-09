@@ -32,7 +32,4 @@ export class EventTypeEntity extends BaseAuditColumns {
   @ManyToOne(() => SeverityLevelEntity, { nullable: true })
   @JoinColumn({ name: 'severity_level_id' })
   severityLevel?: SeverityLevelEntity;
-
-  @Column({ default: true })
-  active: boolean;
 }

@@ -44,7 +44,4 @@ export class EventEntity extends BaseAuditColumns {
 
   @Column({ name: 'processed_at', type: 'timestamp', nullable: true })
   processedAt?: Date;
-
-  @Column({ default: true })
-  active: boolean;
 }

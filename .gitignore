@@ -49,6 +49,3 @@ pids/
 
 # ── Despliegue ────────────────────────────────────────────────────────────────
 .vercel
-
-# ── Credenciales n8n (configurar manualmente en cada ambiente) ────────────────
-ms-alertas/n8n/credentials/*.json

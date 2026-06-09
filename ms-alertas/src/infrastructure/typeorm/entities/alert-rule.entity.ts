@@ -56,9 +56,4 @@ export class AlertRuleEntity extends BaseAuditColumns {
     type: 'text',
   })
   messageTemplate: string;
-
-  @Column({
-    default: true,
-  })
-  active: boolean;
 }

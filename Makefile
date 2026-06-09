@@ -18,22 +18,13 @@ help: ## Muestra esta ayuda
 
 # ── Configuración inicial ─────────────────────────────────────────────────────
 
-.PHONY: setup env volumes install install-api install-web
-setup: env volumes install up seed ## Setup completo: .env + deps + infra + seeds
+.PHONY: setup env install install-api install-web
+setup: env install up seed ## Setup completo: .env + deps + infra + seeds
 	@echo "✓ Setup listo. Ejecuta: make api-dev  y  make web-dev"
 
 env: ## Crea .env desde .env.example si no existe
 	@test -f .env || (cp .env.example .env && echo "✓ Creado .env")
 	@test -f .env && echo "✓ .env OK"
-
-volumes: ## Crea volúmenes Docker externos (solo la primera vez)
-	@docker volume inspect ms-alertas_postgres_data >/dev/null 2>&1 || \
-		(docker volume create ms-alertas_postgres_data && echo "✓ Volumen postgres creado")
-	@docker volume inspect ms-alertas_n8n_data >/dev/null 2>&1 || \
-		(docker volume create ms-alertas_n8n_data && echo "✓ Volumen n8n creado")
-	@docker volume inspect ms-alertas_redis_data >/dev/null 2>&1 || \
-		(docker volume create ms-alertas_redis_data && echo "✓ Volumen redis creado")
-	@echo "✓ Volúmenes OK"
 
 install: install-api install-web ## Instala dependencias de backend y frontend
 
@@ -46,12 +37,10 @@ install-web: ## pnpm install en dashboard-web
 # ── Infraestructura (Docker) ──────────────────────────────────────────────────
 
 .PHONY: up down restart ps logs
-up: env ## Levanta Postgres, Keycloak, Redis y n8n
+up: env ## Levanta Postgres y Redis
 	$(COMPOSE) up -d
 	@echo "✓ Infra arriba"
 	@echo "  Postgres  → localhost:$${DB_PORT:-5432}"
-	@echo "  Keycloak  → http://localhost:$${KEYCLOAK_PORT:-8080}"
-	@echo "  n8n       → http://localhost:$${N8N_PORT:-5678}"
 	@echo "  Redis     → localhost:$${REDIS_PORT:-6379}"
 
 down: ## Detiene y elimina contenedores (conserva volúmenes)
@@ -59,9 +48,6 @@ down: ## Detiene y elimina contenedores (conserva volúmenes)
 
 restart: ## Reinicia todos los servicios Docker
 	$(COMPOSE) restart
-
-restart-keycloak: ## Reinicia Keycloak (útil tras cambiar el realm)
-	$(COMPOSE) restart keycloak
 
 ps: ## Estado de los contenedores
 	$(COMPOSE) ps
@@ -71,9 +57,6 @@ logs: ## Logs de todos los servicios (Ctrl+C para salir)
 
 logs-api-db: ## Logs solo de Postgres
 	$(COMPOSE) logs -f db
-
-logs-keycloak: ## Logs solo de Keycloak
-	$(COMPOSE) logs -f keycloak
 
 # ── Backend (ms-alertas / NestJS) ───────────────────────────────────────────
 
@@ -130,7 +113,6 @@ dev: up ## Levanta infra y muestra cómo arrancar API + frontend
 	@echo "    Dashboard → http://localhost:3000"
 	@echo "    API       → http://localhost:4001/api/v1"
 	@echo "    Swagger   → http://localhost:4001/api/v1/docs"
-	@echo "    Keycloak  → http://localhost:8080"
 	@echo ""
 
 seed: api-seed ## Alias de api-seed
@@ -147,7 +129,7 @@ test: api-test ## Ejecuta tests del API
 clean: web-clean ## Limpia artefactos locales (.next)
 	@echo "✓ Caché del frontend eliminada"
 
-clean-volumes: down ## ⚠️  Elimina volúmenes Docker (BORRA DATOS de BD, n8n, Redis)
+clean-volumes: ## ⚠️  Elimina volúmenes Docker (BORRA DATOS de BD y Redis)
 	@echo "⚠️  Eliminando volúmenes Docker..."
-	-docker volume rm ms-alertas_postgres_data ms-alertas_n8n_data ms-alertas_redis_data 2>/dev/null
+	$(COMPOSE) down -v
 	@echo "✓ Volúmenes eliminados"

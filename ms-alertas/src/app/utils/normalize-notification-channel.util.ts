@@ -37,7 +37,10 @@ export function getNotificationChannelKind(
   if (normalized.includes('TELEGRAM')) return 'TELEGRAM';
   if (normalized.includes('TEAMS')) return 'TEAMS';
   if (normalized.includes('WHATSAPP')) return 'WHATSAPP';
-  if (normalized.includes('GOOGLE_CALENDAR') || normalized.includes('CALENDAR')) {
+  if (
+    normalized.includes('GOOGLE_CALENDAR') ||
+    normalized.includes('CALENDAR')
+  ) {
     return 'GOOGLE_CALENDAR';
   }
 

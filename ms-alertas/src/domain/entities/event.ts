@@ -14,5 +14,4 @@ export class Event extends BaseAuditableEntity {
   status: EventStatus;
   eventDate: Date;
   processedAt?: Date;
-  active: boolean;
 }

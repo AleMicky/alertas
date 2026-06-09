@@ -72,7 +72,12 @@ export function AlertsHomeSummary({ alerts }: Props) {
               Últimas alertas registradas en el sistema.
             </CardDescription>
           </div>
-          <Button variant="outline" size="sm" render={<Link href="/alerts" />}>
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={<Link href="/alerts" />}
+          >
             Ver todas
             <ArrowRight className="size-4" />
           </Button>

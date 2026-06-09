@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 
 type AuthUser = {
@@ -10,6 +11,7 @@ type AuthUser = {
 
 export function useAuth() {
   const { data: session, status } = useSession();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const user: AuthUser | undefined = session?.user
     ? {
@@ -23,9 +25,15 @@ export function useAuth() {
     user,
     isAuthenticated: status === "authenticated",
     isLoading: status === "loading",
-    isLoggingOut: false,
+    isLoggingOut,
     logout: async () => {
-      await signOut({ callbackUrl: "/login" });
+      setIsLoggingOut(true);
+
+      try {
+        await signOut({ callbackUrl: "/login" });
+      } finally {
+        setIsLoggingOut(false);
+      }
     },
   };
 }

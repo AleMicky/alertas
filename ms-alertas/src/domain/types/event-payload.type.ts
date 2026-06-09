@@ -25,7 +25,8 @@ export interface WhatsAppRecipientPayload {
 }
 
 export interface EventRecipient
-  extends EmailRecipientPayload,
+  extends
+    EmailRecipientPayload,
     TelegramRecipientPayload,
     TeamsRecipientPayload,
     WhatsAppRecipientPayload {

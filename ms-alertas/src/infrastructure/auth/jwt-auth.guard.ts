@@ -9,7 +9,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from './public.decorator';
 
 @Injectable()
-export class KeycloakAuthGuard extends AuthGuard('jwt') {
+export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(private readonly reflector: Reflector) {
     super();
   }
@@ -29,7 +29,7 @@ export class KeycloakAuthGuard extends AuthGuard('jwt') {
 
   handleRequest<TUser>(err: Error | null, user: TUser): TUser {
     if (err || !user) {
-      throw err ?? new UnauthorizedException('Token de Keycloak inválido o ausente');
+      throw err ?? new UnauthorizedException('Token inválido o ausente');
     }
 
     return user;

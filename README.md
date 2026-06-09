@@ -1,6 +1,6 @@
 # Alertas
 
-Sistema de gestión y notificación de alertas. Monorepo con API NestJS, dashboard Next.js e infraestructura Docker (PostgreSQL, Keycloak, Redis, n8n).
+Sistema de gestión y notificación de alertas. Monorepo con API NestJS, dashboard Next.js e infraestructura Docker (PostgreSQL, Redis).
 
 ## Estructura
 
@@ -8,7 +8,6 @@ Sistema de gestión y notificación de alertas. Monorepo con API NestJS, dashboa
 alertas/
 ├── ms-alertas/       # API NestJS (puerto 4001)
 ├── dashboard-web/    # Dashboard Next.js (puerto 3000)
-├── keycloak/         # Realm de Keycloak (import automático)
 ├── docker-compose.yml
 ├── Makefile
 └── .env.example
@@ -26,13 +25,10 @@ alertas/
 # 1. Variables de entorno
 cp .env.example .env
 
-# 2. Volúmenes Docker (solo la primera vez)
-make volumes
-
-# 3. Setup completo: dependencias + infra + seeds
+# 2. Setup completo: dependencias + infra + seeds
 make setup
 
-# 4. En terminales separadas
+# 3. En terminales separadas
 make api-dev    # http://localhost:4001/api/v1
 make web-dev    # http://localhost:3000
 ```
@@ -44,19 +40,15 @@ make web-dev    # http://localhost:3000
 | Dashboard  | http://localhost:3000 |
 | API        | http://localhost:4001/api/v1 |
 | Swagger    | http://localhost:4001/api/v1/docs |
-| Keycloak   | http://localhost:8080 |
-| n8n        | http://localhost:5678 |
 
-## Credenciales de desarrollo (Keycloak)
+## Credenciales de desarrollo (dashboard)
 
-Realm: `alertas`
-
-| Usuario            | Contraseña    | Rol      |
-|--------------------|---------------|----------|
-| `admin.alertas`    | `Admin123*`   | admin    |
+| Usuario            | Contraseña     | Rol      |
+|--------------------|----------------|----------|
+| `admin.alertas`    | `Admin123*`    | admin    |
 | `operador.alertas` | `Operador123*` | operador |
 
-> Solo para desarrollo local. Cambiar en producción.
+> Configurables con `DASHBOARD_*` en `.env`. Solo para desarrollo local.
 
 ## Comandos útiles
 
@@ -79,7 +71,7 @@ Copiar `.env.example` a `.env` en la raíz. Es compartido por Docker Compose, `m
 
 1. Un sistema cliente envía un evento (`POST /api/v1/events`) con token `msa_...`
 2. El API crea la alerta y encola notificaciones (BullMQ + Redis)
-3. Un worker envía cada notificación al webhook n8n del canal configurado
+3. Un worker envía cada notificación al webhook del canal configurado
 4. El dashboard permite configurar sistemas, canales, severidades y monitorear eventos
 
 ## Subir a Git

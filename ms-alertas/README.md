@@ -1,12 +1,12 @@
 # MS Alert
 
-Microservicio **NestJS** para gestión de **eventos**, **alertas**, **reglas**, **severidades**, **canales de notificación**, **sistemas cliente** y **tokens**, con integración a **PostgreSQL** y **n8n**.
+Microservicio **NestJS** para gestión de **eventos**, **alertas**, **reglas**, **severidades**, **canales de notificación**, **sistemas cliente** y **tokens**, con integración a **PostgreSQL**.
 
 ## Requisitos
 
 - Node.js 20+
 - [pnpm](https://pnpm.io/)
-- Docker (opcional, para base de datos y n8n)
+- Docker (opcional, para base de datos y Redis)
 
 ## Configuración
 
@@ -22,7 +22,7 @@ pnpm install
 cp .env.example .env
 ```
 
-3. Levanta PostgreSQL y n8n (opcional):
+3. Levanta PostgreSQL y Redis (opcional):
 
 ```bash
 docker compose up -d

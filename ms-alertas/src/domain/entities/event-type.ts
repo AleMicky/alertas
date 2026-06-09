@@ -9,5 +9,4 @@ export class EventType extends BaseAuditableEntity {
   name: string;
   description?: string;
   severityLevel?: SeverityLevel;
-  active: boolean;
 }

@@ -12,5 +12,4 @@ export class AlertRule extends BaseAuditableEntity {
   notificationChannel: NotificationChannel;
   titleTemplate: string;
   messageTemplate: string;
-  active: boolean;
 }

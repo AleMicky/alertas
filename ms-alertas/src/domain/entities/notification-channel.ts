@@ -8,5 +8,4 @@ export class NotificationChannel extends BaseAuditableEntity {
   type: NotificationChannelType;
   webhookUrl: string;
   description?: string;
-  active: boolean;
 }

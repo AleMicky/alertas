@@ -35,7 +35,4 @@ export class ClientSystemTokenEntity extends BaseAuditColumns {
 
   @Column({ nullable: true, type: 'timestamp' })
   lastUsedAt?: Date;
-
-  @Column({ default: true })
-  active: boolean;
 }
