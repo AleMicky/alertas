@@ -1,10 +1,13 @@
 'use client';
 
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LoadingTable, PageHeader } from '@/shared/components';
+import { EmptyState, LoadingTable } from '@/shared/components';
 
+import { ClientSystemConfigurationHeader } from '@/features/client-systems/components/client-system/client-system-configuration-header';
 import { ClientSystemTokenTabContent } from '@/features/client-systems/components/client-system-token/client-system-token-tab-content';
 import { EventTypeTabContent } from '@/features/client-systems/components/event-type/event-type-tab-content';
 import { useClientSystemsQuery } from '@/features/client-systems/hooks/client-system/use-client-system-query';
@@ -24,25 +27,41 @@ export default function ClientSystemConfigurationPage() {
     );
   }
 
-  return (
-    <main className="p-6 space-y-4">
-      <PageHeader
-        title={`Configuración: ${clientSystem?.name ?? 'Sistema cliente'}`}
-        description="Gestiona tipos de evento y tokens de integración."
-      />
+  if (!clientSystem) {
+    return (
+      <main className="space-y-4 p-6">
+        <EmptyState
+          title="Sistema no encontrado"
+          description="El sistema cliente solicitado no existe o fue eliminado."
+        />
+        <div className="flex justify-center">
+          <Button nativeButton={false} render={<Link href="/client-systems" />}>
+            Volver al listado
+          </Button>
+        </div>
+      </main>
+    );
+  }
 
-      <Tabs defaultValue="event-types">
+  return (
+    <main className="space-y-6">
+      <ClientSystemConfigurationHeader clientSystem={clientSystem} />
+
+      <Tabs defaultValue="tokens">
         <TabsList>
-          <TabsTrigger value="event-types">Tipos de evento</TabsTrigger>
           <TabsTrigger value="tokens">Tokens</TabsTrigger>
+          <TabsTrigger value="event-types">Tipos de evento</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="event-types">
-          <EventTypeTabContent clientSystemId={clientSystemId} />
+        <TabsContent value="tokens" className="mt-4">
+          <ClientSystemTokenTabContent
+            clientSystemId={clientSystemId}
+            clientSystem={clientSystem}
+          />
         </TabsContent>
 
-        <TabsContent value="tokens">
-          <ClientSystemTokenTabContent clientSystemId={clientSystemId} />
+        <TabsContent value="event-types" className="mt-4">
+          <EventTypeTabContent clientSystemId={clientSystemId} />
         </TabsContent>
       </Tabs>
     </main>

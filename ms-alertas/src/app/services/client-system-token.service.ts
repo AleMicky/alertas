@@ -23,10 +23,22 @@ export class ClientSystemTokenService extends BaseService<ClientSystemToken> {
     super(clientSystemTokenRepository);
   }
 
-  findByClientSystemId(clientSystemId: string) {
-    return this.clientSystemTokenRepository.findByClientSystemId(
-      clientSystemId,
-    );
+  async findByClientSystemId(clientSystemId: string) {
+    const tokens =
+      await this.clientSystemTokenRepository.findByClientSystemId(
+        clientSystemId,
+      );
+
+    return tokens.map((token) => this.toPublicResponse(token));
+  }
+
+  toPublicResponse(token: ClientSystemToken) {
+    const { tokenHash: _tokenHash, ...rest } = token;
+
+    return {
+      ...rest,
+      token: `msa_••••••••${token.id.replace(/-/g, '').slice(-8)}`,
+    };
   }
 
   async create(

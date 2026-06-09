@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ConfirmDeleteDialog } from '@/shared/components/confirm-delete-dialog';
 import { StatusBadge } from '@/shared/components/status-badge';
 
-import { ClientSystem } from '../types/client-system.types';
+import { ClientSystem } from '../../types/client-system.types';
 
 interface CreateColumnsProps {
   onEdit: (item: ClientSystem) => void;

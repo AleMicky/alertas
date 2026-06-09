@@ -62,7 +62,7 @@ export function ClientSystemTokenFormDialog({
     <FormDialogLayout
       open={open}
       onOpenChange={onOpenChange}
-      title={initialData ? 'Editar token' : 'Nuevo token'}
+      title={initialData ? 'Editar token' : 'Generar token'}
     >
       <TanStackForm form={form}>
         <FieldGroup>
@@ -88,21 +88,23 @@ export function ClientSystemTokenFormDialog({
             )}
           </form.Field>
 
-          <form.Field name="active">
-            {(field) => (
-              <SwitchFormField
-                field={field}
-                label="Activo"
-                disabled={isSubmitting}
-              />
-            )}
-          </form.Field>
+          {initialData ? (
+            <form.Field name="active">
+              {(field) => (
+                <SwitchFormField
+                  field={field}
+                  label="Activo"
+                  disabled={isSubmitting}
+                />
+              )}
+            </form.Field>
+          ) : null}
         </FieldGroup>
 
         <FormSubmitButtons
           isSubmitting={isSubmitting}
-          submitText={initialData ? 'Actualizar' : 'Guardar'}
-          submittingText={initialData ? 'Actualizando...' : 'Guardando...'}
+          submitText={initialData ? 'Actualizar' : 'Generar'}
+          submittingText={initialData ? 'Actualizando...' : 'Generando...'}
           onReset={() => form.reset()}
         />
       </TanStackForm>

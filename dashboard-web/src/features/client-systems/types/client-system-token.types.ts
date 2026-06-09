@@ -8,4 +8,11 @@ export interface ClientSystemToken {
     expiresAt?: string | null;
     lastUsedAt?: string | null;
     active: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface GenerateClientSystemTokenResponse {
+    message: string;
+    token: string;
 }
