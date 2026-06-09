@@ -1,0 +1,54 @@
+# ── Secretos y entorno ────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Dependencias ──────────────────────────────────────────────────────────────
+node_modules/
+
+# ── Artefactos de build ───────────────────────────────────────────────────────
+dist/
+build/
+.next/
+out/
+
+# ── Logs y depuración ─────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Sistema operativo ─────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDEs ──────────────────────────────────────────────────────────────────────
+.idea/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ── Tests ─────────────────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ── TypeScript ────────────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ── Runtime / temporales ──────────────────────────────────────────────────────
+.temp/
+.tmp/
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ── Despliegue ────────────────────────────────────────────────────────────────
+.vercel
+
+# ── Credenciales n8n (configurar manualmente en cada ambiente) ────────────────
+ms-alertas/n8n/credentials/*.json

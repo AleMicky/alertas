@@ -1,0 +1,94 @@
+services:
+  db:
+    image: postgres:16
+    container_name: db-ms-alert
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.6.3
+    container_name: keycloak
+    restart: always
+    env_file:
+      - .env
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/keycloak
+      KC_DB_USERNAME: ${DB_USERNAME}
+      KC_DB_PASSWORD: ${DB_PASSWORD}
+
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME: ${KEYCLOAK_HOST:-localhost}
+      KC_HOSTNAME_PORT: ${KEYCLOAK_PORT:-8080}
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+
+    ports:
+      - "${KEYCLOAK_PORT:-8080}:8080"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    volumes:
+      - ./keycloak/realms:/opt/keycloak/data/import
+
+  n8n:
+    image: n8nio/n8n
+    container_name: ms-notifications-n8n
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    environment:
+      - N8N_HOST=${N8N_HOST:-localhost}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://${N8N_HOST:-localhost}:${N8N_PORT:-5678}/
+      - N8N_EDITOR_BASE_URL=http://${N8N_HOST:-localhost}:${N8N_PORT:-5678}/
+      - GENERIC_TIMEZONE=${TZ:-America/La_Paz}
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+  redis:
+    image: redis:7
+    container_name: ms-notifications-redis
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+    external: true
+    name: ms-alertas_postgres_data
+  n8n_data:
+    external: true
+    name: ms-alertas_n8n_data
+  redis_data:
+    external: true
+    name: ms-alertas_redis_data

@@ -1,0 +1,541 @@
+{
+  "name": "send-email",
+  "nodes": [
+    {
+      "parameters": {
+        "fromEmail": "miguel.ale19934@gmail.com",
+        "toEmail": "={{ $json.email.to.join(',') }}",
+        "subject": "={{ $json.email.subject }}",
+        "html": "={{ $json.email.html || $json.email.message }}",
+        "options": {
+          "appendAttribution": false,
+          "ccEmail": "={{ $json.email.cc.join(',') || '' }}",
+          "bccEmail": "={{ $json.email.bcc.join(',') || ''}}"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1232,
+        -160
+      ],
+      "id": "5d5f2866-8831-4ce8-ac17-081e9b24134b",
+      "name": "Enviar correo",
+      "webhookId": "7e65ad89-dab3-46db-91d4-80598afde3cc",
+      "credentials": {
+        "smtp": {
+          "id": "447LPpptwvK8WrcR",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nconst payload = body?.payload;\n\nconst errors = [];\n\nif (!body?.notificationId) {\n  errors.push('notificationId requerido');\n}\n\nif (body?.channel !== 'EMAIL') {\n  errors.push('channel debe ser EMAIL');\n}\n\nif (!payload) {\n  errors.push('payload requerido');\n}\n\nif (!Array.isArray(payload?.to) || payload.to.length === 0) {\n  errors.push('Debe tener al menos un destinatario en to');\n}\n\nif (!payload?.subject) {\n  errors.push('subject requerido');\n}\n\nif (!payload?.message && !payload?.html) {\n  errors.push('message o html requerido');\n}\n\nreturn [\n  {\n    json: {\n      valid: errors.length === 0,\n      errors,\n      body,\n      payload\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        -16
+      ],
+      "id": "406a7db6-84ab-44de-b2f1-edd09da4b390",
+      "name": "Validar Payload"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? {};\nconst payload = body.payload ?? {};\n\nreturn {\n  json: {\n    notificationId: body.notificationId,\n    channel: body.channel,\n    email: {\n      to: payload.to ?? [],\n      cc: payload.cc ?? [],\n      bcc: payload.bcc ?? [],\n      subject: payload.subject ?? '',\n      message: payload.message ?? '',\n      html: payload.html ?? payload.message ?? '',\n      attachments: payload.attachments ?? [],\n    },\n  },\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        -176
+      ],
+      "id": "2dedc989-07ef-4f07-be85-b6de3911e824",
+      "name": "Normalizar Payload"
+    },
+    {
+      "parameters": {
+        "content": "## Validar\nVerificar que los datos recibidos a través del webhook cumplan con la estructura y campos requeridos.",
+        "height": 256,
+        "width": 368,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -224,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "1002e922-fee5-48a7-895f-f6ffc779ed2c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Correo procesado\",\n  \"notificationId\": \"uuid\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1808,
+        -160
+      ],
+      "id": "e35d826b-8796-4ba3-8042-22330663b69e",
+      "name": "Respond Success"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"message\": \"Payload inválido\",\n  \"errors\": {{ JSON.stringify($json.errors) }}\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        864,
+        0
+      ],
+      "id": "111a4b40-6d84-41ca-8a00-c71e6609ea1d",
+      "name": "Respond Validation Error"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send-email",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        -16
+      ],
+      "id": "8e206acd-9b8a-4c23-aa13-797ccc7606e3",
+      "name": "Email Notification API",
+      "webhookId": "98b0b9d8-3c3d-48cc-9955-24946532bac4"
+    },
+    {
+      "parameters": {
+        "content": "## Normalizar\nTransforma y estructura los datos recibidos en un formato estándar para su procesamiento.",
+        "height": 272,
+        "width": 416,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        192,
+        -288
+      ],
+      "typeVersion": 1,
+      "id": "1e35a892-1bb7-4e74-a47d-897b0a175998",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Enviar Correo\nEnviar la notificación por correo electrónico a los destinatarios configurados.",
+        "height": 272,
+        "width": 256,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1152,
+        -288
+      ],
+      "typeVersion": 1,
+      "id": "2c3f4938-7540-4645-a9de-4b3e4e99bba4",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8044921c-ccb8-459c-a85b-81e4aa89384e",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        864,
+        -480
+      ],
+      "id": "2c7485dc-c47e-4162-aaf5-419c2d127399",
+      "name": "Validar url"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b3d1b240-495c-4365-b65b-76f6393f99ee",
+              "leftValue": "={{ $json.email.attachments?.length > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        -176
+      ],
+      "id": "5f0bbb75-91ac-488d-a80c-211344efdba3",
+      "name": "¿Tiene Adjuntos?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "eafcfb9d-16fc-45a6-a177-85f80d015c4d",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "1274b17d-75c2-47ef-87e2-f9e4eac1b0e6",
+      "name": "¿Existen Errores?"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const attachments = $json.email?.attachments ?? [];\n\nconst errors = [];\n\nfor (const attachment of attachments) {\n  if (!attachment.fileName) {\n    errors.push('fileName requerido');\n  }\n\n  if (!attachment.url) {\n    errors.push('url requerido');\n  }\n}\n\nreturn {\n  json: {\n    ...$json,\n    valid: errors.length === 0,\n    errors\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        -480
+      ],
+      "id": "cfead02d-b816-4fc7-8ab9-43b6710b5a78",
+      "name": "Validar Adjuntos"
+    },
+    {
+      "parameters": {
+        "content": "## Enviar Correo\nEnviar la notificación por correo electrónico a los destinatarios configurados con adjuntos.",
+        "height": 272,
+        "width": 256,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1536,
+        -624
+      ],
+      "typeVersion": 1,
+      "id": "20ca230c-881a-44f6-9676-7b1c6f21075d",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Validar\nTransforma y estructura los datos recibidos en un formato estándar para su procesamiento documento adjuntops.",
+        "height": 272,
+        "width": 416,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        608,
+        -608
+      ],
+      "typeVersion": 1,
+      "id": "2045201d-fbac-4773-81de-b91cef3db831",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Procesar Adjuntos\nDividir la lista de archivos adjuntos en elementos individuales para permitir su procesamiento y descarga de forma independiente.",
+        "height": 272,
+        "width": 384,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1072,
+        -624
+      ],
+      "typeVersion": 1,
+      "id": "3e594b6c-7207-4106-853b-f84385fcf696",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "email.attachments",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        -496
+      ],
+      "id": "0b4c346f-78d5-4f29-946c-30e8576a12cd",
+      "name": "Separar Adjuntos"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json[\"email.attachments\"].url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1312,
+        -496
+      ],
+      "id": "c0f8505a-6993-4f99-b820-f3ed9a3fe20a",
+      "name": "Descargar Adjunto"
+    },
+    {
+      "parameters": {
+        "fromEmail": "miguel.ale19934@gmail.com",
+        "toEmail": "={{ $json.email.to.join(',') }}",
+        "subject": "={{ $json.email.subject }}",
+        "html": "={{ $json.email.html || $json.email.message }}",
+        "options": {
+          "appendAttribution": false,
+          "attachments": "data",
+          "ccEmail": "={{ $json.email.cc.join(',') || '' }}",
+          "bccEmail": "={{ $json.email.bcc.join(',') || ''}}"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1616,
+        -496
+      ],
+      "id": "37a0f4b7-8e1b-40b3-9b9f-8bbde8c3e92c",
+      "name": "Enviar Correo Adjunto",
+      "webhookId": "7e65ad89-dab3-46db-91d4-80598afde3cc",
+      "credentials": {
+        "smtp": {
+          "id": "447LPpptwvK8WrcR",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Enviar correo": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Payload": {
+      "main": [
+        [
+          {
+            "node": "¿Existen Errores?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Payload": {
+      "main": [
+        [
+          {
+            "node": "¿Tiene Adjuntos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Notification API": {
+      "main": [
+        [
+          {
+            "node": "Validar Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Tiene Adjuntos?": {
+      "main": [
+        [
+          {
+            "node": "Validar Adjuntos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Existen Errores?": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Validation Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Adjuntos": {
+      "main": [
+        [
+          {
+            "node": "Validar url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar url": {
+      "main": [
+        [
+          {
+            "node": "Separar Adjuntos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Validation Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separar Adjuntos": {
+      "main": [
+        [
+          {
+            "node": "Descargar Adjunto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar Adjunto": {
+      "main": [
+        [
+          {
+            "node": "Enviar Correo Adjunto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Correo Adjunto": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "22c03a55-1a7b-4467-af9f-bc31d53b9dca",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a542e3c85b77e4c464730e25daa33166503773c64c3513524c02005de7d11a99"
+  },
+  "id": "NPVQ8sy8nEI7CJdP",
+  "tags": []
+}
