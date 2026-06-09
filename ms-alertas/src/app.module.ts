@@ -5,8 +5,6 @@ import { DatabaseModule } from './config/database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { MsAlertsModule } from './ms-alerts.module';
 import { BullModule } from '@nestjs/bullmq';
-import { AuthModule } from './infrastructure/auth/auth.module';
-
 const monorepoEnvPath = join(process.cwd(), '../.env');
 
 @Module({
@@ -22,7 +20,6 @@ const monorepoEnvPath = join(process.cwd(), '../.env');
       },
     }),
     DatabaseModule,
-    AuthModule,
     MsAlertsModule,
   ],
 })

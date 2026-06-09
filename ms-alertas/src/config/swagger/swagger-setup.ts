@@ -7,7 +7,6 @@ import {
 } from '@nestjs/swagger';
 
 const SWAGGER_TAGS = [
-  ['Autenticación', 'Inicio de sesión del dashboard'],
   ['Sistemas cliente', 'Registro de sistemas que emiten eventos'],
   ['Tokens', 'Tokens de autenticación por sistema'],
   ['Niveles de severidad', 'Catálogo de severidades y prioridades'],
@@ -59,15 +58,6 @@ const buildSwaggerConfig = () => {
     )
     .setVersion('1.0')
     .addServer('/', 'Servidor actual')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        description: 'Token JWT del dashboard (operadores / admin)',
-      },
-      'jwt',
-    )
     .addBearerAuth(
       {
         type: 'http',
