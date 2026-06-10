@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+/*import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 
 import {
   ApiBody,
@@ -63,7 +63,7 @@ export class ClientSystemTokenController extends BaseController<
     schema: {
       example: {
         description: 'Token para producción',
-        expiresAt: '2026-12-31T23:59:59.000Z',
+        expiresAt: '2026-12-31',
       },
     },
   })
@@ -92,3 +92,4 @@ export class ClientSystemTokenController extends BaseController<
     return this.clientSystemTokenService.revokeToken(tokenId);
   }
 }
+*/

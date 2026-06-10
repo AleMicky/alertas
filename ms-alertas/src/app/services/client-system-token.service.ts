@@ -1,96 +1,49 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-
-import { BaseService } from 'src/shared/core/base.service';
+import { Injectable } from '@nestjs/common';
 import { ClientSystemToken } from 'src/domain/entities/client-system-token';
-import {
-  ClientSystemRepository,
-  ClientSystemTokenRepository,
-} from 'src/domain/repositories';
+import { ClientSystemTokenRepository } from 'src/domain/repositories';
 import { CreateClientSystemTokenDto } from 'src/presentation/dto/client-system-token';
 import { TokenGeneratorService } from 'src/infrastructure/security/token-generator.service';
 
 @Injectable()
-export class ClientSystemTokenService extends BaseService<ClientSystemToken> {
+export class ClientSystemTokenService {
   constructor(
-    private readonly clientSystemTokenRepository: ClientSystemTokenRepository,
-    private readonly clientSystemRepository: ClientSystemRepository,
+    private readonly tokenRepository: ClientSystemTokenRepository,
     private readonly tokenGeneratorService: TokenGeneratorService,
   ) {
-    super(clientSystemTokenRepository);
   }
 
-  async findByClientSystemId(clientSystemId: string) {
-    const tokens =
-      await this.clientSystemTokenRepository.findByClientSystemId(
-        clientSystemId,
-      );
-
+  async findByClientSystemId(id: string) {
+    const tokens = await this.tokenRepository.findByClientSystemId(id);
     return tokens.map((token) => this.toPublicResponse(token));
+
   }
 
-  toPublicResponse(token: ClientSystemToken) {
-    const { tokenHash: _tokenHash, ...rest } = token;
-
-    return {
-      ...rest,
-      token: `msa_••••••••${token.id.replace(/-/g, '').slice(-8)}`,
-    };
-  }
-
-  async create(
-    dto: CreateClientSystemTokenDto | Partial<ClientSystemToken>,
-  ): Promise<ClientSystemToken> {
-    const clientSystemId =
-      'clientSystemId' in dto ? dto.clientSystemId : dto.clientSystem?.id;
-
-    if (!clientSystemId) {
-      throw new BadRequestException('clientSystemId es requerido');
-    }
-
-    const clientSystem =
-      await this.clientSystemRepository.findOne(clientSystemId);
-
-    if (!clientSystem) {
-      throw new NotFoundException('Sistema cliente no encontrado');
-    }
-
-    const { tokenHash } = await this.tokenGeneratorService.generateToken();
-
-    return this.clientSystemTokenRepository.create({
-      clientSystem,
-      tokenHash,
-      description: dto.description,
-      expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined,
-      active: dto.active ?? true,
-    });
-  }
-
-  async createToken(
-    clientSystemId: string,
-    description?: string,
-    expiresAt?: Date,
-  ) {
-    const plainToken = await this.tokenGeneratorService.createToken(
-      clientSystemId,
-      description,
-      expiresAt,
-    );
-
+  async createToken(clientSystemId: string, dto: CreateClientSystemTokenDto) {
+    const plainToken = await this.tokenGeneratorService.createToken(clientSystemId, dto.expiresAt);
     return {
       message: 'Guarde este token, no podrá visualizarse nuevamente.',
       token: plainToken,
     };
   }
 
-  revokeToken(tokenId: string) {
-    return this.tokenGeneratorService.revokeToken(tokenId);
+  async revokeToken(id: string) {
+    await this.tokenGeneratorService.revokeToken(id);
+    return {
+      message: 'Token revocado correctamente.',
+    };
   }
-
+  
   validateToken(plainToken: string) {
     return this.tokenGeneratorService.validateToken(plainToken);
   }
+
+  toPublicResponse(token: ClientSystemToken) {
+    const { tokenHash: _tokenHash, ...rest } = token;
+    return {
+      ...rest,
+      token: `msa_••••••••${token.id.replace(/-/g, '').slice(-8)}`,
+    };
+  }
+
+
 }

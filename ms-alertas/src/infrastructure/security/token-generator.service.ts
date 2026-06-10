@@ -16,7 +16,7 @@ export class TokenGeneratorService {
   constructor(
     private readonly clientSystemRepository: ClientSystemRepository,
     private readonly clientSystemTokenRepository: ClientSystemTokenRepository,
-  ) {}
+  ) { }
 
   async generateToken(): Promise<{ plainToken: string; tokenHash: string }> {
     const plainToken = `msa_${randomBytes(32).toString('hex')}`;
@@ -31,13 +31,10 @@ export class TokenGeneratorService {
     return bcrypt.compare(plainToken, tokenHash);
   }
 
-  async createToken(
-    clientSystemId: string,
-    description?: string,
-    expiresAt?: Date,
-  ): Promise<string> {
-    const clientSystem =
-      await this.clientSystemRepository.findOne(clientSystemId);
+  async createToken(clientSystemId: string, expiresAt: Date): Promise<string> {
+
+    const clientSystem = await this.clientSystemRepository.findOne(clientSystemId);
+
     if (!clientSystem) {
       throw new NotFoundException('Sistema cliente no encontrado');
     }
@@ -45,13 +42,11 @@ export class TokenGeneratorService {
     const { plainToken, tokenHash } = await this.generateToken();
 
     await this.clientSystemTokenRepository.create({
-      clientSystem,
+      clientSystemId: clientSystem.id,
       tokenHash,
-      description,
       expiresAt,
-      active: true,
     });
-
+    
     return plainToken;
   }
 
@@ -81,13 +76,30 @@ export class TokenGeneratorService {
         continue;
       }
 
-      if (token.expiresAt && token.expiresAt < new Date()) {
+      if (token.expiresAt && this.isExpiredDate(token.expiresAt)) {
         throw new UnauthorizedException('Token expirado');
       }
 
-      return token.clientSystem;
+      const clientSystemFromToken =
+        await this.clientSystemRepository.findOne(token.clientSystemId);
+
+      if (!clientSystemFromToken) {
+        throw new UnauthorizedException('Sistema cliente no encontrado');
+      }
+
+      return clientSystemFromToken;
     }
 
     throw new UnauthorizedException('Token inválido');
+  }
+
+  private isExpiredDate(expiresAt: Date): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const expiration = new Date(expiresAt);
+    expiration.setHours(0, 0, 0, 0);
+
+    return today > expiration;
   }
 }

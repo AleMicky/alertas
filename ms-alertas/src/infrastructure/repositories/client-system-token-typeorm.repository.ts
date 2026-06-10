@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { GenericRepository } from 'src/shared/core/generic.repository';
 import { ClientSystemTokenRepository } from 'src/domain/repositories/client-system-token.repository';
 import { ClientSystemTokenEntity } from '../typeorm/entities/client-system-token.entity';
+import { ClientSystemToken } from 'src/domain/entities';
 
 @Injectable()
 export class ClientSystemTokenTypeormRepository
@@ -17,31 +18,11 @@ export class ClientSystemTokenTypeormRepository
     super(repository);
   }
 
-  async findByToken(
-    tokenHash: string,
-  ): Promise<ClientSystemTokenEntity | null> {
-    return await this.repository.findOne({
-      where: {
-        tokenHash,
-        active: true,
-      },
-      relations: {
-        clientSystem: true,
-      },
-    });
-  }
-
-  async findByClientSystemId(
-    clientSystemId: string,
-  ): Promise<ClientSystemTokenEntity[]> {
+  async findByClientSystemId(clientSystemId: string): Promise<ClientSystemToken[]> {
     return await this.repository.find({
       where: {
-        clientSystem: {
-          id: clientSystemId,
-        },
-      },
-      relations: {
-        clientSystem: true,
+        clientSystemId,
+        active: true,
       },
       order: {
         createdAt: 'DESC',
@@ -49,13 +30,18 @@ export class ClientSystemTokenTypeormRepository
     });
   }
 
-  async findActive(): Promise<ClientSystemTokenEntity[]> {
+  async findByToken(token: string): Promise<ClientSystemToken | null> {
+    return await this.repository.findOne({
+      where: {
+        tokenHash: token,
+      },
+    });
+  }
+
+  async findActive(): Promise<ClientSystemToken[]> {
     return await this.repository.find({
       where: {
         active: true,
-      },
-      relations: {
-        clientSystem: true,
       },
     });
   }

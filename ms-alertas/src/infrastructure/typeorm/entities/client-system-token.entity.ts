@@ -13,6 +13,9 @@ export class ClientSystemTokenEntity extends BaseAuditColumns {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ name: 'client_system_id' })
+  clientSystemId: string;
+
   @ManyToOne(() => ClientSystemEntity)
   @JoinColumn({ name: 'client_system_id' })
   clientSystem: ClientSystemEntity;
@@ -20,19 +23,6 @@ export class ClientSystemTokenEntity extends BaseAuditColumns {
   @Column({ unique: true, name: 'token_hash' })
   tokenHash: string;
 
-  @Column({
-    nullable: true,
-    length: 300,
-  })
-  description?: string;
-
-  @Column({
-    name: 'expires_at',
-    nullable: true,
-    type: 'timestamp',
-  })
-  expiresAt?: Date;
-
-  @Column({ nullable: true, type: 'timestamp' })
-  lastUsedAt?: Date;
+  @Column({ name: 'expires_at', type: 'date' })
+  expiresAt: Date;
 }

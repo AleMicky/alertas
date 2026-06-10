@@ -6,7 +6,7 @@ export class ClientSystemEntity extends BaseAuditColumns {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, unique: true })
   code: string;
 
   @Column({ type: 'varchar', length: 255 })

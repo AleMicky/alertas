@@ -8,7 +8,6 @@ import {
 
 const SWAGGER_TAGS = [
   ['Sistemas cliente', 'Registro de sistemas que emiten eventos'],
-  ['Tokens', 'Tokens de autenticación por sistema'],
   ['Niveles de severidad', 'Catálogo de severidades y prioridades'],
   ['Canales de notificación', 'Webhooks y canales (Telegram, Teams, etc.)'],
   ['Tipos de evento', 'Catálogo de tipos de evento por sistema'],

@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   SWAGGER_DATE,
-  SWAGGER_DATE_FUTURE,
+  SWAGGER_DATE_ONLY,
   SWAGGER_UUID,
 } from 'src/config/swagger/constants/swagger-examples';
 import { BaseAuditSchema } from './base-audit.schema';
@@ -21,8 +21,8 @@ export class ClientSystemTokenResponseSchema extends BaseAuditSchema {
 
   @ApiPropertyOptional({
     type: String,
-    format: 'date-time',
-    example: SWAGGER_DATE_FUTURE,
+    format: 'date',
+    example: SWAGGER_DATE_ONLY,
   })
   expiresAt?: string | null;
 
