@@ -8,3 +8,4 @@ export * from './event-type-response.schema';
 export * from './alert-rule-response.schema';
 export * from './alert-response.schema';
 export * from './alert-notification-response.schema';
+export * from './notification-provider-response.schema';

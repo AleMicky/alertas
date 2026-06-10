@@ -7,7 +7,6 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
-import { NotificationChannelType } from 'src/domain/enums/notification-channel-type.enum';
 
 export class CreateNotificationChannelDto {
   @ApiProperty({ type: String, example: 'TELEGRAM_OPS' })
@@ -19,14 +18,6 @@ export class CreateNotificationChannelDto {
   @IsString()
   @IsNotEmpty()
   name: string;
-
-  @ApiProperty({
-    enum: NotificationChannelType,
-    example: NotificationChannelType.TELEGRAM,
-    description: 'Tipo de canal de notificación',
-  })
-  @IsEnum(NotificationChannelType)
-  type: NotificationChannelType;
 
   @ApiProperty({
     type: String,
@@ -43,9 +34,4 @@ export class CreateNotificationChannelDto {
   @IsOptional()
   @IsString()
   description?: string;
-
-  @ApiPropertyOptional({ type: Boolean, example: true, default: true })
-  @IsOptional()
-  @IsBoolean()
-  active?: boolean;
 }

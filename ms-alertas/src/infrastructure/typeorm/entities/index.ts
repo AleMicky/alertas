@@ -7,3 +7,4 @@ export * from './event-type.entity';
 export * from './alert-rule.entity';
 export * from './alert.entity';
 export * from './alert-notification.entity';
+export * from './notification-provider.entity';

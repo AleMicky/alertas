@@ -7,3 +7,4 @@ export * from './notification-channel';
 export * from './alert-rule';
 export * from './alert';
 export * from './alert-notification';
+export * from './notification-provider';

@@ -8,3 +8,4 @@ export * from './alert-rule.controller';
 export * from './alert.controller';
 export * from './alert-notification.controller';
 export * from './test-n8n.controller';
+export * from './notification-providers.controller';

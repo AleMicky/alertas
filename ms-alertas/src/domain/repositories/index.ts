@@ -7,3 +7,4 @@ export * from './alert-rule.repository';
 export * from './alert.repository';
 export * from './alert-notification.repository';
 export * from './event-type.repository';
+export * from './notification-provider.repository';

@@ -12,6 +12,7 @@ import {
   AlertRuleEntity,
   AlertEntity,
   AlertNotificationEntity,
+  NotificationProviderEntity,
 } from './infrastructure/typeorm/entities';
 // Services
 import {
@@ -26,6 +27,7 @@ import {
   AlertNotificationService,
   AlertOutcomeService,
   NotificationService,
+  NotificationProviderService,
 } from './app/services';
 // Repositories
 import {
@@ -38,6 +40,7 @@ import {
   AlertRuleRepository,
   AlertRepository,
   AlertNotificationRepository,
+  NotificationProviderRepository,
 } from './domain/repositories';
 // Controllers
 import {
@@ -50,6 +53,7 @@ import {
   AlertController,
   AlertNotificationController,
   TestN8nController,
+  NotificationProvidersController,
 } from './presentation/controllers';
 // Repositories
 import {
@@ -62,6 +66,7 @@ import {
   AlertRuleTypeormRepository,
   AlertTypeormRepository,
   AlertNotificationTypeormRepository,
+  NotificationProviderTypeormRepository,
 } from './infrastructure/repositories';
 import { N8nClient } from './infrastructure/integrations/n8n/n8n.client';
 import { BullModule } from '@nestjs/bullmq';
@@ -81,6 +86,7 @@ import { ClientSystemAuthGuard } from './shared/guards/client-system-auth.guard'
       AlertRuleEntity,
       AlertEntity,
       AlertNotificationEntity,
+      NotificationProviderEntity,
     ]),
     BullModule.registerQueue({
       name: 'alert-notifications',
@@ -102,6 +108,7 @@ import { ClientSystemAuthGuard } from './shared/guards/client-system-auth.guard'
     AlertController,
     AlertNotificationController,
     TestN8nController,
+    NotificationProvidersController,
   ],
   providers: [
     N8nClient,
@@ -119,6 +126,7 @@ import { ClientSystemAuthGuard } from './shared/guards/client-system-auth.guard'
     AlertService,
     AlertOutcomeService,
     AlertNotificationService,
+    NotificationProviderService,
     {
       provide: NotificationChannelRepository,
       useClass: NotificationChannelTypeormRepository,
@@ -154,6 +162,10 @@ import { ClientSystemAuthGuard } from './shared/guards/client-system-auth.guard'
     {
       provide: AlertNotificationRepository,
       useClass: AlertNotificationTypeormRepository,
+    },
+    {
+      provide: NotificationProviderRepository,
+      useClass: NotificationProviderTypeormRepository,
     },
   ],
 })

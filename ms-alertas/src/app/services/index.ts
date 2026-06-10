@@ -9,3 +9,4 @@ export * from './alert.service';
 export * from './alert-notification.service';
 export * from './alert-outcome.service';
 export * from './notification.service';
+export * from './notification-provider.service';
