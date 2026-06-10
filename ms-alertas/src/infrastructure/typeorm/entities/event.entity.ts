@@ -6,14 +6,12 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { BaseAuditColumns } from 'src/shared/core/base-audit-columns';
-
 import { EventStatus } from 'src/domain/enums/event-status.enum';
-
 import { ClientSystemEntity } from './client-system.entity';
+import { EventTypeEntity } from './event-type.entity';
 
 @Entity('tevents')
-export class EventEntity extends BaseAuditColumns {
+export class EventEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -21,26 +19,18 @@ export class EventEntity extends BaseAuditColumns {
   @JoinColumn({ name: 'client_system_id' })
   clientSystem: ClientSystemEntity;
 
-  @Column({ unique: true, length: 100 })
-  code: string;
-
-  @Column({ name: 'event_type', length: 100 })
-  eventType: string;
-
-  @Column({ length: 200 })
-  title: string;
-
-  @Column({ type: 'text' })
-  message: string;
+  @ManyToOne(() => EventTypeEntity)
+  @JoinColumn({ name: 'event_type_id' })
+  eventType: EventTypeEntity;
 
   @Column({ name: 'payload_json', type: 'jsonb', nullable: true })
   payloadJson?: Record<string, any>;
 
+  @Column({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
   @Column({ length: 50, default: EventStatus.PENDING })
   status: EventStatus;
-
-  @Column({ name: 'event_date', type: 'timestamp' })
-  eventDate: Date;
 
   @Column({ name: 'processed_at', type: 'timestamp', nullable: true })
   processedAt?: Date;

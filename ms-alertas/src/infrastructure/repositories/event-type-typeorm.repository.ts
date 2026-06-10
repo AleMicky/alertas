@@ -9,7 +9,6 @@ import { EventType } from 'src/domain/entities';
 
 type EventTypePersistenceInput = Partial<EventTypeEntity> & {
   clientSystemId?: string;
-  severityLevelId?: string;
 };
 
 @Injectable()
@@ -19,7 +18,6 @@ export class EventTypeTypeormRepository
 {
   private static readonly relations = {
     clientSystem: true,
-    severityLevel: true,
   };
 
   constructor(
@@ -85,15 +83,12 @@ export class EventTypeTypeormRepository
     entity: EventTypePersistenceInput,
     applyDefaults = false,
   ): DeepPartial<EventTypeEntity> {
-    const { clientSystemId, severityLevelId, ...rest } = entity;
+    const { clientSystemId, ...rest } = entity;
 
     return {
       ...rest,
       ...(clientSystemId && {
         clientSystem: { id: clientSystemId },
-      }),
-      ...(severityLevelId && {
-        severityLevel: { id: severityLevelId },
       }),
       ...(applyDefaults && {
         active: rest.active ?? true,

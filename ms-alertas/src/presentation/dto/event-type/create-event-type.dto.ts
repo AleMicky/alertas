@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsBoolean,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -8,7 +7,6 @@ import {
 } from 'class-validator';
 import {
   SWAGGER_UUID,
-  SWAGGER_UUID_2,
 } from 'src/config/swagger/constants/swagger-examples';
 
 export class CreateEventTypeDto {
@@ -39,18 +37,4 @@ export class CreateEventTypeDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({
-    type: String,
-    format: 'uuid',
-    example: SWAGGER_UUID_2,
-    description: 'Nivel de severidad por defecto del tipo de evento',
-  })
-  @IsOptional()
-  @IsUUID()
-  severityLevelId?: string;
-
-  @ApiPropertyOptional({ type: Boolean, example: true, default: true })
-  @IsOptional()
-  @IsBoolean()
-  active?: boolean;
 }

@@ -10,14 +10,6 @@ import {
 import { EventPayloadDto } from './event-recipient.dto';
 
 export class CreateEventDto {
-  @ApiPropertyOptional({
-    example: 'GESTION_VEHICULAR',
-    description:
-      'Opcional. Si se envía, debe coincidir con el sistema del token Bearer.',
-  })
-  @IsOptional()
-  @IsString()
-  clientSystemCode?: string;
 
   @ApiProperty({
     example: 'VEHICLE_REQUEST_APPROVED',
@@ -26,24 +18,6 @@ export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
   eventTypeCode: string;
-
-  @ApiPropertyOptional({
-    example: 'Solicitud aprobada',
-    description:
-      'Opcional. Si no se envía, se usa el subject del primer recipient o el nombre del tipo de evento.',
-  })
-  @IsOptional()
-  @IsString()
-  title?: string;
-
-  @ApiPropertyOptional({
-    example: 'La solicitud SOL-001 fue aprobada.',
-    description:
-      'Opcional. Si no se envía, se usa el message del primer recipient o la descripción del tipo de evento.',
-  })
-  @IsOptional()
-  @IsString()
-  message?: string;
 
   @ApiPropertyOptional({
     type: EventPayloadDto,
@@ -72,12 +46,4 @@ export class CreateEventDto {
   @IsOptional()
   @IsObject()
   payloadJson?: Record<string, unknown>;
-
-  @ApiPropertyOptional({
-    example: true,
-    default: true,
-  })
-  @IsOptional()
-  @IsBoolean()
-  active?: boolean;
 }

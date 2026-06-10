@@ -1,23 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
 
+import { EventMapper } from 'src/app/mappers/event.mapper';
 import { BaseService } from 'src/shared/core/base.service';
 import { ClientSystem } from 'src/domain/entities/client-system';
 import { Event } from 'src/domain/entities/event';
 import { EventRepository } from 'src/domain/repositories/event.repository';
 import { EventTypeRepository } from 'src/domain/repositories/event-type.repository';
 import { CreateEventDto } from 'src/presentation/dto/event/create-event.dto';
-import { EventStatus } from 'src/domain/enums/event-status.enum';
-import { normalizeEventPayload } from 'src/app/utils/normalize-event-payload.util';
-
-import { AlertService } from './alert.service';
+import { ResponseEventDto } from 'src/presentation/dto/event/response-event.dto';
 
 @Injectable()
 export class EventService extends BaseService<Event> {
   constructor(
     private readonly eventRepository: EventRepository,
     private readonly eventTypeRepository: EventTypeRepository,
-    private readonly alertService: AlertService,
+    private readonly eventMapper: EventMapper,
   ) {
     super(eventRepository);
   }
@@ -25,16 +22,7 @@ export class EventService extends BaseService<Event> {
   async createFromDto(
     dto: CreateEventDto,
     authenticatedClientSystem: ClientSystem,
-  ): Promise<Event> {
-    if (
-      dto.clientSystemCode &&
-      dto.clientSystemCode !== authenticatedClientSystem.code
-    ) {
-      throw new BadRequestException(
-        'El código de sistema cliente no coincide con el token',
-      );
-    }
-
+  ): Promise<ResponseEventDto> {
     const clientSystem = authenticatedClientSystem;
 
     const eventType = await this.eventTypeRepository.findByCode(
@@ -46,45 +34,47 @@ export class EventService extends BaseService<Event> {
       throw new BadRequestException('Tipo de evento no encontrado');
     }
 
-    if (!eventType.severityLevel) {
-      throw new BadRequestException(
-        'El tipo de evento no tiene severidad configurada',
-      );
-    }
-
-    const { title, message, payloadJson } = normalizeEventPayload(
-      dto.payloadJson,
-      eventType,
-      dto.title,
-      dto.message,
-    );
+    const partial = this.eventMapper.fromCreateDto(dto);
 
     const event = await this.eventRepository.create({
+      ...partial,
       clientSystem,
-      code: this.generateEventCode(),
-      eventType: dto.eventTypeCode,
-      title,
-      message,
-      payloadJson,
-      status: EventStatus.PENDING,
-      eventDate: new Date(),
-      active: dto.active ?? true,
+      eventType,
     });
 
-    await this.alertService.createFromEvent(event);
+    // await this.alertService.createFromEvent(event);
 
-    return event;
+    return this.eventMapper.toResponse(event);
   }
 
-  findByCode(code: string) {
-    return this.eventRepository.findByCode(code);
+  async findByClientSystemId(
+    clientSystemId: string,
+  ): Promise<ResponseEventDto[]> {
+    const events =
+      await this.eventRepository.findByClientSystemId(clientSystemId);
+
+    return events.map((event) => this.eventMapper.toResponse(event));
   }
 
-  findByClientSystemId(clientSystemId: string) {
-    return this.eventRepository.findByClientSystemId(clientSystemId);
+  async findAllMapped(): Promise<ResponseEventDto[]> {
+    const events = await this.eventRepository.findAll();
+
+    return events.map((event) => this.eventMapper.toResponse(event));
   }
 
-  private generateEventCode(): string {
-    return `EVT-${randomUUID()}`;
+  async findOneMapped(id: string): Promise<ResponseEventDto | null> {
+    const event = await this.eventRepository.findOne(id);
+
+    return event ? this.eventMapper.toResponse(event) : null;
+  }
+
+  async updateMapped(
+    id: string,
+    dto: Parameters<EventMapper['fromUpdateDto']>[0],
+  ): Promise<ResponseEventDto> {
+    const partial = this.eventMapper.fromUpdateDto(dto);
+    const event = await this.eventRepository.update(id, partial);
+
+    return this.eventMapper.toResponse(event);
   }
 }

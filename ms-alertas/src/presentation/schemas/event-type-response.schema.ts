@@ -27,13 +27,4 @@ export class EventTypeResponseSchema extends BaseAuditSchema {
   })
   description?: string;
 
-  @ApiPropertyOptional({
-    format: 'uuid',
-    example: SWAGGER_UUID_2,
-    description: 'Nivel de severidad por defecto',
-  })
-  severityLevelId?: string;
-
-  @ApiProperty({ type: Boolean, example: true })
-  active: boolean;
 }

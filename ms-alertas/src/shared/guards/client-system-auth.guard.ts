@@ -11,7 +11,7 @@ import { ClientSystemTokenService } from 'src/app/services/client-system-token.s
 export class ClientSystemAuthGuard implements CanActivate {
   constructor(
     private readonly clientSystemTokenService: ClientSystemTokenService,
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -40,9 +40,7 @@ export class ClientSystemAuthGuard implements CanActivate {
       );
     }
 
-    const clientSystem =
-      await this.clientSystemTokenService.validateToken(token);
-
+    const clientSystem = await this.clientSystemTokenService.validateToken(token);
     request.clientSystem = clientSystem;
 
     return true;

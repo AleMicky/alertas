@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
 
@@ -8,9 +8,8 @@ import { EventStatus } from 'src/domain/enums/event-status.enum';
 import { EventEntity } from '../typeorm/entities/event.entity';
 
 type EventPersistenceInput = Partial<EventEntity> & {
-  clientSystemId?: string;
-  severityLevelId?: string;
-  eventDate?: Date | string;
+  clientSystemId: string;
+  eventTypeId: string;
 };
 
 @Injectable()
@@ -18,8 +17,9 @@ export class EventTypeormRepository
   extends GenericRepository<EventEntity>
   implements EventRepository
 {
-  private static readonly relations = {
+  private readonly relations = {
     clientSystem: true,
+    eventType: true,
   };
 
   constructor(
@@ -29,23 +29,10 @@ export class EventTypeormRepository
     super(repository);
   }
 
-  findAll(): Promise<EventEntity[]> {
-    return this.repository.find({
-      relations: EventTypeormRepository.relations,
-    });
-  }
-
   findOne(id: string): Promise<EventEntity | null> {
     return this.repository.findOne({
       where: { id },
-      relations: EventTypeormRepository.relations,
-    });
-  }
-
-  findByCode(code: string): Promise<EventEntity | null> {
-    return this.repository.findOne({
-      where: { code },
-      relations: EventTypeormRepository.relations,
+      relations: this.relations,
     });
   }
 
@@ -54,32 +41,45 @@ export class EventTypeormRepository
       where: {
         clientSystem: { id: clientSystemId },
       },
-      relations: EventTypeormRepository.relations,
+      relations: this.relations,
+      order: {
+        createdAt: 'DESC',
+      },
     });
   }
 
   async create(entity: EventPersistenceInput): Promise<EventEntity> {
-    const persistence = this.toPersistence(entity, true);
-
-    const newEntity = this.repository.create(persistence);
+    const newEntity = this.repository.create(
+      this.toPersistence(entity, true),
+    );
 
     const saved = await this.repository.save(newEntity);
 
-    return (await this.findOne(saved.id))!;
+    const event = await this.findOne(saved.id);
+
+    if (!event) {
+      throw new NotFoundException('Evento creado, pero no encontrado');
+    }
+
+    return event;
   }
 
   async update(
     id: string,
     entity: EventPersistenceInput,
   ): Promise<EventEntity> {
-    const persistence = this.toPersistence(entity);
+    const exists = await this.findOne(id);
 
-    await this.repository.update(id, persistence);
+    if (!exists) {
+      throw new NotFoundException('Evento no encontrado');
+    }
+
+    await this.repository.update(id, this.toPersistence(entity));
 
     const updated = await this.findOne(id);
 
     if (!updated) {
-      throw new Error('Registro no encontrado');
+      throw new NotFoundException('Evento no encontrado');
     }
 
     return updated;
@@ -89,19 +89,26 @@ export class EventTypeormRepository
     entity: EventPersistenceInput,
     applyDefaults = false,
   ): DeepPartial<EventEntity> {
-    const { clientSystemId, severityLevelId, eventDate, ...rest } = entity;
+    const { clientSystemId, eventTypeId, ...rest } = entity;
 
     return {
       ...rest,
+
       ...(clientSystemId && {
-        clientSystem: { id: clientSystemId },
+        clientSystem: {
+          id: clientSystemId,
+        },
       }),
-      ...(eventDate !== undefined && {
-        eventDate: eventDate instanceof Date ? eventDate : new Date(eventDate),
+
+      ...(eventTypeId && {
+        eventType: {
+          id: eventTypeId,
+        },
       }),
+
       ...(applyDefaults && {
         status: rest.status ?? EventStatus.PENDING,
-        active: rest.active ?? true,
+        createdAt: rest.createdAt ?? new Date(),
       }),
     };
   }

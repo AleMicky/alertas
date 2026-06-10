@@ -15,6 +15,7 @@ import {
   NotificationProviderEntity,
 } from './infrastructure/typeorm/entities';
 // Services
+import { EventMapper } from './app/mappers';
 import {
   NotificationChannelsService,
   SeverityLevelService,
@@ -120,6 +121,7 @@ import { ClientSystemAuthGuard } from './shared/guards/client-system-auth.guard'
     SeverityLevelService,
     ClientSystemService,
     ClientSystemTokenService,
+    EventMapper,
     EventService,
     EventTypeService,
     AlertRuleService,

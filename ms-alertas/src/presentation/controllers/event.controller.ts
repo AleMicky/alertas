@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -7,51 +16,30 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 
-import { BaseController } from 'src/shared/core/base.controller';
 import { ApiCrudDoc } from 'src/config/swagger/crud';
 import { ClientSystem } from 'src/domain/entities/client-system';
-import { Event } from 'src/domain/entities/event';
 import { EventService } from 'src/app/services/event.service';
 import { CurrentClientSystem } from 'src/shared/decorators/current-client-system.decorator';
 import { Public } from 'src/infrastructure/auth/public.decorator';
 import { ClientSystemAuthGuard } from 'src/shared/guards/client-system-auth.guard';
 import { CreateEventDto, UpdateEventDto } from '../dto/event';
-import { EventResponseSchema } from '../schemas';
+import { ResponseEventDto } from '../dto/event/response-event.dto';
 
 @Controller('events')
 @ApiCrudDoc({
   tag: 'Eventos',
   createDto: CreateEventDto,
   updateDto: UpdateEventDto,
-  responseDto: EventResponseSchema,
+  responseDto: ResponseEventDto,
 })
-export class EventController extends BaseController<
-  Event,
-  CreateEventDto,
-  UpdateEventDto
-> {
-  constructor(private readonly eventService: EventService) {
-    super(eventService);
-  }
+export class EventController {
+  constructor(private readonly eventService: EventService) {}
 
-  @Post()
-  @Public()
-  @UseGuards(ClientSystemAuthGuard)
-  @ApiBearerAuth('client-system-token')
-  @ApiBody({ type: CreateEventDto })
-  create(
-    @Body() dto: CreateEventDto,
-    @CurrentClientSystem() clientSystem?: ClientSystem,
-  ) {
-    return this.eventService.createFromDto(dto, clientSystem!);
-  }
-
-  @Get('code/:code')
-  @ApiOperation({ summary: 'Obtener evento por código' })
-  @ApiParam({ name: 'code', example: 'EVT_PAGO_RECHAZADO' })
-  @ApiOkResponse({ type: EventResponseSchema })
-  findByCode(@Param('code') code: string) {
-    return this.eventService.findByCode(code);
+  @Get()
+  @ApiOperation({ summary: 'Listar eventos' })
+  @ApiOkResponse({ type: [ResponseEventDto] })
+  findAll() {
+    return this.eventService.findAllMapped();
   }
 
   @Get('client-system/:clientSystemId')
@@ -60,8 +48,54 @@ export class EventController extends BaseController<
     name: 'clientSystemId',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @ApiOkResponse({ type: [EventResponseSchema] })
+  @ApiOkResponse({ type: [ResponseEventDto] })
   findByClientSystemId(@Param('clientSystemId') clientSystemId: string) {
     return this.eventService.findByClientSystemId(clientSystemId);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener evento por ID' })
+  @ApiParam({
+    name: 'id',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({ type: ResponseEventDto })
+  findOne(@Param('id') id: string) {
+    return this.eventService.findOneMapped(id);
+  }
+
+  @Post()
+  @Public()
+  @UseGuards(ClientSystemAuthGuard)
+  @ApiBearerAuth('client-system-token')
+  @ApiBody({ type: CreateEventDto })
+  @ApiOkResponse({ type: ResponseEventDto })
+  create(
+    @Body() dto: CreateEventDto,
+    @CurrentClientSystem() clientSystem?: ClientSystem,
+  ) {
+    return this.eventService.createFromDto(dto, clientSystem!);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Actualizar evento' })
+  @ApiParam({
+    name: 'id',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiBody({ type: UpdateEventDto })
+  @ApiOkResponse({ type: ResponseEventDto })
+  update(@Param('id') id: string, @Body() dto: UpdateEventDto) {
+    return this.eventService.updateMapped(id, dto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Eliminar evento' })
+  @ApiParam({
+    name: 'id',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  delete(@Param('id') id: string) {
+    return this.eventService.delete(id);
   }
 }

@@ -3,7 +3,7 @@ export * from './severity-level-response.schema';
 export * from './client-system-response.schema';
 export * from './client-system-token-response.schema';
 export * from './notification-channel-response.schema';
-export * from './event-response.schema';
+export * from '../dto/event/response-event.dto';
 export * from './event-type-response.schema';
 export * from './alert-rule-response.schema';
 export * from './alert-response.schema';

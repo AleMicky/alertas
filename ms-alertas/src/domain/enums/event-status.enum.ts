@@ -1,5 +1,6 @@
 export enum EventStatus {
   PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
   PROCESSED = 'PROCESSED',
   FAILED = 'FAILED',
 }
