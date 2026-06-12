@@ -32,7 +32,9 @@ export class AlertNotificationService  extends BaseService<AlertNotification> {
   }
 
   async createFromAlert(alert: Alert): Promise<AlertNotification[]> {
-    const eventPayload = (alert.event.payloadJson ?? {}) as EventPayload;
+    console.log(alert);
+    
+   /* const eventPayload = (alert.event.payloadJson ?? {}) as EventPayload;
     const recipients = eventPayload.recipients ?? [];
 
     const notifications: AlertNotification[] = [];
@@ -81,16 +83,17 @@ export class AlertNotificationService  extends BaseService<AlertNotification> {
       });
 
       notifications.push(notification);
-      jobs.push({ alertNotificationId: notification.id });*/
-    }
+      jobs.push({ alertNotificationId: notification.id });
+    }*/
 
-    for (const job of jobs) {
+    /*for (const job of jobs) {
       await this.alertNotificationQueue.add('send-alert-notification', job, {
         jobId: job.alertNotificationId,
       });
     }
 
-    return notifications;
+    return notifications;*/
+    return [];
   }
 
   private cleanRecipientPayload(
@@ -108,3 +111,6 @@ export class AlertNotificationService  extends BaseService<AlertNotification> {
     return this.alertNotificationRepository.findByStatus(status);
   }
 }
+
+
+ 

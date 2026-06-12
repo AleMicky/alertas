@@ -26,7 +26,9 @@ export class AlertService extends BaseService<Alert> {
       createdAt: new Date(),
     });
 
-    /*const notifications =  await this.alertNotificationService.createFromAlert(alert);
+    const notifications =  await this.alertNotificationService.createFromAlert(alert);
+    console.log(notifications);
+    /*
 
     if (notifications.length === 0) {
       await this.alertOutcomeService.markNoRecipients(alert);

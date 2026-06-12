@@ -6,8 +6,7 @@ import { GenericRepository } from 'src/shared/core/generic.repository';
 import { AlertNotificationStatus } from 'src/domain/enums/alert-notification-status.enum';
 import { AlertNotificationRepository } from 'src/domain/repositories/alert-notification.repository';
 import { AlertNotificationEntity } from '../typeorm/entities/alert-notification.entity';
-import { AlertNotification } from 'src/domain/entities';
-
+ 
 type AlertNotificationPersistenceInput = Partial<AlertNotificationEntity> & {
   alertId?: string;
   notificationChannelId?: string;
@@ -63,6 +62,7 @@ export class AlertNotificationTypeormRepository
   }
 
   async create(entity: AlertNotificationPersistenceInput): Promise<AlertNotificationEntity> {
+    
     const persistence = this.toPersistence(entity, true);
     const newEntity = this.repository.create(persistence);
     const saved = await this.repository.save(newEntity);
