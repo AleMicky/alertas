@@ -8,3 +8,5 @@ export * from './alert.repository';
 export * from './alert-notification.repository';
 export * from './event-type.repository';
 export * from './notification-provider.repository';
+export * from './role.repository';
+export * from './user.repository';

@@ -1,7 +1,6 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 
 interface QueryService<T> {
     getAll(): Promise<T[]>;
@@ -16,9 +15,7 @@ export function useBaseEntityQuery<T>(
     service: QueryService<T>,
     options: Options,
 ) {
-    const { status } = useSession();
-    const isAuthenticated = status === 'authenticated';
-    const shouldFetch = (options.enabled ?? true) && isAuthenticated;
+    const shouldFetch = options.enabled ?? true;
 
     const query = useQuery({
         queryKey: [options.queryKey],
@@ -26,13 +23,9 @@ export function useBaseEntityQuery<T>(
         enabled: shouldFetch,
     });
 
-    const isLoading =
-        status === 'loading'
-        || (shouldFetch && query.isPending);
-
     return {
         data: query.data ?? [],
-        isLoading,
+        isLoading: shouldFetch && query.isPending,
         isError: query.isError,
         error: query.error,
         refetch: query.refetch,

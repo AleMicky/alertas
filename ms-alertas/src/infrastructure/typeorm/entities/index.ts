@@ -8,3 +8,5 @@ export * from './alert-rule.entity';
 export * from './alert.entity';
 export * from './alert-notification.entity';
 export * from './notification-provider.entity';
+export * from './role.entity';
+export * from './user.entity';

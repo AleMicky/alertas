@@ -103,24 +103,8 @@ const breadcrumbByPath: Record<string, { group?: string; page: string }> = {
   },
 }
 
-export function getNavGroupsForSession(
-  isAuthenticated = true,
-  roles: string[] = [],
-): AppNavGroup[] {
-  if (!isAuthenticated) {
-    return [];
-  }
-
-  const isAdmin = roles.includes("admin");
-
-  if (isAdmin) {
-    return navGroups;
-  }
-
-  return navGroups.map((group) => ({
-    ...group,
-    items: group.items.filter((item) => item.to !== "/severity-levels"),
-  }));
+export function getNavGroups(): AppNavGroup[] {
+  return navGroups;
 }
 
 export function getNavBreadcrumb(pathname: string) {

@@ -4,10 +4,9 @@ import * as React from "react"
 import Link from "next/link"
 import { Building2 } from "lucide-react"
 
-import { useAuth } from "@/features/auth/hooks/use-auth"
 import {
   appBrand,
-  getNavGroupsForSession,
+  getNavGroups,
 } from "@/navigation/app-nav-config"
 import { AppNavMain } from "@/components/layout/app-nav-main"
 import { AppNavUser } from "@/components/layout/app-nav-user"
@@ -15,8 +14,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -27,21 +24,7 @@ import {
 export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  const { user, isAuthenticated, isLoading } = useAuth()
-
-  const navGroups = React.useMemo(
-    () => getNavGroupsForSession(isAuthenticated, user?.roles),
-    [isAuthenticated, user?.roles],
-  )
-
-  const navUser = React.useMemo(
-    () => ({
-      name: user?.nombreCompleto ?? user?.userName ?? "Usuario",
-      email: user?.userName ?? "sin sesión",
-      avatar: "",
-    }),
-    [user?.nombreCompleto, user?.userName],
-  )
+  const navGroups = React.useMemo(() => getNavGroups(), [])
 
   return (
     <Sidebar
@@ -67,36 +50,17 @@ export function AppSidebar({
       </SidebarHeader>
 
       <SidebarContent>
-        {isLoading ? (
-          <SidebarGroup>
-            <SidebarGroupContent className="px-2 py-4 text-xs text-muted-foreground">
-              Cargando menú…
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ) : navGroups.length > 0 ? (
-          <AppNavMain groups={navGroups} />
-        ) : (
-          <SidebarGroup>
-            <SidebarGroupContent className="px-2 py-4 text-xs leading-relaxed text-muted-foreground">
-              No hay módulos visibles para tu usuario. Contacta al
-              administrador si necesitas acceso.
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+        <AppNavMain groups={navGroups} />
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border/60">
-        {isAuthenticated ? (
-          <AppNavUser user={navUser} />
-        ) : (
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={<Link href="/login" />}>
-                <span>Iniciar sesión</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        )}
+        <AppNavUser
+          user={{
+            name: "Usuario",
+            email: "sin autenticación",
+            avatar: "",
+          }}
+        />
       </SidebarFooter>
 
       <SidebarRail />

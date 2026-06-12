@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
-// Entities
+import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+ // Entities
 import {
   NotificationChannelEntity,
   SeverityLevelEntity,
@@ -13,6 +14,8 @@ import {
   AlertEntity,
   AlertNotificationEntity,
   NotificationProviderEntity,
+  RoleEntity,
+  UserEntity,
 } from './infrastructure/typeorm/entities';
 // Services
 import { EventMapper } from './app/mappers';
@@ -29,6 +32,9 @@ import {
   AlertOutcomeService,
   NotificationService,
   NotificationProviderService,
+  RoleService,
+  AuthService,
+  UserService,
 } from './app/services';
 // Repositories
 import {
@@ -42,6 +48,8 @@ import {
   AlertRepository,
   AlertNotificationRepository,
   NotificationProviderRepository,
+  RoleRepository,
+  UserRepository,
 } from './domain/repositories';
 // Controllers
 import {
@@ -55,6 +63,9 @@ import {
   AlertNotificationController,
   TestN8nController,
   NotificationProvidersController,
+  RoleController,
+  AuthController,
+  UserController,
 } from './presentation/controllers';
 // Repositories
 import {
@@ -68,12 +79,17 @@ import {
   AlertTypeormRepository,
   AlertNotificationTypeormRepository,
   NotificationProviderTypeormRepository,
+  RoleTypeormRepository,
+  UserTypeormRepository,
 } from './infrastructure/repositories';
 import { N8nClient } from './infrastructure/integrations/n8n/n8n.client';
 import { BullModule } from '@nestjs/bullmq';
 import { AlertNotificationProcessor } from './app/processors/alert-notification.processor';
 import { TokenGeneratorService } from './infrastructure/security/token-generator.service';
 import { ClientSystemAuthGuard } from './shared/guards/client-system-auth.guard';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './infrastructure/security/jwt.strategy';
+import { PasswordService } from './infrastructure/security/password.service';
 
 @Module({
   imports: [
@@ -88,7 +104,19 @@ import { ClientSystemAuthGuard } from './shared/guards/client-system-auth.guard'
       AlertEntity,
       AlertNotificationEntity,
       NotificationProviderEntity,
+      UserEntity,
+      RoleEntity,
     ]),
+    PassportModule,
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.getOrThrow<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: configService.get('JWT_EXPIRES_IN') ?? '24h',
+        } as JwtSignOptions,
+      }),
+    }),
     BullModule.registerQueue({
       name: 'alert-notifications',
       defaultJobOptions: {
@@ -110,6 +138,9 @@ import { ClientSystemAuthGuard } from './shared/guards/client-system-auth.guard'
     AlertNotificationController,
     TestN8nController,
     NotificationProvidersController,
+    RoleController,
+    AuthController,
+    UserController,
   ],
   providers: [
     N8nClient,
@@ -129,6 +160,11 @@ import { ClientSystemAuthGuard } from './shared/guards/client-system-auth.guard'
     AlertOutcomeService,
     AlertNotificationService,
     NotificationProviderService,
+    RoleService,
+    UserService,
+    JwtStrategy,
+    PasswordService,
+    AuthService,
     {
       provide: NotificationChannelRepository,
       useClass: NotificationChannelTypeormRepository,
@@ -168,6 +204,14 @@ import { ClientSystemAuthGuard } from './shared/guards/client-system-auth.guard'
     {
       provide: NotificationProviderRepository,
       useClass: NotificationProviderTypeormRepository,
+    },
+    {
+      provide: RoleRepository,
+      useClass: RoleTypeormRepository,
+    },
+    {
+      provide: UserRepository,
+      useClass: UserTypeormRepository,
     },
   ],
 })

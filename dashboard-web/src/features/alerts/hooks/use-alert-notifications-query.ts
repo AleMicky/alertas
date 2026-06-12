@@ -1,7 +1,6 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 
 import { QUERY_KEYS } from '@/shared/constants/query-keys';
 import { useBaseEntityQuery } from '@/shared/core/hooks/use-base-entity-query';
@@ -16,11 +15,9 @@ export function useAlertNotificationsQuery() {
 }
 
 export function useAlertNotificationsByAlert(alertId: string | null) {
-  const { status } = useSession();
-
   return useQuery({
     queryKey: [QUERY_KEYS.alertNotifications, 'by-alert', alertId],
     queryFn: () => alertNotificationService.getByAlertId(alertId!),
-    enabled: Boolean(alertId) && status === 'authenticated',
+    enabled: Boolean(alertId),
   });
 }

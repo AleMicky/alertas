@@ -5,11 +5,9 @@ import {
   Bell,
   ChevronsUpDown,
   CreditCard,
-  LogOut,
   Sparkles,
 } from "lucide-react"
 
-import { useAuth } from "@/features/auth/hooks/use-auth"
 import {
   Avatar,
   AvatarFallback,
@@ -50,7 +48,6 @@ function getInitials(name: string) {
 
 export function AppNavUser({ user }: AppNavUserProps) {
   const { isMobile } = useSidebar()
-  const { logout, isLoggingOut } = useAuth()
   const initials = getInitials(user.name)
 
   return (
@@ -103,35 +100,26 @@ export function AppNavUser({ user }: AppNavUserProps) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem disabled>
                 <Sparkles aria-hidden />
                 Cuenta
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem disabled>
                 <BadgeCheck aria-hidden />
                 Perfil
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem disabled>
                 <CreditCard aria-hidden />
                 Facturación
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem disabled>
                 <Bell aria-hidden />
                 Notificaciones
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              disabled={isLoggingOut}
-              onClick={() => void logout()}
-            >
-              <LogOut aria-hidden />
-              {isLoggingOut ? "Cerrando sesión…" : "Cerrar sesión"}
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

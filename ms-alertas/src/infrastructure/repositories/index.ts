@@ -8,3 +8,5 @@ export * from './alert-typeorm.repository';
 export * from './alert-notification-typeorm.repository';
 export * from './event-type-typeorm.repository';
 export * from './notification-provider-typeorm.repository';
+export * from './role-typeorm.repository';
+export * from './user-typeorm.repository';

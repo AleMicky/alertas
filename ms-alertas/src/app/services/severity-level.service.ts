@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { BaseService } from 'src/shared/core/base.service';
 import { SeverityLevelRepository } from 'src/domain/repositories/severity-level.repository';
 import { SeverityLevel } from 'src/domain/entities/severity-level';
@@ -11,7 +11,11 @@ export class SeverityLevelService extends BaseService<SeverityLevel> {
     super(severityLevelRepository);
   }
 
-  findByCode(code: string) {
-    return this.severityLevelRepository.findByCode(code);
+  async findByCode(code: string) {
+    const severityLevel = await this.severityLevelRepository.findByCode(code);
+    if (!severityLevel) {
+      throw new NotFoundException('Severity level not found');
+    }
+    return severityLevel;
   }
 }

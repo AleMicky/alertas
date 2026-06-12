@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { AuthSessionProvider } from "@/providers/auth-session-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { Toaster } from "sonner";
 
@@ -24,9 +23,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={cn("h-full antialiased font-sans", inter.variable)}>
       <body className="min-h-full flex flex-col">
-        <AuthSessionProvider>
-          <QueryProvider>{children}</QueryProvider>
-        </AuthSessionProvider>
+        <QueryProvider>{children}</QueryProvider>
         <Toaster richColors position="top-right" />
       </body>
     </html>

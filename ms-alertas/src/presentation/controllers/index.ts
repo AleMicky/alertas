@@ -9,3 +9,6 @@ export * from './alert.controller';
 export * from './alert-notification.controller';
 export * from './test-n8n.controller';
 export * from './notification-providers.controller';
+export * from './role.controller';
+export * from './auth.controller';
+export * from './user.controller';
