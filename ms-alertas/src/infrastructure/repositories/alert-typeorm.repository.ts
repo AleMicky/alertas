@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
 
@@ -9,10 +9,6 @@ import { AlertEntity } from '../typeorm/entities/alert.entity';
 
 type AlertPersistenceInput = Partial<AlertEntity> & {
   eventId?: string;
-  alertRuleId?: string;
-  severityLevelId?: string;
-  alertDate?: Date | string;
-  attendedAt?: Date | string;
 };
 
 @Injectable()
@@ -22,8 +18,6 @@ export class AlertTypeormRepository
 {
   private static readonly relations = {
     event: true,
-    alertRule: true,
-    severityLevel: true,
   };
 
   constructor(
@@ -62,11 +56,8 @@ export class AlertTypeormRepository
 
   async create(entity: AlertPersistenceInput): Promise<AlertEntity> {
     const persistence = this.toPersistence(entity, true);
-
     const newEntity = this.repository.create(persistence);
-
     const saved = await this.repository.save(newEntity);
-
     return (await this.findOne(saved.id))!;
   }
 
@@ -81,7 +72,7 @@ export class AlertTypeormRepository
     const updated = await this.findOne(id);
 
     if (!updated) {
-      throw new Error('Registro no encontrado');
+      throw new NotFoundException('Registro no encontrado');
     }
 
     return updated;
@@ -93,30 +84,14 @@ export class AlertTypeormRepository
   ): DeepPartial<AlertEntity> {
     const {
       eventId,
-      alertRuleId,
-      severityLevelId,
-      alertDate,
-      attendedAt,
       ...rest
     } = entity;
 
     return {
       ...rest,
       ...(eventId && { event: { id: eventId } }),
-      ...(alertRuleId && { alertRule: { id: alertRuleId } }),
-      ...(severityLevelId && {
-        severityLevel: { id: severityLevelId },
-      }),
-      ...(alertDate !== undefined && {
-        alertDate: alertDate instanceof Date ? alertDate : new Date(alertDate),
-      }),
-      ...(attendedAt !== undefined && {
-        attendedAt:
-          attendedAt instanceof Date ? attendedAt : new Date(attendedAt),
-      }),
       ...(applyDefaults && {
         status: rest.status ?? AlertStatus.OPEN,
-        active: rest.active ?? true,
       }),
     };
   }

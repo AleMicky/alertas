@@ -20,7 +20,6 @@ import { ApiCrudDoc } from 'src/config/swagger/crud';
 import { ClientSystem } from 'src/domain/entities/client-system';
 import { EventService } from 'src/app/services/event.service';
 import { CurrentClientSystem } from 'src/shared/decorators/current-client-system.decorator';
-import { Public } from 'src/infrastructure/auth/public.decorator';
 import { ClientSystemAuthGuard } from 'src/shared/guards/client-system-auth.guard';
 import { CreateEventDto, UpdateEventDto } from '../dto/event';
 import { ResponseEventDto } from '../dto/event/response-event.dto';
@@ -65,7 +64,6 @@ export class EventController {
   }
 
   @Post()
-  @Public()
   @UseGuards(ClientSystemAuthGuard)
   @ApiBearerAuth('client-system-token')
   @ApiBody({ type: CreateEventDto })

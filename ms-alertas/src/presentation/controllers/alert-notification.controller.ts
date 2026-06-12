@@ -31,18 +31,14 @@ import {
   updateDto: UpdateAlertNotificationDto,
   responseDto: AlertNotificationResponseSchema,
 })
-export class AlertNotificationController extends BaseController<
-  AlertNotification,
-  CreateAlertNotificationDto,
-  UpdateAlertNotificationDto
-> {
+export class AlertNotificationController {
   constructor(
-    private readonly alertNotificationService: AlertNotificationService,
+   // private readonly alertNotificationService: AlertNotificationService,
   ) {
-    super(alertNotificationService);
-  }
+   // super(alertNotificationService);
+   }
 
-  @Get('alert/:alertId')
+  /*@Get('alert/:alertId')
   @ApiOperation({ summary: 'Listar notificaciones por alerta' })
   @ApiParam({
     name: 'alertId',
@@ -98,5 +94,5 @@ export class AlertNotificationController extends BaseController<
     throw new MethodNotAllowedException(
       'No se permite eliminar notificaciones por API',
     );
-  }
+  }*/
 }

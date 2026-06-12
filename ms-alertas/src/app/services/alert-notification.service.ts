@@ -19,13 +19,12 @@ import {
 } from 'src/app/utils/resolve-recipient-target.util';
 
 @Injectable()
-export class AlertNotificationService extends BaseService<AlertNotification> {
+export class AlertNotificationService  extends BaseService<AlertNotification> {
   private readonly logger = new Logger(AlertNotificationService.name);
 
   constructor(
     private readonly alertNotificationRepository: AlertNotificationRepository,
     private readonly notificationChannelRepository: NotificationChannelRepository,
-
     @InjectQueue('alert-notifications')
     private readonly alertNotificationQueue: Queue,
   ) {
@@ -71,7 +70,7 @@ export class AlertNotificationService extends BaseService<AlertNotification> {
         continue;
       }
 
-      const notification = await this.alertNotificationRepository.create({
+      /*const notification = await this.alertNotificationRepository.create({
         alert,
         notificationChannel,
         target: resolveRecipientTarget(recipient)!,
@@ -82,7 +81,7 @@ export class AlertNotificationService extends BaseService<AlertNotification> {
       });
 
       notifications.push(notification);
-      jobs.push({ alertNotificationId: notification.id });
+      jobs.push({ alertNotificationId: notification.id });*/
     }
 
     for (const job of jobs) {

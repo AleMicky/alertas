@@ -15,7 +15,7 @@ import { SeverityLevelEntity } from './severity-level.entity';
 import { EventEntity } from './event.entity';
 
 @Entity('alerts')
-export class AlertEntity extends BaseAuditColumns {
+export class AlertEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -25,28 +25,6 @@ export class AlertEntity extends BaseAuditColumns {
   })
   event: EventEntity;
 
-  @ManyToOne(() => AlertRuleEntity)
-  @JoinColumn({
-    name: 'alert_rule_id',
-  })
-  alertRule: AlertRuleEntity;
-
-  @ManyToOne(() => SeverityLevelEntity)
-  @JoinColumn({
-    name: 'severity_level_id',
-  })
-  severityLevel: SeverityLevelEntity;
-
-  @Column({
-    length: 200,
-  })
-  title: string;
-
-  @Column({
-    type: 'text',
-  })
-  message: string;
-
   @Column({
     length: 50,
     default: AlertStatus.OPEN,
@@ -54,15 +32,25 @@ export class AlertEntity extends BaseAuditColumns {
   status: AlertStatus;
 
   @Column({
-    name: 'alert_date',
+    name: 'created_at',
     type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
   })
-  alertDate: Date;
+  createdAt: Date;
 
   @Column({
-    name: 'attended_at',
+    name: 'notified_at',
     type: 'timestamp',
     nullable: true,
   })
-  attendedAt?: Date;
+  notifiedAt?: Date | null;
+
+  @Column({
+    name: 'failed_at',
+    type: 'timestamp',
+    nullable: true,
+  })
+  failedAt?: Date | null;
+
+
 }

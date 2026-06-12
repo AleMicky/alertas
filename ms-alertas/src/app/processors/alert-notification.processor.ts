@@ -26,7 +26,7 @@ export class AlertNotificationProcessor extends WorkerHost {
       alertNotificationId: string;
     }>,
   ): Promise<void> {
-    const { alertNotificationId } = job.data;
+   /* const { alertNotificationId } = job.data;
 
     const notification =
       await this.alertNotificationService.findOne(alertNotificationId);
@@ -72,7 +72,7 @@ export class AlertNotificationProcessor extends WorkerHost {
       await this.alertNotificationService.update(notification.id, {
         status: AlertNotificationStatus.SENT,
         sentAt: new Date(),
-        responseJson: response as Record<string, unknown>,
+       //∂ responseJson: response as Record<string, unknown>,
       });
 
       await this.alertOutcomeService.syncFromNotifications(alertId);
@@ -95,6 +95,6 @@ export class AlertNotificationProcessor extends WorkerHost {
       );
 
       throw error;
-    }
+    }*/
   }
 }

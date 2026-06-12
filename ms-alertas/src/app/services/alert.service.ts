@@ -22,19 +22,15 @@ export class AlertService extends BaseService<Alert> {
   async createFromEvent(event: Event): Promise<Alert> {
     const alert = await this.alertRepository.create({
       event,
-     // title: event.title,
-   //   message: event.message,
       status: AlertStatus.OPEN,
-      alertDate: new Date(),
-      active: true,
+      createdAt: new Date(),
     });
 
-    const notifications =
-      await this.alertNotificationService.createFromAlert(alert);
+    /*const notifications =  await this.alertNotificationService.createFromAlert(alert);
 
     if (notifications.length === 0) {
       await this.alertOutcomeService.markNoRecipients(alert);
-    }
+    }*/
 
     return alert;
   }
@@ -45,5 +41,18 @@ export class AlertService extends BaseService<Alert> {
 
   findByStatus(status: string) {
     return this.alertRepository.findByStatus(status);
+  }
+
+  async markAsNotified(alertId: string): Promise<Alert> {
+    return this.alertRepository.update(alertId, {
+      status: AlertStatus.NOTIFIED,
+    });
+
+  }
+
+  async markAsFailed(alertId: string): Promise<Alert> {
+    return this.alertRepository.update(alertId, {
+      status: AlertStatus.FAILED,
+    });
   }
 }

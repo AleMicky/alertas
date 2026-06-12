@@ -8,6 +8,12 @@ import { EventRepository } from 'src/domain/repositories/event.repository';
 import { EventTypeRepository } from 'src/domain/repositories/event-type.repository';
 import { CreateEventDto } from 'src/presentation/dto/event/create-event.dto';
 import { ResponseEventDto } from 'src/presentation/dto/event/response-event.dto';
+import { AlertService } from './alert.service';
+
+type EventPayload = {
+  metadata: Record<string, unknown>;
+  recipients: Record<string, unknown>[];
+};
 
 @Injectable()
 export class EventService extends BaseService<Event> {
@@ -15,6 +21,7 @@ export class EventService extends BaseService<Event> {
     private readonly eventRepository: EventRepository,
     private readonly eventTypeRepository: EventTypeRepository,
     private readonly eventMapper: EventMapper,
+    private readonly alertService: AlertService,
   ) {
     super(eventRepository);
   }
@@ -34,7 +41,12 @@ export class EventService extends BaseService<Event> {
       throw new BadRequestException('Tipo de evento no encontrado');
     }
 
-    const partial = this.eventMapper.fromCreateDto(dto);
+    const normalizedPayload = this.normalizePayload(dto.payloadJson);
+
+    const partial = this.eventMapper.fromCreateDto({
+      ...dto,
+      payloadJson: normalizedPayload,
+    });
 
     const event = await this.eventRepository.create({
       ...partial,
@@ -42,14 +54,12 @@ export class EventService extends BaseService<Event> {
       eventType,
     });
 
-    // await this.alertService.createFromEvent(event);
+     await this.alertService.createFromEvent(event);
 
     return this.eventMapper.toResponse(event);
   }
 
-  async findByClientSystemId(
-    clientSystemId: string,
-  ): Promise<ResponseEventDto[]> {
+  async findByClientSystemId(clientSystemId: string): Promise<ResponseEventDto[]> {
     const events =
       await this.eventRepository.findByClientSystemId(clientSystemId);
 
@@ -64,7 +74,6 @@ export class EventService extends BaseService<Event> {
 
   async findOneMapped(id: string): Promise<ResponseEventDto | null> {
     const event = await this.eventRepository.findOne(id);
-
     return event ? this.eventMapper.toResponse(event) : null;
   }
 
@@ -77,4 +86,15 @@ export class EventService extends BaseService<Event> {
 
     return this.eventMapper.toResponse(event);
   }
+
+  private normalizePayload(payload?: Record<string, any>): EventPayload {
+    return {
+      metadata: payload?.metadata ?? {},
+      recipients: Array.isArray(payload?.recipients)
+        ? payload.recipients
+        : [],
+    };
+
+  }
+
 }
