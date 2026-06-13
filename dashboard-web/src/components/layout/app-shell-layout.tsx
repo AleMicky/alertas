@@ -21,7 +21,7 @@ export function AppShellLayout({ children }: AppShellLayoutProps) {
           <div className="flex flex-1">
             <AppSidebar />
 
-            <SidebarInset className="overflow-hidden">
+            <SidebarInset className="overflow-hidden bg-muted/20">
               <div className="flex flex-1 flex-col gap-4 overflow-auto p-4 md:p-6">
                 {children}
               </div>

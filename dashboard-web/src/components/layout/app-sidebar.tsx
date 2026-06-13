@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Building2 } from "lucide-react"
+import { Bell } from "lucide-react"
 
 import {
   appBrand,
@@ -38,23 +38,35 @@ export function AppSidebar({
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
       {...props}
     >
-      <SidebarHeader className="border-b border-sidebar-border/60">
+      <SidebarHeader className="border-b border-sidebar-border/60 p-0">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href={appBrand.homeTo} />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <Building2 className="size-4" aria-hidden />
+            <SidebarMenuButton
+              size="lg"
+              className="relative overflow-hidden rounded-none px-3 py-4 group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:py-2"
+              render={<Link href={appBrand.homeTo} />}
+            >
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-linear-to-br from-sidebar-primary/15 via-transparent to-transparent"
+              />
+              <div className="relative flex aspect-square size-8 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground shadow-sm shadow-sidebar-primary/25">
+                <Bell className="size-4" aria-hidden />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{appBrand.name}</span>
-                <span className="truncate text-xs">{appBrand.tagline}</span>
+              <div className="relative grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold tracking-tight">
+                  {appBrand.name}
+                </span>
+                <span className="truncate text-xs text-sidebar-foreground/70">
+                  {appBrand.tagline}
+                </span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="gap-0 py-2">
         <AppNavMain groups={navGroups} />
       </SidebarContent>
 

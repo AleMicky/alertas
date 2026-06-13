@@ -86,8 +86,10 @@ export function AppNavMain({ groups }: AppNavMainProps) {
   return (
     <>
       {groups.map((group) => (
-        <SidebarGroup key={group.id}>
-          <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+        <SidebarGroup key={group.id} className="px-2 py-1">
+          <SidebarGroupLabel className="text-[11px] font-semibold tracking-wider uppercase text-sidebar-foreground/55">
+            {group.label}
+          </SidebarGroupLabel>
           <SidebarMenu>
             {group.items.map((item) => (
               <NavLinkItem key={`${group.id}-${item.to}`} item={item} />

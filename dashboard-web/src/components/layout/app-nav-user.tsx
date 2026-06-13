@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import {
   BadgeCheck,
   ChevronsUpDown,
@@ -100,7 +101,7 @@ export function AppNavUser({ user }: AppNavUserProps) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem disabled>
+              <DropdownMenuItem render={<Link href="/profile" />}>
                 <BadgeCheck aria-hidden />
                 Perfil
               </DropdownMenuItem>

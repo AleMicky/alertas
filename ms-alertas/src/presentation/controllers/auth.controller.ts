@@ -1,18 +1,16 @@
-import { Body, Controller, Ip, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Ip, Post, Req, UseGuards } from '@nestjs/common';
 import {
-  ApiBearerAuth,
-  ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthService } from 'src/app/services/auth.service';
-import { CurrentUser, Public } from 'src/infrastructure/security';
-import { LoginDto, RefreshDto } from '../dto/auth';
+import { CurrentUser, JwtAuthGuard, Public } from 'src/infrastructure/security';
+import { ChangePasswordDto, LoginDto, RefreshDto } from '../dto/auth';
 
 @ApiTags('Autenticación')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Public()
   @Post('login')
@@ -36,16 +34,34 @@ export class AuthController {
     return this.authService.refresh(body);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  me(
+    @CurrentUser('id')
+    userId: string,
+  ) {
+    return this.authService.me(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('logout')
-  @ApiBearerAuth('jwt')
-  @ApiOperation({ summary: 'Cerrar sesión e invalidar refresh token' })
-  @ApiOkResponse({
-    schema: {
-      type: 'object',
-      properties: { message: { type: 'string', example: 'Sesión cerrada' } },
-    },
-  })
-  logout(@CurrentUser('id') userId: string) {
+  logout(
+    @CurrentUser('id')
+    userId: string,
+  ) {
     return this.authService.logout(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('change-password')
+  changePassword(
+    @CurrentUser('id') userId: string,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(
+      userId,
+      dto.currentPassword,
+      dto.newPassword,
+    );
   }
 }

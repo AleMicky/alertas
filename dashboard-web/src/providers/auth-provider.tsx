@@ -25,6 +25,7 @@ type AuthContextValue = {
   isLoading: boolean;
   login: (credentials: LoginDto, options?: LoginOptions) => Promise<void>;
   logout: () => Promise<void>;
+  syncUser: (user: AuthUser) => void;
   hasRole: (...roles: string[]) => boolean;
 };
 
@@ -38,6 +39,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setUser(authStorage.getUser());
     setIsLoading(false);
+  }, []);
+
+  const syncUser = useCallback((nextUser: AuthUser) => {
+    authStorage.setUser(nextUser);
+    setUser(nextUser);
   }, []);
 
   const login = useCallback(
@@ -81,9 +87,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       login,
       logout,
+      syncUser,
       hasRole,
     }),
-    [user, isLoading, login, logout, hasRole],
+    [user, isLoading, login, logout, syncUser, hasRole],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

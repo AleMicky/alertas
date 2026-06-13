@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     Injectable,
     UnauthorizedException
 } from '@nestjs/common';
@@ -125,12 +126,62 @@ export class AuthService {
         throw new UnauthorizedException('Refresh token inválido');
     }
 
+    async me(userId: string) {
+        const user = await this.userRepository.findOne(userId);
+
+        if (!user || !user.active) {
+            throw new UnauthorizedException('Usuario no autorizado');
+        }
+
+        return {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            fullName: user.fullName,
+            roles: user.roles?.map((role) => role.code) ?? [],
+        };
+    }
+
     async logout(userId: string) {
         await this.userRepository.update(userId, {
             refreshTokenHash: null,
             refreshTokenExpiresAt: null,
         });
 
-        return { message: 'Sesión cerrada' };
+        return {
+            message: 'Sesión cerrada correctamente',
+        };
+    }
+    async changePassword(
+        userId: string,
+        currentPassword: string,
+        newPassword: string,
+    ) {
+        const user = await this.userRepository.findOne(userId);
+
+        if (!user || !user.active) {
+            throw new UnauthorizedException('Usuario no autorizado');
+        }
+
+        const validPassword = await this.passwordService.comparePassword(
+            currentPassword,
+            user.passwordHash,
+        );
+
+        if (!validPassword) {
+            throw new BadRequestException('Contraseña actual incorrecta');
+        }
+
+        const passwordHash = await this.passwordService.hashPassword(newPassword);
+
+        await this.userRepository.update(user.id, {
+            passwordHash,
+            refreshTokenHash: null,
+            refreshTokenExpiresAt: null,
+        });
+
+        return {
+            message: 'Contraseña actualizada correctamente',
+        };
     }
 }

@@ -12,8 +12,8 @@ import {
 } from "lucide-react"
 
 export const appBrand = {
-  name: "Dashboard Web",
-  tagline: "Gestión de alertas",
+  name: "MS Alertas",
+  tagline: "Notificación",
   homeTo: "/",
 } as const
 
@@ -34,8 +34,8 @@ export type AppNavGroup = {
 
 const navGroups: AppNavGroup[] = [
   {
-    id: "general",
-    label: "General",
+    id: "inicio",
+    label: "Inicio",
     items: [
       {
         title: "Dashboard",
@@ -45,8 +45,8 @@ const navGroups: AppNavGroup[] = [
     ],
   },
   {
-    id: "alertas",
-    label: "Alertas",
+    id: "operaciones",
+    label: "Operaciones",
     items: [
       {
         title: "Alertas",
@@ -54,14 +54,14 @@ const navGroups: AppNavGroup[] = [
         icon: Bell,
       },
       {
-        title: "Reglas",
-        to: "/alert-rules",
-        icon: ShieldAlert,
-      },
-      {
         title: "Eventos",
         to: "/events",
         icon: Radio,
+      },
+      {
+        title: "Reglas",
+        to: "/alert-rules",
+        icon: ShieldAlert,
       },
     ],
   },
@@ -108,10 +108,10 @@ const navGroups: AppNavGroup[] = [
 ]
 
 const breadcrumbByPath: Record<string, { group?: string; page: string }> = {
-  "/": { group: "General", page: "Dashboard" },
-  "/alerts": { group: "Alertas", page: "Alertas" },
-  "/alert-rules": { group: "Alertas", page: "Reglas" },
-  "/events": { group: "Alertas", page: "Eventos" },
+  "/": { group: "Inicio", page: "Dashboard" },
+  "/alerts": { group: "Operaciones", page: "Alertas" },
+  "/alert-rules": { group: "Operaciones", page: "Reglas" },
+  "/events": { group: "Operaciones", page: "Eventos" },
   "/severity-levels": {
     group: "Configuración",
     page: "Niveles de severidad",
@@ -132,6 +132,7 @@ const breadcrumbByPath: Record<string, { group?: string; page: string }> = {
     group: "Administración",
     page: "Roles",
   },
+  "/profile": { group: "Cuenta", page: "Perfil" },
   "/login": { page: "Iniciar sesión" },
 }
 

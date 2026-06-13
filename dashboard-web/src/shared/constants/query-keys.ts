@@ -10,4 +10,5 @@ export const QUERY_KEYS = {
     clientSystemTokens: 'client-system-tokens',
     users: 'users',
     roles: 'roles',
+    profile: 'profile',
 } as const;

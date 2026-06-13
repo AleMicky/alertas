@@ -46,6 +46,11 @@ export const authStorage = {
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
   },
 
+  setUser(user: AuthUser) {
+    if (!isBrowser()) return;
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+  },
+
   clearSession() {
     if (!isBrowser()) return;
 

@@ -1,6 +1,11 @@
 import { http } from '@/lib/http';
-import type { LoginDto } from './auth.schema';
-import type { LoginResponse, RefreshResponse } from './auth.types';
+import type { ChangePasswordDto, LoginDto } from './auth.schema';
+import type {
+  AuthUser,
+  ChangePasswordResponse,
+  LoginResponse,
+  RefreshResponse,
+} from './auth.types';
 
 const endpoint = '/auth';
 
@@ -19,5 +24,20 @@ export const authService = {
 
   logout: async (): Promise<void> => {
     await http.post(`${endpoint}/logout`);
+  },
+
+  me: async (): Promise<AuthUser> => {
+    const { data } = await http.get<AuthUser>(`${endpoint}/me`);
+    return data;
+  },
+
+  changePassword: async (
+    payload: ChangePasswordDto,
+  ): Promise<ChangePasswordResponse> => {
+    const { data } = await http.post<ChangePasswordResponse>(
+      `${endpoint}/change-password`,
+      payload,
+    );
+    return data;
   },
 };

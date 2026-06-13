@@ -15,3 +15,7 @@ export type LoginResponse = {
 export type RefreshResponse = {
   accessToken: string;
 };
+
+export type ChangePasswordResponse = {
+  message: string;
+};
