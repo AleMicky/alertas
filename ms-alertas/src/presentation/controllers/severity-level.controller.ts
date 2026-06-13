@@ -1,15 +1,19 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { BaseController } from 'src/shared/core/base.controller';
 import { ApiCrudDoc } from 'src/config/swagger/crud';
 import { SeverityLevel } from 'src/domain/entities/severity-level';
+import { RoleCode } from 'src/domain/enums';
 import { SeverityLevelService } from 'src/app/services/severity-level.service';
+import { Roles } from 'src/infrastructure/security';
 import { SeverityLevelResponseSchema } from '../schemas';
 import {
   CreateSeverityLevelDto,
   UpdateSeverityLevelDto,
 } from '../dto/severity-level';
 
+@ApiBearerAuth('jwt')
+@Roles(RoleCode.ADMIN, RoleCode.OPERADOR)
 @Controller('severity-levels')
 @ApiCrudDoc({
   tag: 'Niveles de severidad',

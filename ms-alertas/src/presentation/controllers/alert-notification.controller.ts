@@ -11,19 +11,20 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 
-import { BaseController } from 'src/shared/core/base.controller';
 import { ApiCrudDoc } from 'src/config/swagger/crud';
-import { AlertNotification } from 'src/domain/entities/alert-notification';
 import { AlertNotificationStatus } from 'src/domain/enums/alert-notification-status.enum';
-import { AlertNotificationService } from 'src/app/services/alert-notification.service';
+import { RoleCode } from 'src/domain/enums';
+import { Roles } from 'src/infrastructure/security';
 import { AlertNotificationResponseSchema } from '../schemas';
 import {
   CreateAlertNotificationDto,
   UpdateAlertNotificationDto,
 } from '../dto/alert-notification';
 
+@ApiBearerAuth('jwt')
+@Roles(RoleCode.ADMIN, RoleCode.OPERADOR, RoleCode.VISUALIZADOR)
 @Controller('alert-notifications')
 @ApiCrudDoc({
   tag: 'Notificaciones',

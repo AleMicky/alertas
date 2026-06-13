@@ -10,3 +10,4 @@ export * from './alert-notification.entity';
 export * from './notification-provider.entity';
 export * from './role.entity';
 export * from './user.entity';
+export * from './login-audit.entity';

@@ -1,13 +1,17 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 
 import { BaseController } from 'src/shared/core/base.controller';
 import { ApiCrudDoc } from 'src/config/swagger/crud';
 import { AlertRule } from 'src/domain/entities/alert-rule';
+import { RoleCode } from 'src/domain/enums';
 import { AlertRuleService } from 'src/app/services/alert-rule.service';
+import { Roles } from 'src/infrastructure/security';
 import { CreateAlertRuleDto, UpdateAlertRuleDto } from '../dto/alert-rule';
 import { AlertRuleResponseSchema } from '../schemas';
 
+@ApiBearerAuth('jwt')
+@Roles(RoleCode.ADMIN, RoleCode.OPERADOR)
 @Controller('alert-rules')
 @ApiCrudDoc({
   tag: 'Reglas de alerta',

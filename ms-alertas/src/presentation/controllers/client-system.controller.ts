@@ -1,16 +1,21 @@
 import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { BaseController } from 'src/shared/core/base.controller';
 import { ApiCrudDoc } from 'src/config/swagger/crud';
 import { ClientSystem } from 'src/domain/entities/client-system';
+import { RoleCode } from 'src/domain/enums';
 import { ClientSystemService } from 'src/app/services/client-system.service';
+import { Roles } from 'src/infrastructure/security';
 import {
   CreateClientSystemDto,
   UpdateClientSystemDto,
   ResponseClientSystemDto,
 } from '../dto/client-system';
-import { ClientSystemTokenService } from 'src/app/services/client-system-token.service'; 
+import { ClientSystemTokenService } from 'src/app/services/client-system-token.service';
 import { CreateClientSystemTokenDto } from '../dto/client-system-token/create-client-system-token.dto';
 
+@ApiBearerAuth('jwt')
+@Roles(RoleCode.ADMIN, RoleCode.OPERADOR)
 @Controller('client-systems')
 @ApiCrudDoc({
   tag: 'Sistemas cliente',

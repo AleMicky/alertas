@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('notification_logs')
+@Entity('tnotification_logs')
 export class NotificationLogEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

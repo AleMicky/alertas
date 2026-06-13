@@ -1,13 +1,17 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 
 import { BaseController } from 'src/shared/core/base.controller';
 import { ApiCrudDoc } from 'src/config/swagger/crud';
 import { EventType } from 'src/domain/entities/event-type';
+import { RoleCode } from 'src/domain/enums';
 import { EventTypeService } from 'src/app/services/event-type.service';
+import { Roles } from 'src/infrastructure/security';
 import { CreateEventTypeDto, UpdateEventTypeDto } from '../dto/event-type';
 import { EventTypeResponseSchema } from '../schemas';
 
+@ApiBearerAuth('jwt')
+@Roles(RoleCode.ADMIN, RoleCode.OPERADOR)
 @Controller('event-types')
 @ApiCrudDoc({
   tag: 'Tipos de evento',

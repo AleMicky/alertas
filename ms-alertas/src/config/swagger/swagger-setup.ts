@@ -7,6 +7,7 @@ import {
 } from '@nestjs/swagger';
 
 const SWAGGER_TAGS = [
+  ['Autenticación', 'Login, refresh y cierre de sesión del dashboard'],
   ['Sistemas cliente', 'Registro de sistemas que emiten eventos'],
   ['Niveles de severidad', 'Catálogo de severidades y prioridades'],
   ['Canales de notificación', 'Webhooks y canales (Telegram, Teams, etc.)'],
@@ -57,6 +58,15 @@ const buildSwaggerConfig = () => {
     )
     .setVersion('1.0')
     .addServer('/', 'Servidor actual')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'JWT de usuario del dashboard',
+      },
+      'jwt',
+    )
     .addBearerAuth(
       {
         type: 'http',

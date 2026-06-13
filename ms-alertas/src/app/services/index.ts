@@ -13,3 +13,4 @@ export * from './notification-provider.service';
 export * from './role.service'; 
 export * from './user.service';
 export * from './auth.service';
+export * from './refresh-token.service';

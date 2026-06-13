@@ -1,8 +1,12 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NotificationService } from 'src/app/services/notification.service';
+import { RoleCode } from 'src/domain/enums';
+import { Roles } from 'src/infrastructure/security';
 import { SendTestN8nDto } from '../dto/test-n8n/send-test-n8n.dto';
 
+@ApiBearerAuth('jwt')
+@Roles(RoleCode.ADMIN)
 @Controller('test-n8n')
 @ApiTags('Pruebas')
 export class TestN8nController {

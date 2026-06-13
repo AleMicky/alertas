@@ -11,3 +11,4 @@ export * from './notification-provider';
 export * from './user';
 export * from './role';
 export * from './user-role';
+export * from './login-audit';

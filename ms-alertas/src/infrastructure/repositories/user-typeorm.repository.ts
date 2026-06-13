@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { IsNull, Not, Repository } from "typeorm";
 
 import { GenericRepository } from "src/shared/core/generic.repository";
 import { UserEntity } from "../typeorm/entities/user.entity";
@@ -27,4 +27,14 @@ export class UserTypeormRepository extends GenericRepository<UserEntity> impleme
     async findByEmailAndPassword(email: string, password: string): Promise<User | null> {
         return await this.userRepository.findOne({ where: { email, passwordHash: password } });
     }
+    async findWithRefreshToken(): Promise<User[]> {
+        return this.repository.find({
+          where: {
+            refreshTokenHash: Not(IsNull()),
+          },
+          relations: {
+            roles: true,
+          },
+        });
+      }
 }

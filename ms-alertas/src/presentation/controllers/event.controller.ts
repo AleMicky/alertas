@@ -18,12 +18,16 @@ import {
 
 import { ApiCrudDoc } from 'src/config/swagger/crud';
 import { ClientSystem } from 'src/domain/entities/client-system';
+import { RoleCode } from 'src/domain/enums';
 import { EventService } from 'src/app/services/event.service';
 import { CurrentClientSystem } from 'src/shared/decorators/current-client-system.decorator';
 import { ClientSystemAuthGuard } from 'src/shared/guards/client-system-auth.guard';
+import { Public, Roles } from 'src/infrastructure/security';
 import { CreateEventDto, UpdateEventDto } from '../dto/event';
 import { ResponseEventDto } from '../dto/event/response-event.dto';
 
+@ApiBearerAuth('jwt')
+@Roles(RoleCode.ADMIN, RoleCode.OPERADOR, RoleCode.VISUALIZADOR)
 @Controller('events')
 @ApiCrudDoc({
   tag: 'Eventos',
@@ -63,6 +67,7 @@ export class EventController {
     return this.eventService.findOneMapped(id);
   }
 
+  @Public()
   @Post()
   @UseGuards(ClientSystemAuthGuard)
   @ApiBearerAuth('client-system-token')

@@ -1,10 +1,15 @@
-import { Body, Controller, Param, Patch, Post } from "@nestjs/common";
-import { BaseController } from "src/shared/core/base.controller";
-import { User } from "src/domain/entities";
-import { UserService } from "src/app/services/user.service";
-import { CreateUserDto, UpdateUserDto, ResponseUserDto } from "../dto/user";
-import { ApiCrudDoc } from "src/config/swagger/crud";
+import { Body, Controller, Param, Patch, Post } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { BaseController } from 'src/shared/core/base.controller';
+import { User } from 'src/domain/entities';
+import { RoleCode } from 'src/domain/enums';
+import { UserService } from 'src/app/services/user.service';
+import { Roles } from 'src/infrastructure/security';
+import { CreateUserDto, UpdateUserDto, ResponseUserDto } from '../dto/user';
+import { ApiCrudDoc } from 'src/config/swagger/crud';
 
+@ApiBearerAuth('jwt')
+@Roles(RoleCode.ADMIN)
 @Controller('users')
 @ApiCrudDoc({
     tag: 'Usuarios',

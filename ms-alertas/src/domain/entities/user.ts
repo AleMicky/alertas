@@ -8,4 +8,6 @@ export class User extends BaseAuditableEntity {
     passwordHash: string;
     fullName: string;
     roles?: Role[];
+    refreshTokenHash?: string | null;
+    refreshTokenExpiresAt?: Date | null;
 }

@@ -25,6 +25,21 @@ export class UserEntity extends BaseAuditColumns {
     @Column({ name: 'full_name', length: 200 })
     fullName: string;
 
+    @Column({
+        name: 'refresh_token_hash',
+        type: 'varchar',
+        length: 255,
+        nullable: true,
+    })
+    refreshTokenHash?: string | null;
+
+    @Column({
+        name: 'refresh_token_expires_at',
+        type: 'timestamp',
+        nullable: true,
+    })
+    refreshTokenExpiresAt?: Date | null;
+
     @ManyToMany(() => RoleEntity)
     @JoinTable({
         name: 'tuser_roles',

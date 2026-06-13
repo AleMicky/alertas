@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
  // Entities
 import {
   NotificationChannelEntity,
@@ -16,6 +17,7 @@ import {
   NotificationProviderEntity,
   RoleEntity,
   UserEntity,
+  LoginAuditEntity,
 } from './infrastructure/typeorm/entities';
 // Services
 import { EventMapper } from './app/mappers';
@@ -35,6 +37,7 @@ import {
   RoleService,
   AuthService,
   UserService,
+  RefreshTokenService,
 } from './app/services';
 // Repositories
 import {
@@ -50,6 +53,7 @@ import {
   NotificationProviderRepository,
   RoleRepository,
   UserRepository,
+  LoginAuditRepository,
 } from './domain/repositories';
 // Controllers
 import {
@@ -81,6 +85,7 @@ import {
   NotificationProviderTypeormRepository,
   RoleTypeormRepository,
   UserTypeormRepository,
+  LoginAuditTypeormRepository,
 } from './infrastructure/repositories';
 import { N8nClient } from './infrastructure/integrations/n8n/n8n.client';
 import { BullModule } from '@nestjs/bullmq';
@@ -88,8 +93,12 @@ import { AlertNotificationProcessor } from './app/processors/alert-notification.
 import { TokenGeneratorService } from './infrastructure/security/token-generator.service';
 import { ClientSystemAuthGuard } from './shared/guards/client-system-auth.guard';
 import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from './infrastructure/security/jwt.strategy';
-import { PasswordService } from './infrastructure/security/password.service';
+import {
+  JwtAuthGuard,
+  JwtStrategy,
+  PasswordService,
+  RolesGuard,
+} from './infrastructure/security';
 
 @Module({
   imports: [
@@ -106,6 +115,7 @@ import { PasswordService } from './infrastructure/security/password.service';
       NotificationProviderEntity,
       UserEntity,
       RoleEntity,
+      LoginAuditEntity,
     ]),
     PassportModule,
     JwtModule.registerAsync({
@@ -164,7 +174,10 @@ import { PasswordService } from './infrastructure/security/password.service';
     UserService,
     JwtStrategy,
     PasswordService,
+    JwtAuthGuard,
+    RolesGuard,
     AuthService,
+    RefreshTokenService,
     {
       provide: NotificationChannelRepository,
       useClass: NotificationChannelTypeormRepository,
@@ -212,6 +225,18 @@ import { PasswordService } from './infrastructure/security/password.service';
     {
       provide: UserRepository,
       useClass: UserTypeormRepository,
+    },
+    {
+      provide: LoginAuditRepository,
+      useClass: LoginAuditTypeormRepository,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

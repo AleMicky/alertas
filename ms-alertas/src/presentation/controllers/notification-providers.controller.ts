@@ -1,16 +1,19 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
-
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { BaseController } from 'src/shared/core/base.controller';
 import { ApiCrudDoc } from 'src/config/swagger/crud';
 import { NotificationProvider } from 'src/domain/entities/notification-provider';
+import { RoleCode } from 'src/domain/enums';
 import { NotificationProviderService } from 'src/app/services/notification-provider.service';
+import { Roles } from 'src/infrastructure/security';
 import {
   CreateNotificationProviderDto,
   UpdateNotificationProviderDto,
 } from '../dto/notification-provider';
 import { NotificationProviderResponseSchema } from '../schemas';
 
+@ApiBearerAuth('jwt')
+@Roles(RoleCode.ADMIN, RoleCode.OPERADOR)
 @Controller('notification-providers')
 @ApiCrudDoc({
   tag: 'Proveedores de notificación',
