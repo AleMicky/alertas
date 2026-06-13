@@ -5,7 +5,9 @@ import {
   Layers,
   Monitor,
   Radio,
+  Shield,
   ShieldAlert,
+  Users,
   type LucideIcon,
 } from "lucide-react"
 
@@ -19,12 +21,14 @@ export type AppNavLink = {
   title: string
   to: string
   icon: LucideIcon
+  roles?: string[]
   items?: { title: string; to: string }[]
 }
 
 export type AppNavGroup = {
   id: string
   label: string
+  roles?: string[]
   items: AppNavLink[]
 }
 
@@ -82,6 +86,25 @@ const navGroups: AppNavGroup[] = [
       },
     ],
   },
+  {
+    id: "administracion",
+    label: "Administración",
+    roles: ["ADMIN"],
+    items: [
+      {
+        title: "Usuarios",
+        to: "/users",
+        icon: Users,
+        roles: ["ADMIN"],
+      },
+      {
+        title: "Roles",
+        to: "/roles",
+        icon: Shield,
+        roles: ["ADMIN"],
+      },
+    ],
+  },
 ]
 
 const breadcrumbByPath: Record<string, { group?: string; page: string }> = {
@@ -101,10 +124,30 @@ const breadcrumbByPath: Record<string, { group?: string; page: string }> = {
     group: "Configuración",
     page: "Sistemas cliente",
   },
+  "/users": {
+    group: "Administración",
+    page: "Usuarios",
+  },
+  "/roles": {
+    group: "Administración",
+    page: "Roles",
+  },
+  "/login": { page: "Iniciar sesión" },
 }
 
-export function getNavGroups(): AppNavGroup[] {
-  return navGroups;
+function canAccess(roles: string[] | undefined, userRoles: string[]) {
+  if (!roles?.length) return true
+  return roles.some((role) => userRoles.includes(role))
+}
+
+export function getNavGroups(userRoles: string[] = []): AppNavGroup[] {
+  return navGroups
+    .filter((group) => canAccess(group.roles, userRoles))
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => canAccess(item.roles, userRoles)),
+    }))
+    .filter((group) => group.items.length > 0)
 }
 
 export function getNavBreadcrumb(pathname: string) {

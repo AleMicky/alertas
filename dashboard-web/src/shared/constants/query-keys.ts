@@ -8,4 +8,6 @@ export const QUERY_KEYS = {
     events: 'events',
     eventTypes: 'event-types',
     clientSystemTokens: 'client-system-tokens',
+    users: 'users',
+    roles: 'roles',
 } as const;

@@ -10,6 +10,7 @@ import {
 } from "@/navigation/app-nav-config"
 import { AppNavMain } from "@/components/layout/app-nav-main"
 import { AppNavUser } from "@/components/layout/app-nav-user"
+import { useAuth } from "@/providers/auth-provider"
 import {
   Sidebar,
   SidebarContent,
@@ -24,7 +25,11 @@ import {
 export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  const navGroups = React.useMemo(() => getNavGroups(), [])
+  const { user } = useAuth()
+  const navGroups = React.useMemo(
+    () => getNavGroups(user?.roles ?? []),
+    [user?.roles],
+  )
 
   return (
     <Sidebar
@@ -56,8 +61,8 @@ export function AppSidebar({
       <SidebarFooter className="border-t border-sidebar-border/60">
         <AppNavUser
           user={{
-            name: "Usuario",
-            email: "sin autenticación",
+            name: user?.fullName ?? "Usuario",
+            email: user?.email ?? user?.username ?? "",
             avatar: "",
           }}
         />

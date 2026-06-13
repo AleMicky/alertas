@@ -2,10 +2,8 @@
 
 import {
   BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
-  Sparkles,
+  LogOut,
 } from "lucide-react"
 
 import {
@@ -28,6 +26,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useAuth } from "@/providers/auth-provider"
 
 type AppNavUserProps = {
   user: {
@@ -48,6 +47,7 @@ function getInitials(name: string) {
 
 export function AppNavUser({ user }: AppNavUserProps) {
   const { isMobile } = useSidebar()
+  const { logout } = useAuth()
   const initials = getInitials(user.name)
 
   return (
@@ -101,25 +101,15 @@ export function AppNavUser({ user }: AppNavUserProps) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem disabled>
-                <Sparkles aria-hidden />
-                Cuenta
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem disabled>
                 <BadgeCheck aria-hidden />
                 Perfil
               </DropdownMenuItem>
-              <DropdownMenuItem disabled>
-                <CreditCard aria-hidden />
-                Facturación
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled>
-                <Bell aria-hidden />
-                Notificaciones
-              </DropdownMenuItem>
             </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => void logout()}>
+              <LogOut aria-hidden />
+              Cerrar sesión
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

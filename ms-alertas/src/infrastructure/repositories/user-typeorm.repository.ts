@@ -27,6 +27,17 @@ export class UserTypeormRepository extends GenericRepository<UserEntity> impleme
     async findByEmailAndPassword(email: string, password: string): Promise<User | null> {
         return await this.userRepository.findOne({ where: { email, passwordHash: password } });
     }
+    async findAll() {
+        return this.userRepository.find({
+            relations: { roles: true },
+        });
+    }
+    async findOne(id: string) {
+        return this.userRepository.findOne({
+            where: { id },
+            relations: { roles: true },
+        });
+    }
     async findWithRefreshToken(): Promise<User[]> {
         return this.repository.find({
           where: {
