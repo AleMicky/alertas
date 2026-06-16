@@ -7,11 +7,10 @@ import {
   XCircle,
 } from 'lucide-react';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 import { Alert } from '../alert.types';
-import { groupAlertsByStatus } from './alert-utils';
+import { getAlertStatusTone, groupAlertsByStatus } from './alert-utils';
 
 interface Props {
   data: Alert[];
@@ -19,35 +18,32 @@ interface Props {
   onStatusChange: (status: string) => void;
 }
 
-function MetricCard({
+function StatChip({
+  icon: Icon,
   label,
   value,
-  hint,
-  icon: Icon,
-  accent,
+  tone,
 }: {
+  icon: typeof BellRing;
   label: string;
   value: number;
-  hint: string;
-  icon: typeof BellRing;
-  accent: string;
+  tone?: string;
 }) {
   return (
-    <Card className="relative overflow-hidden border-muted/60 shadow-sm">
-      <div className={cn('absolute inset-y-0 left-0 w-1', accent)} />
-      <CardContent className="flex items-center gap-3 p-4 pl-5 sm:gap-4">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted/60 sm:size-11">
-          <Icon className="size-4 text-foreground/80 sm:size-5" />
-        </div>
-        <div className="min-w-0">
-          <p className="text-2xl font-semibold tabular-nums tracking-tight sm:text-3xl">
-            {value}
-          </p>
-          <p className="truncate text-sm font-medium">{label}</p>
-          <p className="line-clamp-2 text-xs text-muted-foreground">{hint}</p>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="inline-flex items-center gap-2 rounded-md border bg-background px-2.5 py-1.5 shadow-sm">
+      <div
+        className={cn(
+          'flex size-6 items-center justify-center rounded',
+          tone ?? 'bg-muted text-muted-foreground',
+        )}
+      >
+        <Icon className="size-3.5" />
+      </div>
+      <div className="leading-none">
+        <p className="text-sm font-bold tabular-nums">{value}</p>
+        <p className="text-[10px] text-muted-foreground">{label}</p>
+      </div>
+    </div>
   );
 }
 
@@ -68,80 +64,69 @@ export function AlertsMetricsHeader({
   const statusGroups = groupAlertsByStatus(data);
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
-        <MetricCard
+    <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-wrap gap-2">
+        <StatChip
           icon={BellRing}
-          label="Abiertas"
+          label="abiertas"
           value={open}
-          hint="Requieren seguimiento operativo"
-          accent="bg-amber-500"
+          tone="bg-amber-500/15 text-amber-700 dark:text-amber-400"
         />
-        <MetricCard
+        <StatChip
           icon={AlertTriangle}
-          label="Notificadas"
+          label="notificadas"
           value={notified}
-          hint="Enviadas a canales configurados"
-          accent="bg-sky-500"
+          tone="bg-sky-500/15 text-sky-700 dark:text-sky-400"
         />
-        <MetricCard
+        <StatChip
           icon={CheckCircle2}
-          label="Resueltas"
+          label="resueltas"
           value={resolved}
-          hint="Ciclo de alerta completado"
-          accent="bg-emerald-500"
+          tone="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
         />
-        <MetricCard
+        <StatChip
           icon={XCircle}
-          label="Fallidas"
+          label="fallidas"
           value={failed}
-          hint="Error en entrega o procesamiento"
-          accent="bg-destructive"
+          tone="bg-destructive/15 text-destructive"
         />
       </div>
 
       {statusGroups.length > 0 ? (
-        <Card className="border-muted/60 shadow-sm">
-          <CardContent className="p-4">
-            <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm font-medium">Filtrar por estado</p>
-              <p className="text-xs text-muted-foreground">
-                {total} alerta{total === 1 ? '' : 's'} en total
-              </p>
-            </div>
+        <div className="flex flex-wrap gap-1">
+          <button
+            type="button"
+            onClick={() => onStatusChange('all')}
+            className={cn(
+              'rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-wide transition-all',
+              activeStatus === 'all'
+                ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                : 'border-border bg-background text-muted-foreground hover:border-primary/40',
+            )}
+          >
+            todas · {total}
+          </button>
 
-            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+          {statusGroups.map(({ status, count }) => {
+            const tone = getAlertStatusTone(status);
+
+            return (
               <button
+                key={status}
                 type="button"
-                onClick={() => onStatusChange('all')}
+                onClick={() => onStatusChange(status)}
                 className={cn(
-                  'shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                  activeStatus === 'all'
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border bg-background hover:bg-muted',
+                  'rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-wide transition-all',
+                  activeStatus === status
+                    ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                    : cn('bg-background hover:border-primary/40', tone.badge),
                 )}
               >
-                Todas ({total})
+                {status.replaceAll('_', ' ')} · {count}
               </button>
-
-              {statusGroups.map(({ status, count }) => (
-                <button
-                  key={status}
-                  type="button"
-                  onClick={() => onStatusChange(status)}
-                  className={cn(
-                    'shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium uppercase tracking-wide transition-colors',
-                    activeStatus === status
-                      ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-border bg-background hover:bg-muted',
-                  )}
-                >
-                  {status.replaceAll('_', ' ')} ({count})
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+            );
+          })}
+        </div>
       ) : null}
     </div>
   );

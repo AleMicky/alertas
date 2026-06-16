@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   MethodNotAllowedException,
+  NotFoundException,
   Param,
   ParseEnumPipe,
   Patch,
@@ -16,12 +17,14 @@ import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/sw
 import { ApiCrudDoc } from 'src/config/swagger/crud';
 import { AlertNotificationStatus } from 'src/domain/enums/alert-notification-status.enum';
 import { RoleCode } from 'src/domain/enums';
+import { AlertNotificationService } from 'src/app/services/alert-notification.service';
 import { Roles } from 'src/infrastructure/security';
 import { AlertNotificationResponseSchema } from '../schemas';
 import {
   CreateAlertNotificationDto,
   UpdateAlertNotificationDto,
 } from '../dto/alert-notification';
+import { ResponseAlertNotificationDto } from '../dto/alert-notification/response-alert-notification.dto';
 
 @ApiBearerAuth('jwt')
 @Roles(RoleCode.ADMIN, RoleCode.OPERADOR, RoleCode.VISUALIZADOR)
@@ -34,20 +37,25 @@ import {
 })
 export class AlertNotificationController {
   constructor(
-   // private readonly alertNotificationService: AlertNotificationService,
-  ) {
-   // super(alertNotificationService);
-   }
+    private readonly alertNotificationService: AlertNotificationService,
+  ) {}
 
-  /*@Get('alert/:alertId')
+  @Get()
+  @ApiOperation({ summary: 'Listar notificaciones de alerta' })
+  @ApiOkResponse({ type: [ResponseAlertNotificationDto] })
+  findAll(): Promise<ResponseAlertNotificationDto[]> {
+    return this.alertNotificationService.findAllMapped();
+  }
+
+  @Get('alert/:alertId')
   @ApiOperation({ summary: 'Listar notificaciones por alerta' })
   @ApiParam({
     name: 'alertId',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @ApiOkResponse({ type: [AlertNotificationResponseSchema] })
+  @ApiOkResponse({ type: [ResponseAlertNotificationDto] })
   findByAlertId(@Param('alertId') alertId: string) {
-    return this.alertNotificationService.findByAlertId(alertId);
+    return this.alertNotificationService.findByAlertIdMapped(alertId);
   }
 
   @Get('status/:status')
@@ -57,12 +65,30 @@ export class AlertNotificationController {
     enum: AlertNotificationStatus,
     example: AlertNotificationStatus.SENT,
   })
-  @ApiOkResponse({ type: [AlertNotificationResponseSchema] })
+  @ApiOkResponse({ type: [ResponseAlertNotificationDto] })
   findByStatus(
     @Param('status', new ParseEnumPipe(AlertNotificationStatus))
     status: AlertNotificationStatus,
   ) {
-    return this.alertNotificationService.findByStatus(status);
+    return this.alertNotificationService.findByStatusMapped(status);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener notificación por ID' })
+  @ApiParam({
+    name: 'id',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({ type: ResponseAlertNotificationDto })
+  async findOne(@Param('id') id: string) {
+    const notification =
+      await this.alertNotificationService.findOneMapped(id);
+
+    if (!notification) {
+      throw new NotFoundException('Notificación no encontrada');
+    }
+
+    return notification;
   }
 
   @Post()
@@ -95,5 +121,5 @@ export class AlertNotificationController {
     throw new MethodNotAllowedException(
       'No se permite eliminar notificaciones por API',
     );
-  }*/
+  }
 }

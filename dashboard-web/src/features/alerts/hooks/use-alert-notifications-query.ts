@@ -3,15 +3,27 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { QUERY_KEYS } from '@/shared/constants/query-keys';
-import { useBaseEntityQuery } from '@/shared/core/hooks/use-base-entity-query';
 
 import { alertNotificationService } from '../alert-notification.service';
-import { AlertNotification } from '../alert-notification.types';
+
+const REFRESH_INTERVAL_MS = 15_000;
 
 export function useAlertNotificationsQuery() {
-  return useBaseEntityQuery<AlertNotification>(alertNotificationService, {
-    queryKey: QUERY_KEYS.alertNotifications,
+  const query = useQuery({
+    queryKey: [QUERY_KEYS.alertNotifications],
+    queryFn: alertNotificationService.getAll,
+    refetchInterval: REFRESH_INTERVAL_MS,
+    refetchIntervalInBackground: false,
   });
+
+  return {
+    data: query.data ?? [],
+    isLoading: query.isPending,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+    isFetching: query.isFetching,
+  };
 }
 
 export function useAlertNotificationsByAlert(alertId: string | null) {

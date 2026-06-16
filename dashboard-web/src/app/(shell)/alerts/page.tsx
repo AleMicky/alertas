@@ -8,6 +8,8 @@ import {
   PageHeader,
   QueryErrorState,
 } from '@/shared/components';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export default function AlertsPage() {
   const {
@@ -16,6 +18,7 @@ export default function AlertsPage() {
     isError: alertsError,
     error: alertsFetchError,
     refetch: refetchAlerts,
+    isFetching: alertsFetching,
   } = useAlertQuery();
 
   const {
@@ -24,14 +27,17 @@ export default function AlertsPage() {
     isError: notificationsError,
     error: notificationsFetchError,
     refetch: refetchNotifications,
+    isFetching: notificationsFetching,
   } = useAlertNotificationsQuery();
+
+  const isFetching = alertsFetching || notificationsFetching;
 
   if (alertsLoading) {
     return (
-      <main className="space-y-6">
+      <main className="space-y-3 p-4 md:p-5">
         <PageHeader
-          title="Alertas"
-          description="Dashboard operativo con estado de alertas y entregas por canal de notificación."
+          title="Log de alertas"
+          description="Vista operativa de alertas y entregas por canal."
         />
         <LoadingTable />
       </main>
@@ -40,10 +46,10 @@ export default function AlertsPage() {
 
   if (alertsError) {
     return (
-      <main className="space-y-6">
+      <main className="space-y-3 p-4 md:p-5">
         <PageHeader
-          title="Alertas"
-          description="Dashboard operativo con estado de alertas y entregas por canal de notificación."
+          title="Log de alertas"
+          description="Vista operativa de alertas y entregas por canal."
         />
         <QueryErrorState
           title="No se pudieron cargar las alertas"
@@ -55,10 +61,21 @@ export default function AlertsPage() {
   }
 
   return (
-    <main className="space-y-6">
+    <main className="space-y-3 p-4 md:p-5">
       <PageHeader
-        title="Alertas"
-        description="Dashboard operativo con estado de alertas y entregas por canal de notificación."
+        title="Log de alertas"
+        description="Stream de alertas y entregas. Clic en una línea para ver detalle y notificaciones."
+        action={
+          <Badge
+            variant="outline"
+            className={cn(
+              'font-mono text-[10px] uppercase',
+              isFetching && 'animate-pulse',
+            )}
+          >
+            {isFetching ? 'sync' : 'live · 15s'}
+          </Badge>
+        }
       />
 
       {notificationsError ? (
@@ -73,6 +90,7 @@ export default function AlertsPage() {
         alerts={alerts}
         notifications={notifications}
         notificationsLoading={notificationsLoading}
+        isFetching={isFetching}
       />
     </main>
   );

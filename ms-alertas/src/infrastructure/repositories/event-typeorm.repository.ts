@@ -17,7 +17,7 @@ export class EventTypeormRepository
   extends GenericRepository<EventEntity>
   implements EventRepository
 {
-  private readonly relations = {
+  private static readonly relations = {
     clientSystem: true,
     eventType: true,
   };
@@ -29,10 +29,19 @@ export class EventTypeormRepository
     super(repository);
   }
 
+  findAll(): Promise<EventEntity[]> {
+    return this.repository.find({
+      relations: EventTypeormRepository.relations,
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
   findOne(id: string): Promise<EventEntity | null> {
     return this.repository.findOne({
       where: { id },
-      relations: this.relations,
+      relations: EventTypeormRepository.relations,
     });
   }
 
@@ -41,7 +50,7 @@ export class EventTypeormRepository
       where: {
         clientSystem: { id: clientSystemId },
       },
-      relations: this.relations,
+      relations: EventTypeormRepository.relations,
       order: {
         createdAt: 'DESC',
       },

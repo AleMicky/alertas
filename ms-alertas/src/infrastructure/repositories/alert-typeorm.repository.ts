@@ -33,6 +33,9 @@ export class AlertTypeormRepository
   findAll(): Promise<AlertEntity[]> {
     return this.repository.find({
       relations: AlertTypeormRepository.relations,
+      order: {
+        createdAt: 'DESC',
+      },
     });
   }
 

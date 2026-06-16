@@ -5,14 +5,17 @@ import { ColumnDef } from '@tanstack/react-table';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { StatusBadge } from '@/shared/components/status-badge';
+import { cn } from '@/lib/utils';
 
 import { Alert } from '../alert.types';
 import {
   formatAlertDate,
-  getAlertClientSystemName,
+  formatNotificationStats,
+  getAlertClientSystemCode,
   getAlertEventCode,
-  getSeverityBadgeVariant,
+  getAlertReference,
+  getAlertStatusTone,
+  getAlertTitle,
   isAlertAttended,
 } from './alert-utils';
 
@@ -29,26 +32,24 @@ export function createAlertColumns({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="-ml-3"
+          className="-ml-3 h-7 text-xs"
           onClick={() =>
             column.toggleSorting(column.getIsSorted() === 'asc')
           }
         >
           Alerta
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
         </Button>
       ),
       cell: ({ row }) => {
         const item = row.original;
 
         return (
-          <div className="max-w-[280px] space-y-1 py-1">
-            <p className="font-medium leading-snug">{item.title}</p>
-            <p className="line-clamp-1 text-xs text-muted-foreground">
-              {item.message}
-            </p>
-            <p className="font-mono text-[11px] text-muted-foreground">
+          <div className="max-w-[240px] space-y-0.5 py-1">
+            <p className="text-sm font-medium leading-snug">{getAlertTitle(item)}</p>
+            <p className="line-clamp-1 font-mono text-[10px] text-muted-foreground">
               {getAlertEventCode(item)}
+              {getAlertReference(item) ? ` · ref ${getAlertReference(item)}` : ''}
             </p>
           </div>
         );
@@ -57,33 +58,44 @@ export function createAlertColumns({
     {
       accessorKey: 'status',
       header: 'Estado',
-      cell: ({ row }) => (
-        <Badge variant="outline" className="uppercase">
-          {row.original.status}
-        </Badge>
-      ),
+      cell: ({ row }) => {
+        const tone = getAlertStatusTone(row.original.status);
+
+        return (
+          <span
+            className={cn(
+              'inline-flex rounded px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase',
+              tone.badge,
+            )}
+          >
+            {row.original.status}
+          </span>
+        );
+      },
     },
     {
-      id: 'severity',
-      header: 'Severidad',
+      id: 'deliveries',
+      header: 'Entregas',
       cell: ({ row }) => (
-        <Badge variant={getSeverityBadgeVariant(row.original.severityLevel?.priority)}>
-          {row.original.severityLevel?.name ?? '—'}
-        </Badge>
+        <span className="font-mono text-[10px] tabular-nums">
+          {formatNotificationStats(row.original)}
+        </span>
       ),
     },
     {
       id: 'clientSystem',
-      header: 'Sistema',
+      header: 'Origen',
       cell: ({ row }) => (
-        <span className="text-sm">{getAlertClientSystemName(row.original)}</span>
+        <span className="font-mono text-[11px]">
+          {getAlertClientSystemCode(row.original)}
+        </span>
       ),
     },
     {
       accessorKey: 'alertDate',
       header: 'Fecha',
       cell: ({ row }) => (
-        <span className="text-sm tabular-nums">
+        <span className="font-mono text-[11px] tabular-nums">
           {formatAlertDate(row.original.alertDate)}
         </span>
       ),
@@ -92,22 +104,17 @@ export function createAlertColumns({
       id: 'attended',
       header: 'Atención',
       cell: ({ row }) => (
-        <Badge
-          variant="outline"
-          className={
+        <span
+          className={cn(
+            'font-mono text-[10px]',
             isAlertAttended(row.original)
-              ? 'border-emerald-500/40 text-emerald-700 dark:text-emerald-400'
-              : 'border-amber-500/40 text-amber-800 dark:text-amber-400'
-          }
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : 'text-amber-700 dark:text-amber-400',
+          )}
         >
-          {isAlertAttended(row.original) ? 'Atendida' : 'Pendiente'}
-        </Badge>
+          {isAlertAttended(row.original) ? 'ok' : 'pend'}
+        </span>
       ),
-    },
-    {
-      accessorKey: 'active',
-      header: 'Activo',
-      cell: ({ row }) => <StatusBadge active={row.original.active} />,
     },
     {
       id: 'actions',
@@ -116,11 +123,10 @@ export function createAlertColumns({
         <Button
           variant="ghost"
           size="sm"
-          className="gap-1"
+          className="h-7 px-2"
           onClick={() => onView(row.original)}
         >
-          <Eye className="size-4" />
-          Ver
+          <Eye className="h-3.5 w-3.5" />
         </Button>
       ),
     },

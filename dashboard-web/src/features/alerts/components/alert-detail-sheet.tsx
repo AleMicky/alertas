@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Bell, Copy, Server, ShieldAlert } from 'lucide-react';
+import { Braces, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +14,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
 import { useAlertNotificationsByAlert } from '../hooks/use-alert-notifications-query';
@@ -22,11 +21,15 @@ import { Alert } from '../alert.types';
 import { AlertNotificationSteps } from './alert-notification-steps';
 import {
   formatAlertDate,
-  getAlertClientSystemName,
+  formatNotificationStats,
+  getAlertClientSystemCode,
   getAlertEventCode,
+  getAlertEventLabel,
+  getAlertReference,
   getAlertStatusTone,
-  getSeverityBadgeVariant,
+  getAlertTitle,
   isAlertAttended,
+  shortenId,
 } from './alert-utils';
 
 interface Props {
@@ -43,11 +46,11 @@ function DetailRow({
   children: ReactNode;
 }) {
   return (
-    <div className="grid gap-1 sm:grid-cols-[140px_1fr] sm:items-start">
-      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+    <div className="grid gap-0.5 sm:grid-cols-[120px_1fr] sm:items-start">
+      <dt className="font-mono text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </dt>
-      <dd className="text-sm text-foreground">{children}</dd>
+      <dd className="text-xs text-foreground">{children}</dd>
     </div>
   );
 }
@@ -65,7 +68,7 @@ export function AlertDetailSheet({ alert, open, onOpenChange }: Props) {
 
     try {
       await navigator.clipboard.writeText(alert.id);
-      toast.success('ID copiado al portapapeles');
+      toast.success('ID copiado');
     } catch {
       toast.error('No se pudo copiar el ID');
     }
@@ -75,136 +78,124 @@ export function AlertDetailSheet({ alert, open, onOpenChange }: Props) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full gap-0 overflow-y-auto p-0 sm:max-w-2xl"
+        className="w-full gap-0 overflow-y-auto p-0 sm:max-w-xl"
       >
         {alert ? (
           <>
-            <SheetHeader className="space-y-4 border-b bg-gradient-to-br from-primary/5 via-muted/30 to-background p-4 sm:p-6">
-              <div className="flex flex-wrap items-center gap-2 pr-8">
-                <Badge variant="outline" className="font-mono text-xs">
+            <SheetHeader className="space-y-3 border-b bg-muted/30 p-4">
+              <div className="flex flex-wrap items-center gap-1.5 pr-8">
+                <Badge variant="outline" className="font-mono text-[10px]">
                   {getAlertEventCode(alert)}
                 </Badge>
 
                 {statusTone ? (
                   <span
                     className={cn(
-                      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide',
+                      'inline-flex items-center rounded px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wide',
                       statusTone.badge,
                     )}
                   >
-                    <span className={cn('size-1.5 rounded-full', statusTone.dot)} />
                     {alert.status}
                   </span>
-                ) : null}
-
-                <Badge variant={getSeverityBadgeVariant(alert.severityLevel?.priority)}>
-                  {alert.severityLevel?.name ?? 'Sin severidad'}
-                </Badge>
-              </div>
-
-              <div className="space-y-2 text-left">
-                <SheetTitle className="text-xl leading-snug sm:text-2xl">
-                  {alert.title}
-                </SheetTitle>
-                <SheetDescription className="text-sm leading-relaxed">
-                  {alert.message}
-                </SheetDescription>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="outline" className="gap-1 font-normal">
-                  <Server className="size-3" />
-                  {getAlertClientSystemName(alert)}
-                </Badge>
-
-                {alert.alertRule?.name ? (
-                  <Badge variant="outline" className="gap-1 font-normal">
-                    <ShieldAlert className="size-3" />
-                    {alert.alertRule.name}
-                  </Badge>
                 ) : null}
 
                 <Badge
                   variant="outline"
                   className={cn(
-                    'font-normal',
+                    'font-mono text-[10px]',
                     attended
                       ? 'border-emerald-500/40 text-emerald-700 dark:text-emerald-400'
                       : 'border-amber-500/40 text-amber-800 dark:text-amber-400',
                   )}
                 >
-                  {attended ? 'Atendida' : 'Sin atender'}
+                  {attended ? 'atendida' : 'pendiente'}
                 </Badge>
               </div>
+
+              <SheetTitle className="text-left text-base leading-snug">
+                {getAlertTitle(alert)}
+              </SheetTitle>
+
+              <SheetDescription className="text-left text-xs leading-relaxed">
+                {alert.message}
+              </SheetDescription>
             </SheetHeader>
 
-            <Tabs defaultValue="overview" className="flex flex-1 flex-col">
-              <div className="sticky top-0 z-10 border-b bg-background/95 px-4 py-3 backdrop-blur-sm sm:px-6">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="overview">Detalle</TabsTrigger>
-                  <TabsTrigger value="notifications" className="gap-2">
-                    <Bell className="size-4" />
-                    Notificaciones ({notifications.length})
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-
-              <TabsContent value="overview" className="mt-0 space-y-6 p-4 sm:p-6">
-                <dl className="space-y-4">
-                  <DetailRow label="Fecha alerta">
+            <div className="space-y-5 p-4">
+              <section className="space-y-2">
+                <h3 className="text-xs font-semibold">Resumen</h3>
+                <dl className="space-y-2 rounded-md border bg-muted/20 p-3">
+                  <DetailRow label="Origen">
+                    {getAlertClientSystemCode(alert)}
+                  </DetailRow>
+                  <DetailRow label="Referencia">
+                    {getAlertReference(alert) ?? '—'}
+                  </DetailRow>
+                  <DetailRow label="Registrada">
                     {formatAlertDate(alert.alertDate)}
                   </DetailRow>
                   <DetailRow label="Atendida">
                     {attended
                       ? formatAlertDate(alert.attendedAt)
-                      : 'Pendiente de atención'}
+                      : 'Pendiente'}
                   </DetailRow>
-                  <DetailRow label="Evento">
-                    <span className="font-mono text-xs">{alert.event?.id ?? alert.eventId ?? '—'}</span>
-                  </DetailRow>
-                  <DetailRow label="Regla">
-                    {alert.alertRule?.name ?? alert.alertRuleId ?? '—'}
+                  <DetailRow label="Entregas">
+                    <span
+                      className={cn(
+                        alert.notifications?.failed
+                          ? 'text-destructive'
+                          : 'text-foreground',
+                      )}
+                    >
+                      {formatNotificationStats(alert)}
+                    </span>
                   </DetailRow>
                   <DetailRow label="ID">
                     <div className="flex items-center gap-2">
-                      <code className="truncate rounded bg-muted px-2 py-1 font-mono text-xs">
-                        {alert.id}
+                      <code className="truncate rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">
+                        #{shortenId(alert.id, 12)}
                       </code>
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="size-8 shrink-0"
+                        className="size-7"
                         onClick={handleCopyId}
                       >
-                        <Copy className="size-4" />
+                        <Copy className="size-3.5" />
                       </Button>
                     </div>
                   </DetailRow>
                 </dl>
+              </section>
 
-                {alert.event?.message ? (
-                  <>
-                    <Separator />
-                    <div className="space-y-2">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        Mensaje del evento origen
-                      </p>
-                      <p className="rounded-lg border bg-muted/20 p-3 text-sm">
-                        {alert.event.message}
-                      </p>
+              {alert.event ? (
+                <>
+                  <Separator />
+                  <section className="space-y-2">
+                    <div className="flex items-center gap-1.5">
+                      <Braces className="size-3.5 text-primary" />
+                      <h3 className="text-xs font-semibold">Evento origen</h3>
                     </div>
-                  </>
-                ) : null}
-              </TabsContent>
+                    <p className="rounded-md border bg-muted/20 p-2.5 font-mono text-[11px]">
+                      {getAlertEventLabel(alert)}
+                    </p>
+                  </section>
+                </>
+              ) : null}
 
-              <TabsContent value="notifications" className="mt-0 p-4 sm:p-6">
+              <Separator />
+
+              <section className="space-y-2">
+                <h3 className="text-xs font-semibold">
+                  Notificaciones ({notifications.length})
+                </h3>
                 <AlertNotificationSteps
                   notifications={notifications}
                   isLoading={isLoading}
                 />
-              </TabsContent>
-            </Tabs>
+              </section>
+            </div>
           </>
         ) : null}
       </SheetContent>

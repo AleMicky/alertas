@@ -5,15 +5,21 @@ import { ColumnDef } from '@tanstack/react-table';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { StatusBadge } from '@/shared/components/status-badge';
+import { cn } from '@/lib/utils';
 
 import { Event } from '../event.types';
 import {
   formatEventDate,
   formatPayloadJson,
+  getEventLogLabel,
   getEventPayload,
+  getEventReference,
+  getEventTimestamp,
+  getEventTypeCode,
   getPayloadPreview,
-  getSeverityBadgeVariant,
+  getStatusTone,
+  isEventProcessed,
+  shortenId,
 } from './event-utils';
 
 interface CreateColumnsProps {
@@ -25,42 +31,39 @@ export function createEventColumns({
 }: CreateColumnsProps): ColumnDef<Event>[] {
   return [
     {
-      accessorKey: 'title',
+      id: 'createdAt',
+      accessorFn: (row) => getEventTimestamp(row),
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="-ml-3"
+          className="-ml-3 h-7 text-xs"
           onClick={() =>
             column.toggleSorting(column.getIsSorted() === 'asc')
           }
         >
-          Evento
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          Fecha
+          <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
         </Button>
       ),
-      cell: ({ row }) => {
-        const item = row.original;
-
-        return (
-          <div className="max-w-[280px] space-y-1 py-1">
-            <p className="font-medium leading-snug">{item.title}</p>
-            <p className="line-clamp-1 text-xs text-muted-foreground">
-              {item.message}
-            </p>
-            <p className="font-mono text-[11px] text-muted-foreground">
-              {item.code}
-            </p>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <span className="whitespace-nowrap font-mono text-[11px] tabular-nums">
+          {formatEventDate(getEventTimestamp(row.original))}
+        </span>
+      ),
     },
     {
-      accessorKey: 'eventType',
+      id: 'eventType',
+      accessorFn: (row) => getEventTypeCode(row),
       header: 'Tipo',
       cell: ({ row }) => (
-        <Badge variant="outline" className="font-normal">
-          {row.original.eventType}
-        </Badge>
+        <div className="space-y-0.5">
+          <Badge variant="outline" className="font-mono text-[10px] font-normal">
+            {getEventTypeCode(row.original)}
+          </Badge>
+          <p className="max-w-[180px] truncate text-[11px] text-muted-foreground">
+            {getEventLogLabel(row.original)}
+          </p>
+        </div>
       ),
     },
     {
@@ -68,31 +71,24 @@ export function createEventColumns({
       accessorFn: (row) => row.clientSystem?.name ?? '-',
       header: 'Origen',
       cell: ({ row }) => (
-        <div className="min-w-[120px]">
-          <p className="text-sm font-medium">
-            {row.original.clientSystem?.name ?? '-'}
-          </p>
-          <p className="font-mono text-xs text-muted-foreground">
-            {row.original.clientSystem?.code ?? ''}
-          </p>
-        </div>
+        <span className="font-mono text-[11px]">
+          {row.original.clientSystem?.code ?? row.original.clientSystem?.name ?? '-'}
+        </span>
       ),
     },
     {
-      id: 'severityLevel',
-      accessorFn: (row) => row.severityLevel?.name ?? '-',
-      header: 'Severidad',
+      id: 'reference',
+      accessorFn: (row) => getEventReference(row) ?? '-',
+      header: 'Ref.',
       cell: ({ row }) => (
-        <Badge
-          variant={getSeverityBadgeVariant(row.original.severityLevel?.priority)}
-        >
-          {row.original.severityLevel?.name ?? '-'}
-        </Badge>
+        <span className="font-mono text-[11px] text-muted-foreground">
+          {getEventReference(row.original) ?? '—'}
+        </span>
       ),
     },
     {
       id: 'payload_json',
-      header: 'payload_json',
+      header: 'payload',
       accessorFn: (row) => formatPayloadJson(getEventPayload(row)),
       cell: ({ row }) => {
         const payload = getEventPayload(row.original);
@@ -100,8 +96,8 @@ export function createEventColumns({
 
         if (!hasPayload) {
           return (
-            <span className="text-xs text-muted-foreground italic">
-              Sin datos
+            <span className="text-[11px] text-muted-foreground italic">
+              —
             </span>
           );
         }
@@ -110,14 +106,9 @@ export function createEventColumns({
           <button
             type="button"
             onClick={() => onView(row.original)}
-            className="group max-w-[220px] rounded-md border bg-muted/40 px-2.5 py-2 text-left transition-colors hover:border-primary/40 hover:bg-muted"
+            className="group max-w-[200px] truncate rounded px-1 py-0.5 text-left font-mono text-[10px] text-emerald-700 transition-colors hover:bg-muted dark:text-emerald-400"
           >
-            <code className="block truncate font-mono text-[11px] text-foreground/90 group-hover:text-primary">
-              {getPayloadPreview(payload)}
-            </code>
-            <span className="mt-1 block text-[10px] text-muted-foreground group-hover:text-primary">
-              Clic para ver completo
-            </span>
+            {getPayloadPreview(payload, 48)}
           </button>
         );
       },
@@ -125,49 +116,58 @@ export function createEventColumns({
     {
       accessorKey: 'status',
       header: 'Estado',
-      cell: ({ row }) => (
-        <Badge variant="secondary" className="uppercase tracking-wide">
-          {row.original.status}
-        </Badge>
-      ),
+      cell: ({ row }) => {
+        const tone = getStatusTone(row.original.status);
+
+        return (
+          <span
+            className={cn(
+              'inline-flex rounded px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase',
+              tone.badge,
+            )}
+          >
+            {row.original.status}
+          </span>
+        );
+      },
     },
     {
-      id: 'eventDate',
-      accessorFn: (row) => row.eventDate,
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="-ml-3"
-          onClick={() =>
-            column.toggleSorting(column.getIsSorted() === 'asc')
-          }
-        >
-          Fecha
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      id: 'tracking',
+      header: 'Seg.',
       cell: ({ row }) => (
-        <span className="whitespace-nowrap text-sm tabular-nums">
-          {formatEventDate(row.original.eventDate)}
+        <span
+          className={cn(
+            'font-mono text-[10px]',
+            isEventProcessed(row.original)
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : 'text-amber-700 dark:text-amber-400',
+          )}
+        >
+          {isEventProcessed(row.original) ? 'cerrado' : 'activo'}
         </span>
       ),
     },
     {
-      accessorKey: 'active',
-      header: 'Activo',
-      cell: ({ row }) => <StatusBadge active={row.original.active} />,
+      id: 'id',
+      accessorFn: (row) => row.id,
+      header: 'ID',
+      cell: ({ row }) => (
+        <span className="font-mono text-[10px] text-muted-foreground">
+          {shortenId(row.original.id)}
+        </span>
+      ),
     },
     {
       id: 'actions',
       header: '',
       cell: ({ row }) => (
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
+          className="h-7 px-2"
           onClick={() => onView(row.original)}
         >
-          <Eye className="mr-1.5 h-4 w-4" />
-          Ver
+          <Eye className="h-3.5 w-3.5" />
         </Button>
       ),
     },

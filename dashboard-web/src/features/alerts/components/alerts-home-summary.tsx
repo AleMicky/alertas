@@ -15,9 +15,10 @@ import { cn } from '@/lib/utils';
 
 import { Alert } from '../alert.types';
 import {
+  formatNotificationStats,
   getAlertStatusTone,
+  getAlertTitle,
   getRelativeTime,
-  getSeverityBadgeVariant,
   sortAlertsByDateDesc,
 } from './alert-utils';
 
@@ -99,9 +100,9 @@ export function AlertsHomeSummary({ alerts }: Props) {
                   className="flex items-start justify-between gap-3 rounded-lg border bg-muted/10 p-3 transition-colors hover:bg-muted/30"
                 >
                   <div className="min-w-0 space-y-1">
-                    <p className="truncate text-sm font-medium">{alert.title}</p>
+                    <p className="truncate text-sm font-medium">{getAlertTitle(alert)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {getRelativeTime(alert.alertDate)}
+                      {getRelativeTime(alert.alertDate)} · {formatNotificationStats(alert)}
                     </p>
                   </div>
 
@@ -114,9 +115,6 @@ export function AlertsHomeSummary({ alerts }: Props) {
                     >
                       {alert.status}
                     </span>
-                    <Badge variant={getSeverityBadgeVariant(alert.severityLevel?.priority)}>
-                      {alert.severityLevel?.name ?? '—'}
-                    </Badge>
                   </div>
                 </Link>
               );

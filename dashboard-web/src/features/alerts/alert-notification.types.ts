@@ -10,14 +10,15 @@ export type AlertNotificationStatus =
 
 export interface AlertNotification {
   id: string;
-  alert?: Alert;
+  alert?: Pick<Alert, 'id' | 'status' | 'title' | 'message' | 'alertDate'>;
   alertId?: string;
-  notificationChannel?: NotificationChannel;
+  notificationChannel?: Pick<NotificationChannel, 'id' | 'code' | 'name'>;
   notificationChannelId?: string;
   target: string;
   title: string;
   message: string;
   status: AlertNotificationStatus | string;
+  createdAt?: string;
   sentAt?: Date | string;
   responseJson?: Record<string, unknown>;
   response_json?: Record<string, unknown>;

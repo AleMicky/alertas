@@ -20,7 +20,7 @@ import {
   LoginAuditEntity,
 } from './infrastructure/typeorm/entities';
 // Services
-import { EventMapper } from './app/mappers';
+import { EventMapper, AlertMapper, AlertNotificationMapper } from './app/mappers';
 import {
   NotificationChannelsService,
   SeverityLevelService,
@@ -163,6 +163,8 @@ import {
     ClientSystemService,
     ClientSystemTokenService,
     EventMapper,
+    AlertMapper,
+    AlertNotificationMapper,
     EventService,
     EventTypeService,
     AlertRuleService,

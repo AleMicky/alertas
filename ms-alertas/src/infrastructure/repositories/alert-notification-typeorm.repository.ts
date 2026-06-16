@@ -4,7 +4,10 @@ import { DeepPartial, Repository } from 'typeorm';
 
 import { GenericRepository } from 'src/shared/core/generic.repository';
 import { AlertNotificationStatus } from 'src/domain/enums/alert-notification-status.enum';
-import { AlertNotificationRepository } from 'src/domain/repositories/alert-notification.repository';
+import {
+  AlertNotificationRepository,
+  AlertNotificationStats,
+} from 'src/domain/repositories/alert-notification.repository';
 import { AlertNotificationEntity } from '../typeorm/entities/alert-notification.entity';
  
 type AlertNotificationPersistenceInput = Partial<AlertNotificationEntity> & {
@@ -37,6 +40,9 @@ export class AlertNotificationTypeormRepository
   findAll(): Promise<AlertNotificationEntity[]> {
     return this.repository.find({
       relations: AlertNotificationTypeormRepository.relations,
+      order: {
+        createdAt: 'DESC',
+      },
     });
   }
 
@@ -58,7 +64,61 @@ export class AlertNotificationTypeormRepository
     return this.repository.find({
       where: { status: status as AlertNotificationStatus },
       relations: AlertNotificationTypeormRepository.relations,
+      order: {
+        createdAt: 'DESC',
+      },
     });
+  }
+
+  async countStatsByAlertIds(
+    alertIds: string[],
+  ): Promise<Record<string, AlertNotificationStats>> {
+    if (alertIds.length === 0) {
+      return {};
+    }
+
+    const rows = await this.repository
+      .createQueryBuilder('notification')
+      .innerJoin('notification.alert', 'alert')
+      .select('alert.id', 'alertId')
+      .addSelect('COUNT(*)', 'total')
+      .addSelect(
+        `SUM(CASE WHEN notification.status = :sent THEN 1 ELSE 0 END)`,
+        'sent',
+      )
+      .addSelect(
+        `SUM(CASE WHEN notification.status = :failed THEN 1 ELSE 0 END)`,
+        'failed',
+      )
+      .addSelect(
+        `SUM(CASE WHEN notification.status IN ('PENDING', 'PROCESSING') THEN 1 ELSE 0 END)`,
+        'pending',
+      )
+      .where('alert.id IN (:...alertIds)', { alertIds })
+      .setParameters({
+        sent: AlertNotificationStatus.SENT,
+        failed: AlertNotificationStatus.FAILED,
+      })
+      .groupBy('alert.id')
+      .getRawMany<{
+        alertId: string;
+        total: string;
+        sent: string;
+        failed: string;
+        pending: string;
+      }>();
+
+    return Object.fromEntries(
+      rows.map((row) => [
+        row.alertId,
+        {
+          total: Number(row.total) || 0,
+          sent: Number(row.sent) || 0,
+          failed: Number(row.failed) || 0,
+          pending: Number(row.pending) || 0,
+        },
+      ]),
+    );
   }
 
   async create(entity: AlertNotificationPersistenceInput): Promise<AlertNotificationEntity> {

@@ -12,8 +12,10 @@ import {
 } from 'src/domain/types/event-payload.type';
 
 import { buildAlertNotificationPayload } from 'src/app/utils/build-alert-notification-payload.util';
+import { AlertNotificationMapper } from 'src/app/mappers/alert-notification.mapper';
 import { AlertNotificationRepository } from 'src/domain/repositories/alert-notification.repository';
 import { NotificationChannelRepository } from 'src/domain/repositories/notification-channel.repository';
+import { ResponseAlertNotificationDto } from 'src/presentation/dto/alert-notification/response-alert-notification.dto';
 
 @Injectable()
 export class AlertNotificationService extends BaseService<AlertNotification> {
@@ -22,6 +24,7 @@ export class AlertNotificationService extends BaseService<AlertNotification> {
   constructor(
     private readonly alertNotificationRepository: AlertNotificationRepository,
     private readonly notificationChannelRepository: NotificationChannelRepository,
+    private readonly alertNotificationMapper: AlertNotificationMapper,
     @InjectQueue('alert-notifications')
     private readonly alertNotificationQueue: Queue,
   ) {
@@ -101,5 +104,43 @@ export class AlertNotificationService extends BaseService<AlertNotification> {
 
   findByStatus(status: AlertNotificationStatus) {
     return this.alertNotificationRepository.findByStatus(status);
+  }
+
+  async findAllMapped(): Promise<ResponseAlertNotificationDto[]> {
+    const notifications = await this.alertNotificationRepository.findAll();
+
+    return notifications.map((notification) =>
+      this.alertNotificationMapper.toResponse(notification),
+    );
+  }
+
+  async findOneMapped(id: string): Promise<ResponseAlertNotificationDto | null> {
+    const notification = await this.alertNotificationRepository.findOne(id);
+
+    return notification
+      ? this.alertNotificationMapper.toResponse(notification)
+      : null;
+  }
+
+  async findByAlertIdMapped(
+    alertId: string,
+  ): Promise<ResponseAlertNotificationDto[]> {
+    const notifications =
+      await this.alertNotificationRepository.findByAlertId(alertId);
+
+    return notifications.map((notification) =>
+      this.alertNotificationMapper.toResponse(notification),
+    );
+  }
+
+  async findByStatusMapped(
+    status: AlertNotificationStatus,
+  ): Promise<ResponseAlertNotificationDto[]> {
+    const notifications =
+      await this.alertNotificationRepository.findByStatus(status);
+
+    return notifications.map((notification) =>
+      this.alertNotificationMapper.toResponse(notification),
+    );
   }
 }

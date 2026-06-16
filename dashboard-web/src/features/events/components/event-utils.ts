@@ -12,6 +12,43 @@ export function getEventPayload(
   return event.payloadJson ?? event.payload_json;
 }
 
+export function getEventTimestamp(event: Event): string | undefined {
+  return event.createdAt;
+}
+
+export function getEventTypeCode(event: Event): string {
+  return event.eventType?.code ?? '—';
+}
+
+export function getEventTypeName(event: Event): string {
+  return event.eventType?.name ?? getEventTypeCode(event);
+}
+
+export function getEventReference(event: Event): string | undefined {
+  const payload = getEventPayload(event);
+  const metadata = payload?.metadata;
+
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+    return undefined;
+  }
+
+  const reference = (metadata as Record<string, unknown>).reference;
+
+  return typeof reference === 'string' && reference.trim()
+    ? reference.trim()
+    : undefined;
+}
+
+export function getEventLogLabel(event: Event): string {
+  const reference = getEventReference(event);
+
+  if (reference) {
+    return `${getEventTypeName(event)} · ${reference}`;
+  }
+
+  return getEventTypeName(event);
+}
+
 export function parseEventDate(value: Date | string | undefined): Date | null {
   if (!value) return null;
 
@@ -41,8 +78,13 @@ export function formatEventTime(value: Date | string | undefined) {
   return date.toLocaleTimeString('es-MX', {
     hour: '2-digit',
     minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
   });
 }
+
+export const EVENT_LOG_GRID =
+  'grid-cols-[4.25rem_4.75rem_minmax(0,1fr)_2.25rem_2.75rem]';
 
 export function formatEventDay(value: Date | string | undefined) {
   const date = parseEventDate(value);
@@ -56,6 +98,44 @@ export function formatEventDay(value: Date | string | undefined) {
   });
 }
 
+export function getEventDayKey(value: Date | string | undefined): string {
+  const date = parseEventDate(value);
+
+  if (!date) return 'unknown';
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+export function formatEventDayLabel(value: Date | string | undefined): string {
+  const date = parseEventDate(value);
+
+  if (!date) return 'Sin fecha';
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const target = new Date(date);
+  target.setHours(0, 0, 0, 0);
+
+  const diffDays = Math.floor(
+    (today.getTime() - target.getTime()) / 86_400_000,
+  );
+
+  if (diffDays === 0) return 'Hoy';
+  if (diffDays === 1) return 'Ayer';
+
+  return date.toLocaleDateString('es-MX', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    ...(date.getFullYear() !== today.getFullYear() && { year: 'numeric' }),
+  });
+}
+
 export function getRelativeTime(value: Date | string | undefined) {
   const date = parseEventDate(value);
 
@@ -64,28 +144,36 @@ export function getRelativeTime(value: Date | string | undefined) {
   const diffMs = Date.now() - date.getTime();
   const diffMin = Math.floor(diffMs / 60_000);
 
-  if (diffMin < 1) return 'Hace un momento';
-  if (diffMin < 60) return `Hace ${diffMin} min`;
+  if (diffMin < 1) return 'ahora';
+  if (diffMin < 60) return `${diffMin}m`;
 
   const diffHours = Math.floor(diffMin / 60);
 
-  if (diffHours < 24) return `Hace ${diffHours} h`;
+  if (diffHours < 24) return `${diffHours}h`;
 
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffDays < 7) return `Hace ${diffDays} d`;
+  if (diffDays < 7) return `${diffDays}d`;
 
   return formatEventDay(value);
 }
 
 export function isEventProcessed(event: Event) {
-  return Boolean(event.processedAt);
+  if (event.processedAt) return true;
+
+  const status = event.status?.toUpperCase() ?? '';
+
+  return status === 'PROCESSED' || status === 'FAILED';
+}
+
+export function isEventPending(event: Event) {
+  return !isEventProcessed(event);
 }
 
 export function sortEventsByDateDesc(events: Event[]) {
   return [...events].sort((a, b) => {
-    const dateA = parseEventDate(a.eventDate)?.getTime() ?? 0;
-    const dateB = parseEventDate(b.eventDate)?.getTime() ?? 0;
+    const dateA = parseEventDate(getEventTimestamp(a))?.getTime() ?? 0;
+    const dateB = parseEventDate(getEventTimestamp(b))?.getTime() ?? 0;
 
     return dateB - dateA;
   });
@@ -110,20 +198,35 @@ export function groupEventsByStatus(events: Event[]) {
     .sort((a, b) => b.count - a.count);
 }
 
-export function getSeverityAccentClass(priority?: number) {
-  if (priority === undefined) return 'bg-muted-foreground';
-  if (priority >= 3) return 'bg-destructive';
-  if (priority >= 2) return 'bg-primary';
-  return 'bg-emerald-500';
-}
+export function getStatusAccentClass(status: string) {
+  const normalized = status.toLowerCase();
 
-export function getSeverityBadgeVariant(
-  priority?: number,
-): 'default' | 'secondary' | 'destructive' | 'outline' {
-  if (priority === undefined) return 'secondary';
-  if (priority >= 3) return 'destructive';
-  if (priority >= 2) return 'default';
-  return 'secondary';
+  if (
+    normalized.includes('error')
+    || normalized.includes('fail')
+    || normalized.includes('rechaz')
+  ) {
+    return 'bg-destructive';
+  }
+
+  if (
+    normalized.includes('process')
+    || normalized.includes('proces')
+    || normalized.includes('ok')
+    || normalized.includes('complet')
+  ) {
+    return 'bg-emerald-500';
+  }
+
+  if (
+    normalized.includes('pend')
+    || normalized.includes('new')
+    || normalized.includes('recib')
+  ) {
+    return 'bg-amber-500';
+  }
+
+  return 'bg-muted-foreground';
 }
 
 export function getStatusTone(status: string) {
@@ -137,6 +240,7 @@ export function getStatusTone(status: string) {
     return {
       badge: 'bg-destructive/15 text-destructive border-destructive/30',
       dot: 'bg-destructive',
+      text: 'text-destructive',
     };
   }
 
@@ -149,6 +253,7 @@ export function getStatusTone(status: string) {
     return {
       badge: 'bg-emerald-500/15 text-emerald-700 border-emerald-500/30 dark:text-emerald-400',
       dot: 'bg-emerald-500',
+      text: 'text-emerald-600 dark:text-emerald-400',
     };
   }
 
@@ -160,12 +265,14 @@ export function getStatusTone(status: string) {
     return {
       badge: 'bg-amber-500/15 text-amber-800 border-amber-500/30 dark:text-amber-400',
       dot: 'bg-amber-500',
+      text: 'text-amber-700 dark:text-amber-400',
     };
   }
 
   return {
     badge: 'bg-muted text-muted-foreground border-border',
     dot: 'bg-muted-foreground',
+    text: 'text-muted-foreground',
   };
 }
 
@@ -195,6 +302,28 @@ export function getPayloadPreview(
   return `${formatted.slice(0, maxLength)}…`;
 }
 
+export function shortenId(id: string, length = 8) {
+  if (id.length <= length) return id;
+
+  return id.slice(0, length);
+}
+
+export function getSeverityAccentClass(priority?: number) {
+  if (priority === undefined) return 'bg-muted-foreground';
+  if (priority >= 3) return 'bg-destructive';
+  if (priority >= 2) return 'bg-primary';
+  return 'bg-emerald-500';
+}
+
+export function getSeverityBadgeVariant(
+  priority?: number,
+): 'default' | 'secondary' | 'destructive' | 'outline' {
+  if (priority === undefined) return 'secondary';
+  if (priority >= 3) return 'destructive';
+  if (priority >= 2) return 'default';
+  return 'secondary';
+}
+
 export interface EventFilters {
   search: string;
   status: string;
@@ -222,11 +351,13 @@ export function filterEvents(events: Event[], filters: EventFilters) {
     const payload = formatPayloadJson(getEventPayload(event), 0).toLowerCase();
 
     return (
-      event.title.toLowerCase().includes(search)
-      || event.code.toLowerCase().includes(search)
-      || event.message.toLowerCase().includes(search)
-      || event.eventType.toLowerCase().includes(search)
+      event.id.toLowerCase().includes(search)
+      || getEventTypeCode(event).toLowerCase().includes(search)
+      || getEventTypeName(event).toLowerCase().includes(search)
+      || getEventReference(event)?.toLowerCase().includes(search)
+      || event.status.toLowerCase().includes(search)
       || event.clientSystem?.name?.toLowerCase().includes(search)
+      || event.clientSystem?.code?.toLowerCase().includes(search)
       || payload.includes(search)
     );
   });

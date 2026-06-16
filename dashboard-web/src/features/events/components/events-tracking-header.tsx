@@ -1,18 +1,14 @@
 'use client';
 
-import {
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  Layers,
-} from 'lucide-react';
+import { Activity, CheckCircle2, CircleDashed, Layers } from 'lucide-react';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 import { Event } from '../event.types';
 import {
+  getStatusTone,
   groupEventsByStatus,
+  isEventPending,
   isEventProcessed,
 } from './event-utils';
 
@@ -22,35 +18,32 @@ interface Props {
   onStatusChange: (status: string) => void;
 }
 
-function MetricCard({
+function StatChip({
+  icon: Icon,
   label,
   value,
-  hint,
-  icon: Icon,
-  accent,
+  tone,
 }: {
+  icon: typeof Layers;
   label: string;
   value: number;
-  hint: string;
-  icon: typeof Layers;
-  accent: string;
+  tone?: string;
 }) {
   return (
-    <Card className="relative overflow-hidden border-muted/60 shadow-sm">
-      <div className={cn('absolute inset-y-0 left-0 w-1', accent)} />
-      <CardContent className="flex items-center gap-4 p-4 pl-5">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted/60">
-          <Icon className="size-5 text-foreground/80" />
-        </div>
-        <div>
-          <p className="text-3xl font-semibold tabular-nums tracking-tight">
-            {value}
-          </p>
-          <p className="text-sm font-medium">{label}</p>
-          <p className="text-xs text-muted-foreground">{hint}</p>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="inline-flex items-center gap-2 rounded-md border bg-background px-2.5 py-1.5 shadow-sm">
+      <div
+        className={cn(
+          'flex size-6 items-center justify-center rounded',
+          tone ?? 'bg-muted text-muted-foreground',
+        )}
+      >
+        <Icon className="size-3.5" />
+      </div>
+      <div className="leading-none">
+        <p className="text-sm font-bold tabular-nums">{value}</p>
+        <p className="text-[10px] text-muted-foreground">{label}</p>
+      </div>
+    </div>
   );
 }
 
@@ -59,98 +52,71 @@ export function EventsTrackingHeader({
   activeStatus,
   onStatusChange,
 }: Props) {
-  const pending = data.filter((item) => !isEventProcessed(item)).length;
+  const pending = data.filter((item) => isEventPending(item)).length;
   const processed = data.filter((item) => isEventProcessed(item)).length;
   const statusGroups = groupEventsByStatus(data);
   const total = data.length;
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
-          icon={Layers}
-          label="En seguimiento"
-          value={total}
-          hint="Eventos en el periodo visible"
-          accent="bg-primary"
-        />
-        <MetricCard
-          icon={Clock}
-          label="Pendientes"
+    <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-wrap gap-2">
+        <StatChip icon={Layers} label="total" value={total} />
+        <StatChip
+          icon={CircleDashed}
+          label="activos"
           value={pending}
-          hint="Sin fecha de procesamiento"
-          accent="bg-amber-500"
+          tone="bg-amber-500/15 text-amber-700 dark:text-amber-400"
         />
-        <MetricCard
+        <StatChip
           icon={CheckCircle2}
-          label="Procesados"
+          label="cerrados"
           value={processed}
-          hint="Con processedAt registrado"
-          accent="bg-emerald-500"
+          tone="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
         />
-        <MetricCard
-          icon={AlertCircle}
-          label="Estados distintos"
+        <StatChip
+          icon={Activity}
+          label="estados"
           value={statusGroups.length}
-          hint="Agrupación por status API"
-          accent="bg-violet-500"
+          tone="bg-primary/10 text-primary"
         />
       </div>
 
       {statusGroups.length > 0 ? (
-        <Card className="border-muted/60 shadow-sm">
-          <CardContent className="p-4">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <p className="text-sm font-medium">Pipeline por estado</p>
-              <p className="text-xs text-muted-foreground">
-                Clic para filtrar el seguimiento
-              </p>
-            </div>
+        <div className="flex flex-wrap gap-1">
+          <button
+            type="button"
+            onClick={() => onStatusChange('all')}
+            className={cn(
+              'rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-wide transition-all',
+              activeStatus === 'all'
+                ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                : 'border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground',
+            )}
+          >
+            todos · {total}
+          </button>
 
-            <div className="flex flex-wrap gap-2">
+          {statusGroups.map(({ status, count }) => {
+            const tone = getStatusTone(status);
+
+            return (
               <button
+                key={status}
                 type="button"
-                onClick={() => onStatusChange('all')}
+                onClick={() => onStatusChange(status)}
                 className={cn(
-                  'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                  activeStatus === 'all'
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border bg-background hover:bg-muted',
+                  'rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-wide transition-all',
+                  activeStatus === status
+                    ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                    : cn('bg-background hover:border-primary/40', tone.badge),
                 )}
               >
-                Todos ({total})
+                {status.replaceAll('_', ' ')} · {count}
               </button>
-
-              {statusGroups.map(({ status, count }) => (
-                <button
-                  key={status}
-                  type="button"
-                  onClick={() => onStatusChange(status)}
-                  className={cn(
-                    'rounded-full border px-3 py-1.5 text-xs font-medium uppercase tracking-wide transition-colors',
-                    activeStatus === status
-                      ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-border bg-background hover:bg-muted',
-                  )}
-                >
-                  {status.replaceAll('_', ' ')} ({count})
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+            );
+          })}
+        </div>
       ) : null}
     </div>
   );
 }
-
-
-/*
-$_SESSION['_MAIL_USUARIO']='faviana.pimentel@endecorani.bo';
-$_SESSION['_MAIL_PASSWORD']='password...';
-$_SESSION['_MAIL_REMITENTE']='motifacion@endecorani.bo';   
-$_SESSION['_MAIL_SERVIDOR']='smtp.gmail.com';
-$_SESSION['_MAIL_PUERTO']=587;
-$_SESSION['_MAIL_AUTENTIFICACION']=true;
-$_SESSION['_SMTPSecure']='tls';
-*/

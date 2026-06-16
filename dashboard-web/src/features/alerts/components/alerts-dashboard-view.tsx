@@ -1,20 +1,19 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Bell, LayoutGrid, LayoutList } from 'lucide-react';
+import { Bell, LayoutList, RefreshCw, ScrollText } from 'lucide-react';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DataTable } from '@/shared/components/data-table';
 
 import { Alert } from '../alert.types';
 import { AlertNotification } from '../alert-notification.types';
 import { AlertDetailSheet } from './alert-detail-sheet';
-import { AlertNotificationsPanel } from './alert-notifications-panel';
 import { createAlertColumns } from './alert-columns';
 import { AlertsFilters } from './alerts-filters';
+import { AlertsLogPanel } from './alerts-log-panel';
 import { AlertsMetricsHeader } from './alerts-metrics-header';
-import { AlertsTimeline } from './alerts-timeline';
+import { NotificationsLogPanel } from './notifications-log-panel';
 import {
   AlertFilters,
   filterAlerts,
@@ -25,6 +24,7 @@ interface Props {
   alerts: Alert[];
   notifications: AlertNotification[];
   notificationsLoading?: boolean;
+  isFetching?: boolean;
 }
 
 const defaultFilters: AlertFilters = {
@@ -37,6 +37,7 @@ export function AlertsDashboardView({
   alerts,
   notifications,
   notificationsLoading = false,
+  isFetching,
 }: Props) {
   const [selected, setSelected] = useState<Alert | null>(null);
   const [filters, setFilters] = useState<AlertFilters>(defaultFilters);
@@ -55,7 +56,7 @@ export function AlertsDashboardView({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <AlertsMetricsHeader
         data={alerts}
         activeStatus={filters.status}
@@ -63,94 +64,65 @@ export function AlertsDashboardView({
           setFilters((current) => ({ ...current, status }))}
       />
 
-      <AlertsFilters
-        filters={filters}
-        onChange={setFilters}
-        resultCount={filtered.length}
-      />
+      <Tabs defaultValue="log" className="space-y-2">
+        <div className="flex flex-col gap-2 rounded-lg border bg-card/50 p-2.5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+          <AlertsFilters
+            filters={filters}
+            onChange={setFilters}
+            resultCount={filtered.length}
+            isFetching={isFetching}
+          />
 
-      <Tabs defaultValue="cards">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">Centro de alertas</h2>
-            <p className="text-sm text-muted-foreground">
-              Vista visual para móvil, tabla para auditoría y panel de entregas.
-            </p>
+          <div className="flex items-center gap-2 self-end lg:self-auto">
+            {isFetching ? (
+              <RefreshCw className="size-3.5 animate-spin text-muted-foreground" />
+            ) : null}
+            <TabsList className="h-7">
+              <TabsTrigger value="log" className="gap-1 px-2 text-[10px]">
+                <ScrollText className="size-3" />
+                Log
+              </TabsTrigger>
+              <TabsTrigger value="table" className="gap-1 px-2 text-[10px]">
+                <LayoutList className="size-3" />
+                Tabla
+              </TabsTrigger>
+              <TabsTrigger value="notifications" className="gap-1 px-2 text-[10px]">
+                <Bell className="size-3" />
+                Entregas
+              </TabsTrigger>
+            </TabsList>
           </div>
-
-          <TabsList className="grid w-full grid-cols-3 sm:w-auto">
-            <TabsTrigger value="cards" className="gap-1.5 text-xs sm:gap-2 sm:text-sm">
-              <LayoutGrid className="size-4" />
-              Tarjetas
-            </TabsTrigger>
-            <TabsTrigger value="table" className="gap-1.5 text-xs sm:gap-2 sm:text-sm">
-              <LayoutList className="size-4" />
-              Tabla
-            </TabsTrigger>
-            <TabsTrigger value="notifications" className="gap-1.5 text-xs sm:gap-2 sm:text-sm">
-              <Bell className="size-4" />
-              <span className="hidden sm:inline">Notificaciones</span>
-              <span className="sm:hidden">Notif.</span>
-            </TabsTrigger>
-          </TabsList>
         </div>
 
-        <TabsContent value="cards" className="mt-4">
-          <Card className="overflow-hidden border-muted/60 shadow-sm">
-            <CardHeader className="border-b bg-gradient-to-r from-muted/30 to-transparent">
-              <CardTitle className="text-base">Línea de tiempo</CardTitle>
-              <CardDescription>
-                Alertas agrupadas por día. Toca una tarjeta para ver detalle y
-                notificaciones enviadas.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6">
-              <AlertsTimeline
-                alerts={filtered}
-                selectedId={selected?.id}
-                onSelect={setSelected}
-              />
-            </CardContent>
-          </Card>
+        <TabsContent value="log" className="mt-0">
+          <AlertsLogPanel
+            alerts={filtered}
+            selectedId={selected?.id}
+            onSelect={setSelected}
+          />
         </TabsContent>
 
-        <TabsContent value="table" className="mt-4">
-          <Card className="overflow-hidden border-muted/60 shadow-sm">
-            <CardHeader className="border-b bg-muted/20">
-              <CardTitle className="text-base">Vista tabular</CardTitle>
-              <CardDescription>
-                Misma data filtrada, ideal para revisión en escritorio.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6">
-              <DataTable
-                columns={columns}
-                data={filtered}
-                searchColumn="title"
-                searchPlaceholder="Filtrar en tabla…"
-              />
-            </CardContent>
-          </Card>
+        <TabsContent value="table" className="mt-0">
+          <DataTable
+            columns={columns}
+            data={filtered}
+            searchColumn="title"
+            searchPlaceholder="Filtrar en tabla…"
+          />
         </TabsContent>
 
-        <TabsContent value="notifications" className="mt-4">
-          <Card className="overflow-hidden border-muted/60 shadow-sm">
-            <CardHeader className="border-b bg-muted/20">
-              <CardTitle className="text-base">Entregas por canal</CardTitle>
-              <CardDescription>
-                Estado de cada notificación generada a partir de las alertas.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6">
-              {notificationsLoading ? (
-                <p className="text-sm text-muted-foreground">
-                  Cargando notificaciones…
-                </p>
-              ) : (
-                <AlertNotificationsPanel data={notifications} />
-              )}
-            </CardContent>
-          </Card>
+        <TabsContent value="notifications" className="mt-0">
+          {notificationsLoading ? (
+            <p className="px-2 font-mono text-[11px] text-muted-foreground">
+              Cargando entregas…
+            </p>
+          ) : (
+            <NotificationsLogPanel
+              data={notifications}
+              alerts={alerts}
+              onAlertSelect={setSelected}
+            />
+          )}
         </TabsContent>
       </Tabs>
 

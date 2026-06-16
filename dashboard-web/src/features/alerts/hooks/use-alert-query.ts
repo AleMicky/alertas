@@ -1,13 +1,27 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
+
 import { QUERY_KEYS } from '@/shared/constants/query-keys';
-import { useBaseEntityQuery } from '@/shared/core/hooks/use-base-entity-query';
 
 import { alertService } from '../alert.service';
-import { Alert } from '../alert.types';
+
+const REFRESH_INTERVAL_MS = 15_000;
 
 export function useAlertQuery() {
-  return useBaseEntityQuery<Alert>(alertService, {
-    queryKey: QUERY_KEYS.alerts,
+  const query = useQuery({
+    queryKey: [QUERY_KEYS.alerts],
+    queryFn: alertService.getAll,
+    refetchInterval: REFRESH_INTERVAL_MS,
+    refetchIntervalInBackground: false,
   });
+
+  return {
+    data: query.data ?? [],
+    isLoading: query.isPending,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+    isFetching: query.isFetching,
+  };
 }
