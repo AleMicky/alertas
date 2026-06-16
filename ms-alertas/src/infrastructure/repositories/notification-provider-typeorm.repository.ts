@@ -83,7 +83,13 @@ export class NotificationProviderTypeormRepository
     entity: NotificationProviderPersistenceInput,
   ): Promise<NotificationProviderEntity> {
     const persistence = this.toPersistence(entity);
-    await this.repository.update(id, persistence);
+    const existing = await this.findOne(id);
+    if (!existing) {
+      throw new Error('Registro no encontrado');
+    }
+    await this.repository.save(
+      this.repository.merge(existing, this.toPersistence(entity)),
+    );
     const updated = await this.findOne(id);
 
     if (!updated) {

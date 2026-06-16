@@ -6,4 +6,6 @@ export class NotificationChannelResponseDto extends BaseAuditSchema {
   name: string;
   webhookUrl: string;
   description?: string;
+  payloadSchemaJson?: Record<string, unknown>;
+  payloadExampleJson?: Record<string, unknown>;
 }

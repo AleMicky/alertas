@@ -2,6 +2,7 @@ export * from './form-field-error';
 export * from './text-form-field';
 export * from './number-form-field';
 export * from './textarea-form-field';
+export * from './json-form-field';
 export * from './switch-form-field';
 export * from './select-form-field';
 export * from './form-submit-buttons';

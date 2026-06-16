@@ -1,8 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsBoolean,
-  IsEnum,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
   IsUrl,
@@ -34,4 +33,26 @@ export class CreateNotificationChannelDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({
+    type: Object,
+    example: {
+      title: 'string',
+      message: 'string',
+    },
+  })
+  @IsOptional()
+  @IsObject()
+  payloadSchemaJson?: Record<string, unknown>;
+
+  @ApiPropertyOptional({
+    type: Object,
+    example: {
+      title: 'string',
+      message: 'string',
+    },
+  })
+  @IsOptional()
+  @IsObject()
+  payloadExampleJson?: Record<string, unknown>;
 }

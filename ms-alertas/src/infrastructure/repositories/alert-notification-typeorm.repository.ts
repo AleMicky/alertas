@@ -75,9 +75,16 @@ export class AlertNotificationTypeormRepository
     id: string,
     entity: AlertNotificationPersistenceInput,
   ): Promise<AlertNotificationEntity> {
+    const existing = await this.findOne(id);
 
-    const persistence = this.toPersistence(entity);
-    await this.repository.update(id, persistence);
+    if (!existing) {
+      throw new NotFoundException('Registro no encontrado');
+    }
+
+    await this.repository.save(
+      this.repository.merge(existing, this.toPersistence(entity)),
+    );
+
     const updated = await this.findOne(id);
     if (!updated) {
       throw new NotFoundException('Registro no encontrado');

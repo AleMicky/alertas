@@ -69,9 +69,15 @@ export class AlertRuleTypeormRepository
     id: string,
     entity: AlertRulePersistenceInput,
   ): Promise<AlertRuleEntity> {
-    const persistence = this.toPersistence(entity);
+    const existing = await this.findOne(id);
 
-    await this.repository.update(id, persistence);
+    if (!existing) {
+      throw new Error('Registro no encontrado');
+    }
+
+    await this.repository.save(
+      this.repository.merge(existing, this.toPersistence(entity)),
+    );
 
     const updated = await this.findOne(id);
 
