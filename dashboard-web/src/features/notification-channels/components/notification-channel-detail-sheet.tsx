@@ -229,12 +229,12 @@ export function NotificationChannelDetailSheet({
 
           <JsonBlock
             title="Body"
-            value={channel.payloadExampleJson}
+            value={channel.payloadBodyJson}
             emptyMessage="Sin body configurado."
             onCopy={() =>
               copyText(
                 'Body',
-                formatJsonObject(channel.payloadExampleJson),
+                formatJsonObject(channel.payloadBodyJson),
               )
             }
           />

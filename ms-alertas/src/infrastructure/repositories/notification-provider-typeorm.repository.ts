@@ -49,6 +49,21 @@ export class NotificationProviderTypeormRepository
     });
   }
 
+  findByClientSystemChannelAndCode(
+    clientSystemId: string,
+    notificationChannelId: string,
+    code: string,
+  ): Promise<NotificationProvider | null> {
+    return this.repository.findOne({
+      where: {
+        clientSystem: { id: clientSystemId },
+        notificationChannel: { id: notificationChannelId },
+        code: code.trim().toUpperCase(),
+      },
+      relations: NotificationProviderTypeormRepository.relations,
+    });
+  }
+
   findByNotificationChannelId(
     notificationChannelId: string,
   ): Promise<NotificationProvider[]> {

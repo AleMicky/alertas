@@ -26,13 +26,12 @@ export class AlertService extends BaseService<Alert> {
       createdAt: new Date(),
     });
 
-    const notifications =  await this.alertNotificationService.createFromAlert(alert);
-    console.log(notifications);
-    /*
+    const notifications =
+      await this.alertNotificationService.createFromAlert(alert);
 
     if (notifications.length === 0) {
       await this.alertOutcomeService.markNoRecipients(alert);
-    }*/
+    }
 
     return alert;
   }
@@ -49,7 +48,6 @@ export class AlertService extends BaseService<Alert> {
     return this.alertRepository.update(alertId, {
       status: AlertStatus.NOTIFIED,
     });
-
   }
 
   async markAsFailed(alertId: string): Promise<Alert> {

@@ -21,6 +21,6 @@ export class NotificationChannelEntity extends BaseAuditColumns {
   @Column({ name: 'payload_schema_json', type: 'jsonb', nullable: true })
   payloadSchemaJson?: Record<string, unknown>;
 
-  @Column({ name: 'payload_example_json', type: 'jsonb', nullable: true })
-  payloadExampleJson?: Record<string, unknown>;
+  @Column({ name: 'payload_body_json', type: 'jsonb', nullable: true })
+  payloadBodyJson?: Record<string, unknown>;
 }

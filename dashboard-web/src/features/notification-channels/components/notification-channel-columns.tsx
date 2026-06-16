@@ -37,7 +37,7 @@ function getWebhookHost(url: string) {
 }
 
 async function copyPayloadBody(item: NotificationChannel) {
-  const formatted = formatJsonObject(item.payloadExampleJson);
+  const formatted = formatJsonObject(item.payloadBodyJson);
 
   if (!formatted) {
     toast.error('Este canal no tiene body configurado');

@@ -17,7 +17,15 @@ export class CreateEventDto {
   @IsNotEmpty()
   eventTypeCode: string;
 
-   
+  @ApiProperty({
+    example: 'SOL-001',
+    description: 'Referencia externa del evento',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  reference?: string;
+
   @IsOptional()
   @IsObject()
   payloadJson?: Record<string, unknown>;

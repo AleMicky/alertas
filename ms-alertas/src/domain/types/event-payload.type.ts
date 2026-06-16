@@ -31,6 +31,7 @@ export interface EventRecipient
     TeamsRecipientPayload,
     WhatsAppRecipientPayload {
   channel: string;
+  provider?: string;
   attendee?: string;
   target?: string;
   [key: string]: unknown;

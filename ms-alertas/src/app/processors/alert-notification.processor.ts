@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 
-import { getNotificationChannelKind } from 'src/app/utils/normalize-notification-channel.util';
+import { buildN8nNotificationPayload } from 'src/app/utils/build-n8n-notification-payload.util';
 import { AlertNotificationService } from 'src/app/services/alert-notification.service';
 import { AlertOutcomeService } from 'src/app/services/alert-outcome.service';
 import { N8nClient } from 'src/infrastructure/integrations/n8n/n8n.client';
@@ -26,7 +26,7 @@ export class AlertNotificationProcessor extends WorkerHost {
       alertNotificationId: string;
     }>,
   ): Promise<void> {
-   /* const { alertNotificationId } = job.data;
+    const { alertNotificationId } = job.data;
 
     const notification =
       await this.alertNotificationService.findOne(alertNotificationId);
@@ -56,23 +56,25 @@ export class AlertNotificationProcessor extends WorkerHost {
         );
       }
 
-      const channelCode = notification.notificationChannel.code;
-      const channelKind = getNotificationChannelKind(channelCode);
-      const n8nChannel = channelKind === 'GENERIC' ? channelCode : channelKind;
+      if (!notification.target) {
+        throw new Error(
+          `Destino no configurado para la notificación ${notification.id}`,
+        );
+      }
 
-      const response = await this.n8nClient.sendNotification(webhookUrl, {
-        notificationId: notification.id,
-        channel: n8nChannel,
-        target: notification.target,
-        title: notification.title,
-        message: notification.message,
-        payload: notification.payloadJson ?? {},
-      });
+      const n8nPayload = buildN8nNotificationPayload(notification);
+      const response = await this.n8nClient.sendNotification(
+        webhookUrl,
+        n8nPayload,
+      );
 
       await this.alertNotificationService.update(notification.id, {
         status: AlertNotificationStatus.SENT,
         sentAt: new Date(),
-       //∂ responseJson: response as Record<string, unknown>,
+        responseJson:
+          typeof response === 'object' && response !== null
+            ? (response as Record<string, unknown>)
+            : { result: response },
       });
 
       await this.alertOutcomeService.syncFromNotifications(alertId);
@@ -95,6 +97,6 @@ export class AlertNotificationProcessor extends WorkerHost {
       );
 
       throw error;
-    }*/
+    }
   }
 }

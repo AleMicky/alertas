@@ -54,5 +54,5 @@ export class CreateNotificationChannelDto {
   })
   @IsOptional()
   @IsObject()
-  payloadExampleJson?: Record<string, unknown>;
+  payloadBodyJson?: Record<string, unknown>;
 }

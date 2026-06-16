@@ -27,7 +27,7 @@ export const createNotificationChannelSchema =
     name: values.name,
     webhookUrl: values.webhookUrl,
     description: values.description,
-    payloadExampleJson: buildPayloadExampleFromText(
+    payloadBodyJson: buildPayloadExampleFromText(
       values.payloadExampleText ?? '',
     ),
     payloadSchemaJson: buildPayloadSchemaJson(values.payloadRequired),
@@ -41,7 +41,7 @@ export const updateNotificationChannelSchema =
       name: values.name,
       webhookUrl: values.webhookUrl,
       description: values.description,
-      payloadExampleJson: values.payloadExampleText
+      payloadBodyJson: values.payloadExampleText
         ? buildPayloadExampleFromText(values.payloadExampleText)
         : undefined,
       payloadSchemaJson: values.payloadRequired

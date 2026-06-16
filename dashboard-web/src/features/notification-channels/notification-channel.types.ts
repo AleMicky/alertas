@@ -7,9 +7,9 @@ export interface NotificationChannel extends BaseAuditableEntity {
     webhookUrl: string;
     description?: string;
     payloadSchemaJson?: Record<string, unknown>;
-    payloadExampleJson?: Record<string, unknown>;
+    payloadBodyJson?: Record<string, unknown>;
     /** Alias que puede enviar la API en snake_case */
     webhook_url?: string;
     payload_schema_json?: Record<string, unknown>;
-    payload_example_json?: Record<string, unknown>;
+    payload_body_json?: Record<string, unknown>;
 }

@@ -17,7 +17,10 @@ export class AlertTypeormRepository
   implements AlertRepository
 {
   private static readonly relations = {
-    event: true,
+    event: {
+      clientSystem: true,
+      eventType: true,
+    },
   };
 
   constructor(

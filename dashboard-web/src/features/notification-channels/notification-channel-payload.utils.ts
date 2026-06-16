@@ -43,9 +43,9 @@ export function normalizeNotificationChannel(
   return {
     ...channel,
     webhookUrl: channel.webhookUrl ?? channel.webhook_url ?? '',
-    payloadExampleJson:
-      normalizeJsonField(channel.payloadExampleJson) ??
-      normalizeJsonField(channel.payload_example_json),
+    payloadBodyJson:
+      normalizeJsonField(channel.payloadBodyJson) ??
+      normalizeJsonField(channel.payload_body_json),
     payloadSchemaJson:
       normalizeJsonField(channel.payloadSchemaJson) ??
       normalizeJsonField(channel.payload_schema_json),
@@ -185,7 +185,7 @@ export function syncPayloadRequiredKeys(
 
 export function parsePayloadFromChannel(channel?: NotificationChannel | null) {
   const normalized = normalizeNotificationChannel(channel);
-  const example = normalized?.payloadExampleJson ?? null;
+  const example = normalized?.payloadBodyJson ?? null;
   const requiredList = Array.isArray(normalized?.payloadSchemaJson?.required)
     ? (normalized.payloadSchemaJson.required as string[])
     : [];
@@ -231,7 +231,7 @@ export function getNotificationChannelPayloadSummary(
   channel: NotificationChannel,
 ) {
   const normalized = normalizeNotificationChannel(channel);
-  const example = normalized?.payloadExampleJson ?? {};
+  const example = normalized?.payloadBodyJson ?? {};
   const fieldKeys = Object.keys(example);
   const requiredList = Array.isArray(normalized?.payloadSchemaJson?.required)
     ? (normalized.payloadSchemaJson.required as string[])

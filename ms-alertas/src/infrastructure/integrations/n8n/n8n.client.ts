@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import axios, { isAxiosError } from 'axios';
 
-export interface N8nNotificationPayload {
+export interface N8nNotificationPayload extends Record<string, unknown> {
   notificationId: string;
+  alertId?: string;
+  eventId?: string;
   channel: string;
   target: string;
   title: string;
@@ -14,7 +16,7 @@ export interface N8nNotificationPayload {
 export class N8nClient {
   async sendNotification(
     webhookUrl: string,
-    body: N8nNotificationPayload,
+    body: N8nNotificationPayload | Record<string, unknown>,
   ): Promise<unknown> {
     if (!webhookUrl) {
       throw new Error('Webhook URL no configurada');

@@ -1,5 +1,7 @@
+import { NotificationChannel } from 'src/domain/entities/notification-channel';
 import { EventRecipient } from 'src/domain/types/event-payload.type';
 
+import { getChannelRequiredFields } from './normalize-recipient-payload.util';
 import { getNotificationChannelKind } from './normalize-notification-channel.util';
 
 function firstNonEmptyString(values: unknown[]): string | undefined {
@@ -20,7 +22,31 @@ function firstEmailFromList(values?: unknown[]): string | undefined {
   return firstNonEmptyString(values);
 }
 
-export function resolveRecipientTarget(
+function resolveTargetFromSchema(
+  recipient: EventRecipient,
+  channel: NotificationChannel,
+): string | undefined {
+  const requiredFields = getChannelRequiredFields(channel);
+
+  for (const field of requiredFields) {
+    const value = recipient[field];
+
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+
+    if (Array.isArray(value)) {
+      const resolved = firstNonEmptyString(value);
+      if (resolved) {
+        return resolved;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function resolveLegacyRecipientTarget(
   recipient: EventRecipient,
 ): string | undefined {
   const kind = getNotificationChannelKind(recipient.channel);
@@ -56,6 +82,26 @@ export function resolveRecipientTarget(
   return firstNonEmptyString([recipient.target, recipient.to?.[0]]);
 }
 
-export function isRecipientTargetValid(recipient: EventRecipient): boolean {
-  return Boolean(resolveRecipientTarget(recipient));
+export function resolveRecipientTarget(
+  recipient: EventRecipient,
+  channel?: NotificationChannel,
+): string | undefined {
+  const legacyTarget = resolveLegacyRecipientTarget(recipient);
+
+  if (legacyTarget) {
+    return legacyTarget;
+  }
+
+  if (channel) {
+    return resolveTargetFromSchema(recipient, channel);
+  }
+
+  return undefined;
+}
+
+export function isRecipientTargetValid(
+  recipient: EventRecipient,
+  channel?: NotificationChannel,
+): boolean {
+  return Boolean(resolveRecipientTarget(recipient, channel));
 }
