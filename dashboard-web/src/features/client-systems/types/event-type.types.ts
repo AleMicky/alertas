@@ -1,12 +1,12 @@
-import { ClientSystem } from "./client-system.types";
-import { SeverityLevel } from "../../severity-levels/severity-level.types";
+import { BaseAuditableEntity } from '@/shared/core/base-auditable.type';
+import { ClientSystem } from './client-system.types';
 
-export interface EventType {
+export interface EventType extends BaseAuditableEntity {
     id: string;
-    clientSystem: ClientSystem;
+    clientSystemId?: string;
+    clientSystem?: ClientSystem;
     code: string;
     name: string;
     description?: string;
-    severityLevel?: SeverityLevel;
     active: boolean;
 }

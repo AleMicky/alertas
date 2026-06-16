@@ -37,7 +37,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setUser(authStorage.getUser());
+    const storedUser = authStorage.getUser();
+    const accessToken = authStorage.getAccessToken();
+
+    if (!storedUser || !accessToken) {
+      authStorage.clearSession();
+      setUser(null);
+    } else {
+      setUser(storedUser);
+    }
+
     setIsLoading(false);
   }, []);
 

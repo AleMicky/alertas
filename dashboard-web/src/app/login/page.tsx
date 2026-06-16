@@ -1,8 +1,15 @@
-'use client';
-
+import { Suspense } from 'react';
 import { Bell } from 'lucide-react';
 
 import { LoginForm } from '@/features/auth/components/login-form';
+
+function LoginFormFallback() {
+  return (
+    <div className="flex h-48 w-full max-w-sm items-center justify-center rounded-xl border border-border/60 bg-card/80 text-sm text-muted-foreground">
+      Cargando formulario...
+    </div>
+  );
+}
 
 export default function LoginPage() {
   return (
@@ -23,7 +30,9 @@ export default function LoginPage() {
         </div>
       </header>
 
-      <LoginForm />
+      <Suspense fallback={<LoginFormFallback />}>
+        <LoginForm />
+      </Suspense>
     </main>
   );
 }

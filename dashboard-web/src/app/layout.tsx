@@ -10,6 +10,8 @@ import { ThemeProvider } from "@/providers/theme-provider";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {
@@ -26,9 +28,14 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
-      className={cn("h-full antialiased font-sans", inter.variable)}
+      className={cn("h-full", inter.variable)}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body
+        className={cn(
+          "min-h-full flex flex-col bg-background text-foreground antialiased",
+          inter.className,
+        )}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

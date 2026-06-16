@@ -1,4 +1,5 @@
 import { http } from '@/lib/http';
+import { unwrapApiResponse } from '@/lib/api-response';
 import { baseService } from '@/shared/core/base.service';
 
 import { EventType } from '../types/event-type.types';
@@ -18,11 +19,12 @@ export const eventTypeService = {
 
     findActiveByClientSystemId: async (
         clientSystemId: string,
-    ): Promise<EventType[]> => {
-        const { data } = await http.get<EventType[]>(
-            `${endpoint}/client-system/${clientSystemId}/active`,
-        );
-
-        return data;
-    },
+    ): Promise<EventType[]> =>
+        unwrapApiResponse<EventType[]>(
+            (
+                await http.get(
+                    `${endpoint}/client-system/${clientSystemId}/active`,
+                )
+            ).data,
+        ),
 };

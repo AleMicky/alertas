@@ -1,8 +1,13 @@
 import axios, {
   type AxiosError,
+  type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios';
 import { authStorage } from '@/features/auth/auth-storage';
+import {
+  type ApiResponse,
+  unwrapApiResponse,
+} from '@/lib/api-response';
 
 type RetryableRequest = InternalAxiosRequestConfig & {
   _retry?: boolean;
@@ -15,12 +20,14 @@ async function refreshAccessToken(): Promise<string | null> {
   if (!refreshToken) return null;
 
   const baseURL = process.env.NEXT_PUBLIC_API_URL;
-  const response = await axios.post<{ accessToken: string }>(
+  const response = await axios.post<ApiResponse<{ accessToken: string }>>(
     `${baseURL}/auth/refresh`,
     { refreshToken },
   );
 
-  const accessToken = response.data.accessToken;
+  const accessToken = unwrapApiResponse<{ accessToken: string }>(
+    response.data,
+  ).accessToken;
   authStorage.setAccessToken(accessToken);
   return accessToken;
 }
@@ -38,7 +45,10 @@ http.interceptors.request.use((config) => {
 });
 
 http.interceptors.response.use(
-  (response) => response,
+  (response: AxiosResponse) => {
+    response.data = unwrapApiResponse(response.data);
+    return response;
+  },
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryableRequest | undefined;
 

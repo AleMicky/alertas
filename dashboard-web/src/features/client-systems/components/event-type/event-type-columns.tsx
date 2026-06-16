@@ -4,7 +4,7 @@ import { ArrowUpDown, Edit } from 'lucide-react';
 import { ColumnDef } from '@tanstack/react-table';
 
 import { Button } from '@/components/ui/button';
-import { ConfirmDeleteDialog } from '@/shared/components';
+import { ConfirmDeleteDialog, StatusBadge } from '@/shared/components';
 
 import { EventType } from '@/features/client-systems/types/event-type.types';
 
@@ -35,9 +35,14 @@ export function createEventTypeColumns({
       header: 'Nombre',
     },
     {
-      accessorFn: (row) => row.severityLevel?.name ?? '-',
-      id: 'severity',
-      header: 'Severidad',
+      accessorKey: 'description',
+      header: 'Descripción',
+      cell: ({ row }) => row.original.description || '—',
+    },
+    {
+      accessorKey: 'active',
+      header: 'Estado',
+      cell: ({ row }) => <StatusBadge active={row.original.active} />,
     },
     {
       id: 'actions',

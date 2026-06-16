@@ -4,7 +4,6 @@ export const createClientSystemSchema = z.object({
     code: z.string().min(2, 'Código requerido'),
     name: z.string().min(2, 'Nombre requerido'),
     description: z.string().optional(),
-    active: z.boolean(),
 });
 
 export const updateClientSystemSchema = createClientSystemSchema.partial();
@@ -14,5 +13,4 @@ export const defaultCreateClientSystem: CreateClientSystemDto = {
     code: '',
     name: '',
     description: '',
-    active: true,
 };

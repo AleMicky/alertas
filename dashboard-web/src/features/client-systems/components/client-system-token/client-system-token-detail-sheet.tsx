@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Copy, KeyRound, Pencil, ShieldOff } from 'lucide-react';
+import { Copy, KeyRound, ShieldOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Badge } from '@/components/ui/badge';
@@ -28,7 +28,6 @@ interface Props {
   clientSystem?: ClientSystem;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit: (token: ClientSystemToken) => void;
   onRevoke: (tokenId: string) => void;
   isRevoking?: boolean;
 }
@@ -55,7 +54,6 @@ export function ClientSystemTokenDetailSheet({
   clientSystem,
   open,
   onOpenChange,
-  onEdit,
   onRevoke,
   isRevoking = false,
 }: Props) {
@@ -112,8 +110,8 @@ export function ClientSystemTokenDetailSheet({
                   <Badge variant="destructive">Expirado</Badge>
                 ) : null}
               </div>
-              <SheetTitle className="text-left text-xl">
-                {token.description || 'Token sin descripción'}
+              <SheetTitle className="text-left font-mono text-xl">
+                {token.token}
               </SheetTitle>
               <SheetDescription className="text-left">
                 El valor completo solo se muestra al generarlo. Usa la referencia
@@ -152,10 +150,6 @@ export function ClientSystemTokenDetailSheet({
                   {formatTokenDate(token.expiresAt)}
                 </DetailRow>
 
-                <DetailRow label="Último uso">
-                  {formatTokenDate(token.lastUsedAt)}
-                </DetailRow>
-
                 <DetailRow label="Creado">
                   {formatTokenDate(token.createdAt)}
                 </DetailRow>
@@ -163,6 +157,12 @@ export function ClientSystemTokenDetailSheet({
                 <DetailRow label="Actualizado">
                   {formatTokenDate(token.updatedAt)}
                 </DetailRow>
+
+                {token.createdBy ? (
+                  <DetailRow label="Creado por">
+                    {token.createdBy}
+                  </DetailRow>
+                ) : null}
               </dl>
 
               <Separator />
@@ -185,32 +185,24 @@ export function ClientSystemTokenDetailSheet({
                 </Button>
               </div>
 
-              <Separator />
+              {token.active ? (
+                <>
+                  <Separator />
 
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="gap-2"
-                  onClick={() => onEdit(token)}
-                >
-                  <Pencil className="size-4" aria-hidden />
-                  Editar
-                </Button>
-
-                {token.active ? (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    className="gap-2"
-                    disabled={isRevoking}
-                    onClick={() => onRevoke(token.id)}
-                  >
-                    <ShieldOff className="size-4" aria-hidden />
-                    {isRevoking ? 'Revocando…' : 'Revocar token'}
-                  </Button>
-                ) : null}
-              </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      className="gap-2"
+                      disabled={isRevoking}
+                      onClick={() => onRevoke(token.id)}
+                    >
+                      <ShieldOff className="size-4" aria-hidden />
+                      {isRevoking ? 'Revocando…' : 'Revocar token'}
+                    </Button>
+                  </div>
+                </>
+              ) : null}
             </div>
           </>
         ) : null}

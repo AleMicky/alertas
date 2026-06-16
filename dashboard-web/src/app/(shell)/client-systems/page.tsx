@@ -1,15 +1,15 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
+import { ClientSystemDetailPanel } from '@/features/client-systems/components/client-system/client-system-detail-panel';
 import { ClientSystemFormDialog } from '@/features/client-systems/components/client-system/client-system-form-dialog';
 import { ClientSystemsLoading } from '@/features/client-systems/components/client-system/client-systems-loading';
 import { ClientSystemsMetrics } from '@/features/client-systems/components/client-system/client-systems-metrics';
-import { ClientSystemsTable } from '@/features/client-systems/components/client-system/client-system-table';
+import { ClientSystemsList } from '@/features/client-systems/components/client-system/client-system-list';
 import { useClientSystemsMutations } from '@/features/client-systems/hooks/client-system/use-client-system-mutations';
 import { useClientSystemsQuery } from '@/features/client-systems/hooks/client-system/use-client-system-query';
 import { CreateClientSystemDto } from '@/features/client-systems/schemas/client-system.schema';
@@ -17,9 +17,9 @@ import { ClientSystem } from '@/features/client-systems/types/client-system.type
 import { PageHeader } from '@/shared/components';
 
 export default function ClientSystemsPage() {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<ClientSystem | null>(null);
+  const [detailSystem, setDetailSystem] = useState<ClientSystem | null>(null);
 
   const { data: clientSystems, isLoading } = useClientSystemsQuery();
 
@@ -34,6 +34,21 @@ export default function ClientSystemsPage() {
   const isSubmitting = isCreating || isUpdating;
 
   const systems = useMemo(() => clientSystems ?? [], [clientSystems]);
+
+  useEffect(() => {
+    if (systems.length === 0) {
+      setDetailSystem(null);
+      return;
+    }
+
+    setDetailSystem((current) => {
+      if (current && systems.some((item) => item.id === current.id)) {
+        return systems.find((item) => item.id === current.id) ?? current;
+      }
+
+      return systems[0];
+    });
+  }, [systems]);
 
   const handleCreate = () => {
     setSelected(null);
@@ -66,8 +81,18 @@ export default function ClientSystemsPage() {
     });
   };
 
+  const handleDelete = (id: string) => {
+    remove(id, {
+      onSuccess: () => {
+        if (detailSystem?.id === id) {
+          setDetailSystem(null);
+        }
+      },
+    });
+  };
+
   return (
-    <main className="space-y-6">
+    <main className="space-y-4">
       <PageHeader
         title="Sistemas cliente"
         description="Orígenes conectados que emiten eventos hacia la plataforma de alertas."
@@ -85,16 +110,25 @@ export default function ClientSystemsPage() {
         <>
           <ClientSystemsMetrics data={systems} />
 
-          <ClientSystemsTable
-            data={systems}
-            onManage={(item) => router.push(`/client-systems/${item.id}`)}
-            onEdit={(item) => {
-              setSelected(item);
-              setOpen(true);
-            }}
-            onDelete={(id) => remove(id)}
-            onCreate={handleCreate}
-          />
+          <div className="grid items-start gap-4 xl:grid-cols-5">
+            <div className="xl:col-span-2">
+              <ClientSystemsList
+                data={systems}
+                selectedId={detailSystem?.id}
+                onSelect={setDetailSystem}
+                onEdit={(item) => {
+                  setSelected(item);
+                  setOpen(true);
+                }}
+                onDelete={handleDelete}
+                onCreate={handleCreate}
+              />
+            </div>
+
+            <div className="xl:col-span-3">
+              <ClientSystemDetailPanel clientSystem={detailSystem} />
+            </div>
+          </div>
         </>
       )}
 

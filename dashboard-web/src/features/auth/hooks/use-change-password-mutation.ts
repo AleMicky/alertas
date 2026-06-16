@@ -1,10 +1,10 @@
 'use client';
 
-import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
+import { getApiErrorMessage } from '@/lib/api-response';
 import { authStorage } from '../auth-storage';
 import { authService } from '../auth.service';
 import type { ChangePasswordDto } from '../auth.schema';
@@ -21,15 +21,9 @@ export function useChangePasswordMutation() {
       router.replace('/login');
     },
     onError: (error: unknown) => {
-      if (axios.isAxiosError(error)) {
-        const message = error.response?.data?.message;
-        if (typeof message === 'string') {
-          toast.error(message);
-          return;
-        }
-      }
-
-      toast.error('No se pudo actualizar la contraseña');
+      toast.error(
+        getApiErrorMessage(error, 'No se pudo actualizar la contraseña'),
+      );
     },
   });
 

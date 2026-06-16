@@ -1,15 +1,11 @@
-import { ClientSystem } from "./client-system.types";
+import { BaseAuditableEntity } from '@/shared/core/base-auditable.type';
 
-export interface ClientSystemToken {
+export interface ClientSystemToken extends BaseAuditableEntity {
     id: string;
-    clientSystem: ClientSystem;
+    clientSystemId: string;
     token: string;
-    description?: string;
     expiresAt?: string | null;
-    lastUsedAt?: string | null;
     active: boolean;
-    createdAt?: string;
-    updatedAt?: string;
 }
 
 export interface GenerateClientSystemTokenResponse {

@@ -7,104 +7,70 @@ import { FieldGroup } from '@/components/ui/field';
 import { FormDialogLayout } from '@/shared/components/form-dialog-layout';
 import {
   FormSubmitButtons,
-  SwitchFormField,
   TanStackForm,
   TextFormField,
-  TextareaFormField,
 } from '@/shared/components/form';
 
 import {
-  CreateClientSystemTokenDto,
-  createClientSystemTokenSchema,
-  defaultCreateClientSystemToken,
+  GenerateClientSystemTokenDto,
+  defaultGenerateClientSystemToken,
+  generateClientSystemTokenSchema,
 } from '@/features/client-systems/schemas/client-system-token.schema';
-import { ClientSystemToken } from '@/features/client-systems/types/client-system-token.types';
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialData: ClientSystemToken | null;
-  clientSystemId: string;
   isSubmitting: boolean;
-  onSubmit: (values: CreateClientSystemTokenDto) => void;
+  onSubmit: (values: GenerateClientSystemTokenDto) => void;
 }
 
 export function ClientSystemTokenFormDialog({
   open,
   onOpenChange,
-  initialData,
-  clientSystemId,
   isSubmitting,
   onSubmit,
 }: Props) {
   const form = useForm({
-    defaultValues: defaultCreateClientSystemToken,
+    defaultValues: defaultGenerateClientSystemToken,
     validators: {
-      onSubmit: createClientSystemTokenSchema,
+      onSubmit: generateClientSystemTokenSchema,
     },
     onSubmit: async ({ value }) =>
       onSubmit({
-        ...value,
         expiresAt: value.expiresAt || undefined,
       }),
   });
 
   useEffect(() => {
-    form.reset({
-      clientSystemId,
-      description: initialData?.description ?? '',
-      expiresAt: initialData?.expiresAt ?? '',
-      active: initialData?.active ?? true,
-    });
-  }, [clientSystemId, form, initialData, open]);
+    if (open) {
+      form.reset(defaultGenerateClientSystemToken);
+    }
+  }, [form, open]);
 
   return (
     <FormDialogLayout
       open={open}
       onOpenChange={onOpenChange}
-      title={initialData ? 'Editar token' : 'Generar token'}
+      title="Generar token"
     >
       <TanStackForm form={form}>
         <FieldGroup>
-          <form.Field name="description">
-            {(field) => (
-              <TextareaFormField
-                field={field}
-                label="Descripción"
-                placeholder="Uso del token"
-                disabled={isSubmitting}
-              />
-            )}
-          </form.Field>
-
           <form.Field name="expiresAt">
             {(field) => (
               <TextFormField
                 field={field}
                 label="Expira en"
-                type="datetime-local"
+                type="date"
                 disabled={isSubmitting}
               />
             )}
           </form.Field>
-
-          {initialData ? (
-            <form.Field name="active">
-              {(field) => (
-                <SwitchFormField
-                  field={field}
-                  label="Activo"
-                  disabled={isSubmitting}
-                />
-              )}
-            </form.Field>
-          ) : null}
         </FieldGroup>
 
         <FormSubmitButtons
           isSubmitting={isSubmitting}
-          submitText={initialData ? 'Actualizar' : 'Generar'}
-          submittingText={initialData ? 'Actualizando...' : 'Generando...'}
+          submitText="Generar"
+          submittingText="Generando..."
           onReset={() => form.reset()}
         />
       </TanStackForm>

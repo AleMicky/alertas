@@ -7,7 +7,6 @@ import { FieldGroup } from '@/components/ui/field';
 import { FormDialogLayout } from '@/shared/components/form-dialog-layout';
 import {
   FormSubmitButtons,
-  SwitchFormField,
   TanStackForm,
   TextareaFormField,
   TextFormField,
@@ -51,7 +50,6 @@ export function ClientSystemFormDialog({
       code: initialData?.code ?? '',
       name: initialData?.name ?? '',
       description: initialData?.description ?? '',
-      active: initialData?.active ?? true,
     });
   }, [initialData, open]);
 
@@ -93,16 +91,6 @@ export function ClientSystemFormDialog({
                 field={field}
                 label="Descripción"
                 placeholder="Descripción opcional"
-                disabled={isSubmitting}
-              />
-            )}
-          </form.Field>
-
-          <form.Field name="active">
-            {(field) => (
-              <SwitchFormField
-                field={field}
-                label="Activo"
                 disabled={isSubmitting}
               />
             )}

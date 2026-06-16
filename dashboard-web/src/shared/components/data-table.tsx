@@ -29,6 +29,9 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   searchColumn?: string;
   searchPlaceholder?: string;
+  selectedRowId?: string;
+  onRowClick?: (row: TData) => void;
+  getRowId?: (row: TData) => string;
 }
 
 export function DataTable<TData, TValue>({
@@ -36,6 +39,9 @@ export function DataTable<TData, TValue>({
   data,
   searchColumn,
   searchPlaceholder = 'Buscar...',
+  selectedRowId,
+  onRowClick,
+  getRowId,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -98,8 +104,17 @@ export function DataTable<TData, TValue>({
 
           <TableBody>
             {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+              table.getRowModel().rows.map((row) => {
+                const rowId = getRowId?.(row.original);
+                const isSelected = rowId !== undefined && rowId === selectedRowId;
+
+                return (
+                <TableRow
+                  key={row.id}
+                  data-state={isSelected ? 'selected' : undefined}
+                  className={onRowClick ? 'cursor-pointer' : undefined}
+                  onClick={() => onRowClick?.(row.original)}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
@@ -109,7 +124,8 @@ export function DataTable<TData, TValue>({
                     </TableCell>
                   ))}
                 </TableRow>
-              ))
+              );
+              })
             ) : (
               <TableRow>
                 <TableCell

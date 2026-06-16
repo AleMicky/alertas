@@ -4,6 +4,10 @@ import { useState } from 'react';
 
 import { useEventTypeMutations } from '@/features/client-systems/hooks/event-type/use-event-type-mutations';
 import { useEventTypesByClientSystem } from '@/features/client-systems/hooks/event-type/use-event-types-by-client-system';
+import {
+  CreateEventTypeDto,
+  UpdateEventTypeDto,
+} from '@/features/client-systems/schemas/event-type.shcema';
 import { EventType } from '@/features/client-systems/types/event-type.types';
 import { EventTypeFormDialog } from './event-type-form-dialog';
 import { EventTypeTable } from './event-type-table';
@@ -52,7 +56,7 @@ export function EventTypeTabContent({ clientSystemId }: Props) {
             update(
               {
                 id: selected.id,
-                data: values,
+                data: values as UpdateEventTypeDto,
               },
               {
                 onSuccess: () => {
@@ -64,7 +68,7 @@ export function EventTypeTabContent({ clientSystemId }: Props) {
             return;
           }
 
-          create(values, {
+          create(values as CreateEventTypeDto, {
             onSuccess: () => {
               setSelected(null);
               setDialogOpen(false);

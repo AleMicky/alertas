@@ -15,7 +15,6 @@ interface Props {
   isLoading: boolean;
   onCreate: () => void;
   onView: (item: ClientSystemToken) => void;
-  onEdit: (item: ClientSystemToken) => void;
   onDelete: (id: string) => void;
 }
 
@@ -24,12 +23,10 @@ export function ClientSystemTokenTable({
   isLoading,
   onCreate,
   onView,
-  onEdit,
   onDelete,
 }: Props) {
   const columns = createClientSystemTokenColumns({
     onView,
-    onEdit,
     onDelete,
   });
 
@@ -74,8 +71,8 @@ export function ClientSystemTokenTable({
           <DataTable
             columns={columns}
             data={data}
-            searchColumn="description"
-            searchPlaceholder="Buscar por descripción..."
+            searchColumn="token"
+            searchPlaceholder="Buscar por referencia..."
           />
         )}
       </CardContent>

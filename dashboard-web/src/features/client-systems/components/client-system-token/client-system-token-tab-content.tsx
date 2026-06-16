@@ -30,24 +30,10 @@ export function ClientSystemTokenTabContent({
   const { data: tokens = [], isLoading } = useClientSystemTokensByClientSystem(clientSystemId);
   const {
     generate,
-    update,
-    remove,
     revoke,
     isGenerating,
-    isUpdating,
     isRevoking,
   } = useClientSystemTokenMutations();
-
-  const closeDialogs = () => {
-    setSelected(null);
-    setDialogOpen(false);
-  };
-
-  const handleEditFromDetail = (token: ClientSystemToken) => {
-    setDetailOpen(false);
-    setSelected(token);
-    setDialogOpen(true);
-  };
 
   const handleRevoke = (tokenId: string) => {
     revoke(tokenId, {
@@ -63,54 +49,29 @@ export function ClientSystemTokenTabContent({
       <ClientSystemTokenTable
         data={tokens}
         isLoading={isLoading}
-        onCreate={() => {
-          setSelected(null);
-          setDialogOpen(true);
-        }}
+        onCreate={() => setDialogOpen(true)}
         onView={(item) => {
           setSelected(item);
           setDetailOpen(true);
         }}
-        onEdit={(item) => {
-          setSelected(item);
-          setDialogOpen(true);
-        }}
-        onDelete={(id) => remove(id)}
+        onDelete={(id) => revoke(id)}
       />
 
       <ClientSystemTokenFormDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        initialData={selected}
-        clientSystemId={clientSystemId}
-        isSubmitting={isGenerating || isUpdating}
+        isSubmitting={isGenerating}
         onSubmit={(values) => {
-          if (selected) {
-            update(
-              {
-                id: selected.id,
-                data: values,
-              },
-              {
-                onSuccess: closeDialogs,
-              },
-            );
-            return;
-          }
-
           generate(
             {
               clientSystemId,
-              data: {
-                description: values.description,
-                expiresAt: values.expiresAt,
-              },
+              data: values,
             },
             {
               onSuccess: (response) => {
                 setPlainToken(response.token);
                 setCreatedDialogOpen(true);
-                closeDialogs();
+                setDialogOpen(false);
               },
             },
           );
@@ -128,7 +89,6 @@ export function ClientSystemTokenTabContent({
         clientSystem={clientSystem}
         open={detailOpen}
         onOpenChange={setDetailOpen}
-        onEdit={handleEditFromDetail}
         onRevoke={handleRevoke}
         isRevoking={isRevoking}
       />

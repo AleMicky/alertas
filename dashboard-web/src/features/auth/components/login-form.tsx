@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Loader2, Lock, User } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -12,6 +12,7 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { TanStackForm } from '@/shared/components/form';
 import { FormFieldError } from '@/shared/components/form/form-field-error';
+import { getApiErrorMessage } from '@/lib/api-response';
 import { useAuth } from '@/providers/auth-provider';
 import {
   defaultLoginValues,
@@ -20,11 +21,18 @@ import {
 } from '../auth.schema';
 
 export function LoginForm() {
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
 
   const redirectTo = searchParams.get('from');
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace(redirectTo && redirectTo !== '/login' ? redirectTo : '/');
+    }
+  }, [isAuthenticated, isLoading, redirectTo, router]);
 
   const form = useForm({
     defaultValues: defaultLoginValues,
@@ -36,8 +44,13 @@ export function LoginForm() {
         await login(value as LoginDto, {
           redirectTo: redirectTo && redirectTo !== '/login' ? redirectTo : '/',
         });
-      } catch {
-        toast.error('Credenciales inválidas. Verifica tu usuario y contraseña.');
+      } catch (error) {
+        toast.error(
+          getApiErrorMessage(
+            error,
+            'Credenciales inválidas. Verifica tu usuario y contraseña.',
+          ),
+        );
       }
     },
   });
@@ -45,6 +58,14 @@ export function LoginForm() {
   useEffect(() => {
     form.reset(defaultLoginValues);
   }, []);
+
+  if (isLoading || isAuthenticated) {
+    return (
+      <div className="flex h-48 w-full max-w-sm items-center justify-center rounded-xl border border-border/60 bg-card/80 text-sm text-muted-foreground">
+        {isAuthenticated ? 'Redirigiendo...' : 'Cargando...'}
+      </div>
+    );
+  }
 
   return (
     <Card className="w-full max-w-sm border-border/60 bg-card/80 shadow-xl shadow-primary/5 backdrop-blur-sm">

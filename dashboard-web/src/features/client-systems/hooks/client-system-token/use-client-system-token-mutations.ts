@@ -4,29 +4,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { QUERY_KEYS } from '@/shared/constants/query-keys';
-import { useBaseEntityMutations } from '@/shared/core/hooks/use-base-entity-mutations';
 
-import {
-    CreateClientSystemTokenDto,
-    UpdateClientSystemTokenDto,
-} from '../../schemas/client-system-token.schema';
+import { GenerateClientSystemTokenDto } from '../../schemas/client-system-token.schema';
 import { clientSystemTokenService } from '../../services/client-system-token.service';
-import {
-    ClientSystemToken,
-    GenerateClientSystemTokenResponse,
-} from '../../types/client-system-token.types';
+import { GenerateClientSystemTokenResponse } from '../../types/client-system-token.types';
 
 export function useClientSystemTokenMutations() {
     const queryClient = useQueryClient();
-
-    const baseMutations = useBaseEntityMutations<
-        ClientSystemToken,
-        CreateClientSystemTokenDto,
-        UpdateClientSystemTokenDto
-    >(clientSystemTokenService, {
-        queryKey: QUERY_KEYS.clientSystemTokens,
-        entityName: 'Token de sistema cliente',
-    });
 
     const generateMutation = useMutation({
         mutationFn: ({
@@ -34,7 +18,7 @@ export function useClientSystemTokenMutations() {
             data,
         }: {
             clientSystemId: string;
-            data: Pick<CreateClientSystemTokenDto, 'description' | 'expiresAt'>;
+            data: GenerateClientSystemTokenDto;
         }) => clientSystemTokenService.generate(clientSystemId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({
@@ -61,7 +45,6 @@ export function useClientSystemTokenMutations() {
     });
 
     return {
-        ...baseMutations,
         generate: generateMutation.mutate,
         generateAsync: generateMutation.mutateAsync,
         isGenerating: generateMutation.isPending,

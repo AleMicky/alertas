@@ -7,8 +7,6 @@ import { FieldGroup } from '@/components/ui/field';
 import { FormDialogLayout } from '@/shared/components/form-dialog-layout';
 import {
   FormSubmitButtons,
-  SelectFormField,
-  SwitchFormField,
   TanStackForm,
   TextFormField,
   TextareaFormField,
@@ -16,11 +14,11 @@ import {
 
 import {
   CreateEventTypeDto,
+  UpdateEventTypeDto,
   createEventTypeSchema,
   defaultCreateEventType,
 } from '@/features/client-systems/schemas/event-type.shcema';
 import { EventType } from '@/features/client-systems/types/event-type.types';
-import { useSeverityLevelsQuery } from '@/features/severity-levels/hooks/use-severity-levels-query';
 
 interface Props {
   open: boolean;
@@ -28,7 +26,7 @@ interface Props {
   initialData: EventType | null;
   clientSystemId: string;
   isSubmitting: boolean;
-  onSubmit: (values: CreateEventTypeDto) => void;
+  onSubmit: (values: CreateEventTypeDto | UpdateEventTypeDto) => void;
 }
 
 export function EventTypeFormDialog({
@@ -39,28 +37,28 @@ export function EventTypeFormDialog({
   isSubmitting,
   onSubmit,
 }: Props) {
-  const { data: severityLevels } = useSeverityLevelsQuery();
-  const severityOptions = severityLevels.map((level) => ({
-    label: `${level.code} - ${level.name}`,
-    value: level.id,
-  }));
-
   const form = useForm({
     defaultValues: defaultCreateEventType,
     validators: {
       onSubmit: createEventTypeSchema,
     },
-    onSubmit: async ({ value }) => onSubmit(value),
+    onSubmit: async ({ value }) => {
+      if (initialData) {
+        const { clientSystemId: _clientSystemId, ...updateData } = value;
+        onSubmit(updateData);
+        return;
+      }
+
+      onSubmit(value);
+    },
   });
 
   useEffect(() => {
     form.reset({
       clientSystemId,
-      severityLevelId: initialData?.severityLevel?.id ?? '',
       code: initialData?.code ?? '',
       name: initialData?.name ?? '',
       description: initialData?.description ?? '',
-      active: initialData?.active ?? true,
     });
   }, [clientSystemId, form, initialData, open]);
 
@@ -94,34 +92,12 @@ export function EventTypeFormDialog({
             )}
           </form.Field>
 
-          <form.Field name="severityLevelId">
-            {(field) => (
-              <SelectFormField
-                field={field}
-                label="Severidad"
-                options={severityOptions}
-                placeholder="Seleccionar severidad"
-                disabled={isSubmitting}
-              />
-            )}
-          </form.Field>
-
           <form.Field name="description">
             {(field) => (
               <TextareaFormField
                 field={field}
                 label="Descripción"
                 placeholder="Descripción opcional"
-                disabled={isSubmitting}
-              />
-            )}
-          </form.Field>
-
-          <form.Field name="active">
-            {(field) => (
-              <SwitchFormField
-                field={field}
-                label="Activo"
                 disabled={isSubmitting}
               />
             )}

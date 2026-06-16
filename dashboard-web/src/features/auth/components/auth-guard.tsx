@@ -27,7 +27,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   if (!isAuthenticated) {
-    return null;
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">
+        Redirigiendo al inicio de sesión...
+      </div>
+    );
   }
 
   return <>{children}</>;

@@ -1,48 +1,44 @@
-import { baseService } from '@/shared/core/base.service';
 import { http } from '@/lib/http';
+import { unwrapApiResponse } from '@/lib/api-response';
 
 import {
     ClientSystemToken,
     GenerateClientSystemTokenResponse,
 } from '../types/client-system-token.types';
-import {
-    CreateClientSystemTokenDto,
-    UpdateClientSystemTokenDto,
-} from '../schemas/client-system-token.schema';
+import { GenerateClientSystemTokenDto } from '../schemas/client-system-token.schema';
 
-const endpoint = '/client-system-tokens';
+const endpoint = '/client-systems';
 
 export const clientSystemTokenService = {
-    ...baseService<
-        ClientSystemToken,
-        CreateClientSystemTokenDto,
-        UpdateClientSystemTokenDto
-    >(endpoint),
-
-    findByClientSystemId: async (clientSystemId: string): Promise<ClientSystemToken[]> => {
-        const { data } = await http.get<ClientSystemToken[]>(
-            `${endpoint}/client-system/${clientSystemId}`,
-        );
-
-        return data;
-    },
+    findByClientSystemId: async (
+        clientSystemId: string,
+    ): Promise<ClientSystemToken[]> =>
+        unwrapApiResponse<ClientSystemToken[]>(
+            (
+                await http.get(
+                    `${endpoint}/${clientSystemId}/tokens`,
+                )
+            ).data,
+        ),
 
     generate: async (
         clientSystemId: string,
-        payload: Pick<CreateClientSystemTokenDto, 'description' | 'expiresAt'>,
-    ): Promise<GenerateClientSystemTokenResponse> => {
-        const { data } = await http.post<GenerateClientSystemTokenResponse>(
-            `${endpoint}/client-system/${clientSystemId}/generate`,
-            {
-                description: payload.description || undefined,
-                expiresAt: payload.expiresAt || undefined,
-            },
-        );
-
-        return data;
-    },
+        payload: GenerateClientSystemTokenDto,
+    ): Promise<GenerateClientSystemTokenResponse> =>
+        unwrapApiResponse<GenerateClientSystemTokenResponse>(
+            (
+                await http.post(
+                    `${endpoint}/${clientSystemId}/generate-token`,
+                    {
+                        expiresAt: payload.expiresAt || undefined,
+                    },
+                )
+            ).data,
+        ),
 
     revoke: async (tokenId: string): Promise<void> => {
-        await http.delete(`${endpoint}/${tokenId}/revoke`);
+        unwrapApiResponse<void>(
+            (await http.delete(`${endpoint}/${tokenId}/revoke`)).data,
+        );
     },
 };

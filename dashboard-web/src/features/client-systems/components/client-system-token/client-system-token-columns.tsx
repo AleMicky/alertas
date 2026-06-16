@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye, Edit } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { ColumnDef } from '@tanstack/react-table';
 
 import { Badge } from '@/components/ui/badge';
@@ -16,21 +16,14 @@ import {
 
 interface CreateColumnsProps {
   onView: (item: ClientSystemToken) => void;
-  onEdit: (item: ClientSystemToken) => void;
   onDelete: (id: string) => void;
 }
 
 export function createClientSystemTokenColumns({
   onView,
-  onEdit,
   onDelete,
 }: CreateColumnsProps): ColumnDef<ClientSystemToken>[] {
   return [
-    {
-      accessorKey: 'description',
-      header: 'Descripción',
-      cell: ({ row }) => row.original.description || 'Sin descripción',
-    },
     {
       accessorKey: 'token',
       header: 'Referencia',
@@ -79,18 +72,9 @@ export function createClientSystemTokenColumns({
             Detalle
           </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onEdit(row.original)}
-          >
-            <Edit className="mr-1 h-4 w-4" />
-            Editar
-          </Button>
-
           <ConfirmDeleteDialog
-            title="¿Eliminar token?"
-            description="Esta acción eliminará el registro del token."
+            title="¿Revocar token?"
+            description="El token dejará de ser válido para autenticación."
             onConfirm={() => onDelete(row.original.id)}
           />
         </div>
