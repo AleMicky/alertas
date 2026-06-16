@@ -25,6 +25,20 @@ export function isApiResponse(value: unknown): value is ApiResponse {
   );
 }
 
+export function isApiErrorResponse(value: unknown): value is ApiResponse {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const candidate = value as ApiResponse;
+
+  return (
+    candidate.success === false &&
+    typeof candidate.message === 'string' &&
+    typeof candidate.timestamp === 'string'
+  );
+}
+
 export function unwrapApiResponse<T>(payload: unknown): T {
   if (isApiResponse(payload)) {
     return payload.data as T;
@@ -58,6 +72,10 @@ export function getApiErrorMessage(
   }
 
   const data = error.response?.data;
+
+  if (isApiErrorResponse(data)) {
+    return formatApiErrors(data.errors) ?? data.message;
+  }
 
   if (isApiResponse(data) && !data.success) {
     return formatApiErrors(data.errors) ?? data.message;

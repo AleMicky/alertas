@@ -3,6 +3,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import { getApiErrorMessage } from '@/lib/api-response';
+
 interface MutationService<T, TCreate, TUpdate> {
     create(data: TCreate): Promise<T>;
     update(id: string, data: TUpdate): Promise<T>;
@@ -38,6 +40,14 @@ export function useBaseEntityMutations<
                 `${options.entityName} creado correctamente`,
             );
         },
+        onError: (error: unknown) => {
+            toast.error(
+                getApiErrorMessage(
+                    error,
+                    `No se pudo crear ${options.entityName.toLowerCase()}`,
+                ),
+            );
+        },
     });
 
     const updateMutation = useMutation({
@@ -53,6 +63,14 @@ export function useBaseEntityMutations<
                 `${options.entityName} actualizado correctamente`,
             );
         },
+        onError: (error: unknown) => {
+            toast.error(
+                getApiErrorMessage(
+                    error,
+                    `No se pudo actualizar ${options.entityName.toLowerCase()}`,
+                ),
+            );
+        },
     });
 
     const deleteMutation = useMutation({
@@ -63,6 +81,14 @@ export function useBaseEntityMutations<
             });
             toast.success(
                 `${options.entityName} eliminado correctamente`,
+            );
+        },
+        onError: (error: unknown) => {
+            toast.error(
+                getApiErrorMessage(
+                    error,
+                    `No se pudo eliminar ${options.entityName.toLowerCase()}`,
+                ),
             );
         },
     });

@@ -61,9 +61,7 @@ export class TokenGeneratorService {
       throw new BadRequestException('Token ya ha sido revocado');
     }
 
-    await this.clientSystemTokenRepository.update(tokenId, {
-      active: false,
-    });
+    await this.clientSystemTokenRepository.delete(tokenId);
   }
 
   async validateToken(plainToken: string) {

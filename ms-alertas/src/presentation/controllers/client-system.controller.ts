@@ -49,4 +49,9 @@ export class ClientSystemController extends BaseController<
   revokeToken(@Param('tokenId') tokenId: string) {
     return this.clientSystemTokenService.revokeToken(tokenId);
   }
+
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.clientSystemService.deleteFromToken(id);
+  }
 }
