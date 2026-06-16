@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
-import { NotificationChannelFormDialog } from '@/features/notification-channels/components/notification-channel-form-dialog';
-import { NotificationChannelsTable } from '@/features/notification-channels/components/notification-channel.table';
+import { NotificationChannelFormSheet } from '@/features/notification-channels/components/notification-channel-form-sheet';
+import { NotificationChannelsTable } from '@/features/notification-channels/components/notification-channel-table';
 import { useNotificationChannelsMutations } from '@/features/notification-channels/hooks/use-notification-channel-mutations';
 import { useNotificationChannelsQuery } from '@/features/notification-channels/hooks/use-notification-channel-query';
 import { CreateNotificationChannelDto } from '@/features/notification-channels/notification-channel.schema';
@@ -27,6 +28,7 @@ export default function NotificationChannelsPage() {
   } = useNotificationChannelsMutations();
 
   const isSubmitting = isCreating || isUpdating;
+  const channels = useMemo(() => notificationChannels ?? [], [notificationChannels]);
 
   const handleCreate = () => {
     setSelected(null);
@@ -35,10 +37,12 @@ export default function NotificationChannelsPage() {
 
   const handleSubmit = (values: CreateNotificationChannelDto) => {
     if (selected) {
+      const { code: _code, ...data } = values;
+
       update(
         {
           id: selected.id,
-          data: values,
+          data,
         },
         {
           onSuccess: () => {
@@ -60,13 +64,14 @@ export default function NotificationChannelsPage() {
   };
 
   return (
-    <main className="p-6 space-y-4">
+    <main className="space-y-4">
       <PageHeader
         title="Canales de notificación"
-        description="Configura dónde se envían las alertas."
+        description="Configura los destinos webhook donde se envían las alertas."
         action={
-          <Button onClick={handleCreate}>
-            Nuevo
+          <Button onClick={handleCreate} className="gap-2">
+            <Plus className="size-4" />
+            Nuevo canal
           </Button>
         }
       />
@@ -75,7 +80,7 @@ export default function NotificationChannelsPage() {
         <LoadingTable />
       ) : (
         <NotificationChannelsTable
-          data={notificationChannels}
+          data={channels}
           onEdit={(item) => {
             setSelected(item);
             setOpen(true);
@@ -84,7 +89,7 @@ export default function NotificationChannelsPage() {
         />
       )}
 
-      <NotificationChannelFormDialog
+      <NotificationChannelFormSheet
         open={open}
         onOpenChange={setOpen}
         initialData={selected}

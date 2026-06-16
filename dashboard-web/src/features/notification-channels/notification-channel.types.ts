@@ -1,17 +1,9 @@
-export enum NotificationChannelType {
-    EMAIL = 'EMAIL',
-    WHATSAPP = 'WHATSAPP',
-    TELEGRAM = 'TELEGRAM',
-    TEAMS = 'TEAMS',
-    GOOGLE_CALENDAR = 'GOOGLE_CALENDAR',
-}
+import { BaseAuditableEntity } from '@/shared/core/base-auditable.type';
 
-export interface NotificationChannel {
+export interface NotificationChannel extends BaseAuditableEntity {
     id: string;
     code: string;
     name: string;
-    type: NotificationChannelType;
     webhookUrl: string;
     description?: string;
-    active: boolean;
 }

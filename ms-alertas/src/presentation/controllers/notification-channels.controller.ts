@@ -6,8 +6,7 @@ import { NotificationChannel } from 'src/domain/entities/notification-channel';
 import { RoleCode } from 'src/domain/enums';
 import { NotificationChannelsService } from 'src/app/services/notification-channels.service';
 import { Roles } from 'src/infrastructure/security';
-import { NotificationChannelResponseSchema } from '../schemas';
-import { CreateNotificationChannelDto, UpdateNotificationChannelDto } from '../dto/notification-channel';
+ import { CreateNotificationChannelDto, UpdateNotificationChannelDto, NotificationChannelResponseDto } from '../dto/notification-channel';
 
 @ApiBearerAuth('jwt')
 @Roles(RoleCode.ADMIN, RoleCode.OPERADOR)
@@ -16,7 +15,7 @@ import { CreateNotificationChannelDto, UpdateNotificationChannelDto } from '../d
   tag: 'Canales de notificación',
   createDto: CreateNotificationChannelDto,
   updateDto: UpdateNotificationChannelDto,
-  responseDto: NotificationChannelResponseSchema,
+  responseDto: NotificationChannelResponseDto,
 })
 export class NotificationChannelsController extends BaseController<
   NotificationChannel,
