@@ -1,0 +1,20 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
+import { ErrorCode } from './error-codes';
+
+export class BusinessException extends HttpException {
+    constructor(
+        message: string,
+        public readonly errorCode: ErrorCode,
+        status: HttpStatus = HttpStatus.BAD_REQUEST,
+        public readonly errors?: unknown,
+    ) {
+        super(
+            {
+                message,
+                errorCode,
+                errors,
+            },
+            status,
+        );
+    }
+}

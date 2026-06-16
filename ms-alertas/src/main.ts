@@ -2,10 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { swaggerSetup } from './config/swagger/swagger-setup';
+import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
+import { ResponseInterceptor } from './shared/interceptors/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new ResponseInterceptor());
   app.enableCors({
     origin: process.env.ALLOWED_ORIGINS?.split(','),
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
