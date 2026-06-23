@@ -14,9 +14,6 @@ export class AlertResponseSchema extends BaseAuditSchema {
   eventId: string;
 
   @ApiProperty({ format: 'uuid', example: SWAGGER_UUID_2 })
-  alertRuleId: string;
-
-  @ApiProperty({ format: 'uuid', example: SWAGGER_UUID_2 })
   severityLevelId: string;
 
   @ApiProperty({ example: 'Pago rechazado - orden ORD-99' })

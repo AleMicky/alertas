@@ -20,10 +20,6 @@ export class CreateAlertDto {
 
   @ApiProperty({ type: String, format: 'uuid', example: SWAGGER_UUID_2 })
   @IsUUID()
-  alertRuleId: string;
-
-  @ApiProperty({ type: String, format: 'uuid', example: SWAGGER_UUID_2 })
-  @IsUUID()
   severityLevelId: string;
 
   @ApiProperty({ type: String, example: 'Pago rechazado - orden ORD-99' })

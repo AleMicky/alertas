@@ -6,7 +6,6 @@ import {
   Monitor,
   Radio,
   Shield,
-  ShieldAlert,
   Users,
   type LucideIcon,
 } from "lucide-react"
@@ -58,11 +57,6 @@ const navGroups: AppNavGroup[] = [
         to: "/events",
         icon: Radio,
       },
-      {
-        title: "Reglas",
-        to: "/alert-rules",
-        icon: ShieldAlert,
-      },
     ],
   },
   {
@@ -110,7 +104,6 @@ const navGroups: AppNavGroup[] = [
 const breadcrumbByPath: Record<string, { group?: string; page: string }> = {
   "/": { group: "Inicio", page: "Dashboard" },
   "/alerts": { group: "Operaciones", page: "Alertas" },
-  "/alert-rules": { group: "Operaciones", page: "Reglas" },
   "/events": { group: "Operaciones", page: "Eventos" },
   "/severity-levels": {
     group: "Configuración",
