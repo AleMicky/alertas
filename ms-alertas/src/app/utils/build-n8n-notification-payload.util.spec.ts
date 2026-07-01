@@ -57,11 +57,7 @@ describe('buildN8nNotificationPayload', () => {
               requestId: 'SOL-001',
             },
           },
-          eventType: {
-            code: 'PRUEBA',
-            name: 'Prueba',
-            description: 'Evento de prueba',
-          },
+          eventTypeCode: 'PRUEBA',
           clientSystem: {
             code: 'RRHH',
             name: 'RRHH',
@@ -88,7 +84,6 @@ describe('buildN8nNotificationPayload', () => {
       },
       eventType: {
         code: 'PRUEBA',
-        name: 'Prueba',
       },
       clientSystem: {
         code: 'RRHH',

@@ -3,7 +3,6 @@ export * from './client-system.entity';
 export * from './client-system-token.entity';
 export * from './notification-channel.entity';
 export * from './event.entity';
-export * from './event-type.entity';
 export * from './alert.entity';
 export * from './alert-notification.entity';
 export * from './role.entity';

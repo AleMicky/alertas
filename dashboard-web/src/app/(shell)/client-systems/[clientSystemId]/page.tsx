@@ -9,7 +9,6 @@ import { EmptyState, LoadingTable } from '@/shared/components';
 
 import { ClientSystemConfigurationHeader } from '@/features/client-systems/components/client-system/client-system-configuration-header';
 import { ClientSystemTokenTabContent } from '@/features/client-systems/components/client-system-token/client-system-token-tab-content';
-import { EventTypeTabContent } from '@/features/client-systems/components/event-type/event-type-tab-content';
 import { useClientSystemsQuery } from '@/features/client-systems/hooks/client-system/use-client-system-query';
 
 export default function ClientSystemConfigurationPage() {
@@ -50,7 +49,6 @@ export default function ClientSystemConfigurationPage() {
       <Tabs defaultValue="tokens">
         <TabsList>
           <TabsTrigger value="tokens">Tokens</TabsTrigger>
-          <TabsTrigger value="event-types">Tipos de evento</TabsTrigger>
         </TabsList>
 
         <TabsContent value="tokens" className="mt-4">
@@ -58,10 +56,6 @@ export default function ClientSystemConfigurationPage() {
             clientSystemId={clientSystemId}
             clientSystem={clientSystem}
           />
-        </TabsContent>
-
-        <TabsContent value="event-types" className="mt-4">
-          <EventTypeTabContent clientSystemId={clientSystemId} />
         </TabsContent>
       </Tabs>
     </main>

@@ -53,11 +53,11 @@ export function buildN8nNotificationPayload(
   const channelCode = notification.notificationChannel.code;
   const title = resolveNotificationTitle(
     recipientPayload,
-    event.eventType?.name,
+    event.eventTypeCode,
   );
   const message = resolveNotificationMessage(
     recipientPayload,
-    event.eventType?.description,
+    undefined,
     title,
   );
   const reference =
@@ -76,11 +76,8 @@ export function buildN8nNotificationPayload(
     message,
     ...(reference ? { reference } : {}),
     metadata,
-    eventType: event.eventType
-      ? {
-          code: event.eventType.code,
-          name: event.eventType.name,
-        }
+    eventType: event.eventTypeCode
+      ? { code: event.eventTypeCode }
       : undefined,
     clientSystem: event.clientSystem
       ? {

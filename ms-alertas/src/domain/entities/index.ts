@@ -1,7 +1,6 @@
 export * from './client-system';
 export * from './client-system-token';
 export * from './event';
-export * from './event-type';
 export * from './severity-level';
 export * from './notification-channel';
 export * from './alert';

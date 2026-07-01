@@ -24,11 +24,7 @@ export class EventMapper extends BaseMapper<
         code: entity.clientSystem.code,
         name: entity.clientSystem.name,
       },
-      eventType: {
-        id: entity.eventType.id,
-        code: entity.eventType.code,
-        name: entity.eventType.name,
-      },
+      eventTypeCode: entity.eventTypeCode,
       payloadJson: entity.payloadJson,
       status: entity.status,
       createdAt: entity.createdAt.toISOString(),
@@ -38,6 +34,7 @@ export class EventMapper extends BaseMapper<
 
   fromCreateDto(dto: CreateEventDto): Partial<Event> {
     return {
+      eventTypeCode: dto.eventTypeCode,
       payloadJson: dto.payloadJson,
       status: EventStatus.PENDING,
     };

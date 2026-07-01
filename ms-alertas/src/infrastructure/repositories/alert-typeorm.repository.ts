@@ -19,7 +19,6 @@ export class AlertTypeormRepository
   private static readonly relations = {
     event: {
       clientSystem: true,
-      eventType: true,
     },
   };
 

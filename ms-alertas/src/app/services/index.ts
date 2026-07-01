@@ -3,7 +3,6 @@ export * from './severity-level.service';
 export * from './client-system.service';
 export * from './client-system-token.service';
 export * from './event.service';
-export * from './event-type.service';
 export * from './alert.service';
 export * from './alert-notification.service';
 export * from './alert-outcome.service';

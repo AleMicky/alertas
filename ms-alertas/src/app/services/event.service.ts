@@ -6,7 +6,6 @@ import { BaseService } from 'src/shared/core/base.service';
 import { ClientSystem } from 'src/domain/entities/client-system';
 import { Event } from 'src/domain/entities/event';
 import { EventRepository } from 'src/domain/repositories/event.repository';
-import { EventTypeRepository } from 'src/domain/repositories/event-type.repository';
 import { NotificationChannelRepository } from 'src/domain/repositories/notification-channel.repository';
 import { EventRecipient } from 'src/domain/types/event-payload.type';
 import { CreateEventDto } from 'src/presentation/dto/event/create-event.dto';
@@ -17,7 +16,6 @@ import { AlertService } from './alert.service';
 export class EventService extends BaseService<Event> {
   constructor(
     private readonly eventRepository: EventRepository,
-    private readonly eventTypeRepository: EventTypeRepository,
     private readonly notificationChannelRepository: NotificationChannelRepository,
     private readonly eventMapper: EventMapper,
     private readonly alertService: AlertService,
@@ -30,15 +28,6 @@ export class EventService extends BaseService<Event> {
     authenticatedClientSystem: ClientSystem,
   ): Promise<ResponseEventDto> {
     const clientSystem = authenticatedClientSystem;
-
-    const eventType = await this.eventTypeRepository.findByCode(
-      clientSystem.id,
-      dto.eventTypeCode,
-    );
-
-    if (!eventType) {
-      throw new BadRequestException('Tipo de evento no encontrado');
-    }
 
     const normalizedPayload = await this.normalizePayload(
       dto.payloadJson,
@@ -53,7 +42,6 @@ export class EventService extends BaseService<Event> {
     const event = await this.eventRepository.create({
       ...partial,
       clientSystem,
-      eventType,
     });
 
     await this.alertService.createFromEvent(event);

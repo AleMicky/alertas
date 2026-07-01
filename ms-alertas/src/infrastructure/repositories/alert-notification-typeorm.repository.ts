@@ -24,7 +24,6 @@ export class AlertNotificationTypeormRepository
     alert: {
       event: {
         clientSystem: true,
-        eventType: true,
       },
     },
     notificationChannel: true,

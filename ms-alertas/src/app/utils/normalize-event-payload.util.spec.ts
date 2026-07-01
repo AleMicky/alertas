@@ -1,12 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
 
-import { EventType } from 'src/domain/entities/event-type';
 import { normalizeEventPayload } from './normalize-event-payload.util';
 
-const eventType = {
-  name: 'Solicitud aprobada',
-  description: 'Evento de aprobación',
-} as EventType;
+const eventTypeCode = 'VEHICLE_REQUEST_APPROVED';
 
 describe('normalizeEventPayload', () => {
   it('deriva title y message desde recipients', () => {
@@ -25,7 +21,7 @@ describe('normalizeEventPayload', () => {
           },
         ],
       },
-      eventType,
+      eventTypeCode,
     );
 
     expect(result.title).toBe('Solicitud de Vacaciones');
@@ -50,7 +46,7 @@ describe('normalizeEventPayload', () => {
           },
         ],
       },
-      eventType,
+      eventTypeCode,
     );
 
     expect(result.payloadJson.recipients).toHaveLength(2);
@@ -68,7 +64,7 @@ describe('normalizeEventPayload', () => {
           },
         ],
       },
-      eventType,
+      eventTypeCode,
       'Título explícito',
       'Mensaje explícito',
     );
@@ -83,7 +79,7 @@ describe('normalizeEventPayload', () => {
         {
           recipients: [{ channel: 'EMAIL', to: [] }],
         },
-        eventType,
+        eventTypeCode,
       ),
     ).toThrow(BadRequestException);
   });

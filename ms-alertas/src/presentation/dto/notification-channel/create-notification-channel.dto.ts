@@ -26,6 +26,14 @@ export class CreateNotificationChannelDto {
   @IsUrl()
   webhookUrl: string;
 
+  @ApiProperty({
+    type: String,
+    example: '1234567890',
+  })
+  @IsString()
+  @IsOptional()
+  webhookToken?: string;
+
   @ApiPropertyOptional({
     type: String,
     example: 'Canal para el equipo de operaciones',

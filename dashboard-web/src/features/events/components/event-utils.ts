@@ -17,11 +17,11 @@ export function getEventTimestamp(event: Event): string | undefined {
 }
 
 export function getEventTypeCode(event: Event): string {
-  return event.eventType?.code ?? '—';
+  return event.eventTypeCode ?? '—';
 }
 
 export function getEventTypeName(event: Event): string {
-  return event.eventType?.name ?? getEventTypeCode(event);
+  return getEventTypeCode(event);
 }
 
 export function getEventReference(event: Event): string | undefined {

@@ -5,7 +5,6 @@ export const QUERY_KEYS = {
     alerts: 'alerts',
     alertNotifications: 'alert-notifications',
     events: 'events',
-    eventTypes: 'event-types',
     clientSystemTokens: 'client-system-tokens',
     users: 'users',
     roles: 'roles',

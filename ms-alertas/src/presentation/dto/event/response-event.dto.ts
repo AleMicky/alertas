@@ -4,16 +4,10 @@ class ClientSystem {
   name: string;
 }
 
-class EventType {
-  id: string;
-  code: string;
-  name: string;
-}
-
 export class ResponseEventDto {
   id: string;
   clientSystem: ClientSystem;
-  eventType: EventType;
+  eventTypeCode: string;
   payloadJson?: Record<string, unknown>;
   status: string;
   createdAt: string;

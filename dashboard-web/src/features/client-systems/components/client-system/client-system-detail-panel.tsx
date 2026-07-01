@@ -13,7 +13,6 @@ import { EmptyState, StatusBadge } from '@/shared/components';
 import { formatDate } from '@/shared/utils/format-date';
 
 import { ClientSystemTokenTabContent } from '../client-system-token/client-system-token-tab-content';
-import { EventTypeTabContent } from '../event-type/event-type-tab-content';
 import { ClientSystem } from '../../types/client-system.types';
 
 interface Props {
@@ -41,7 +40,7 @@ export function ClientSystemDetailPanel({ clientSystem }: Props) {
       <Card className="flex h-full min-h-[420px] items-center justify-center border-muted/60 shadow-sm">
         <EmptyState
           title="Selecciona un sistema"
-          description="Elige un sistema de la lista lateral para ver y configurar sus tokens y tipos de evento."
+          description="Elige un sistema de la lista lateral para ver y configurar sus tokens."
         />
       </Card>
     );
@@ -87,7 +86,6 @@ export function ClientSystemDetailPanel({ clientSystem }: Props) {
       <Tabs defaultValue="tokens">
         <TabsList>
           <TabsTrigger value="tokens">Tokens</TabsTrigger>
-          <TabsTrigger value="event-types">Tipos de evento</TabsTrigger>
         </TabsList>
 
         <TabsContent value="tokens" className="mt-4">
@@ -95,10 +93,6 @@ export function ClientSystemDetailPanel({ clientSystem }: Props) {
             clientSystemId={clientSystem.id}
             clientSystem={clientSystem}
           />
-        </TabsContent>
-
-        <TabsContent value="event-types" className="mt-4">
-          <EventTypeTabContent clientSystemId={clientSystem.id} />
         </TabsContent>
       </Tabs>
     </div>

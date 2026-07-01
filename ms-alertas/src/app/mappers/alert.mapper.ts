@@ -41,8 +41,7 @@ export class AlertMapper {
   }
 
   private buildTitle(alert: Alert): string {
-    const eventType =
-      alert.event?.eventType?.name ?? alert.event?.eventType?.code ?? 'Alerta';
+    const eventType = alert.event?.eventTypeCode ?? 'Alerta';
     const reference = this.getEventReference(alert);
 
     return reference ? `${eventType} · ${reference}` : eventType;
@@ -50,8 +49,7 @@ export class AlertMapper {
 
   private buildMessage(alert: Alert): string {
     const client = alert.event?.clientSystem?.name ?? alert.event?.clientSystem?.code;
-    const eventType =
-      alert.event?.eventType?.name ?? alert.event?.eventType?.code;
+    const eventType = alert.event?.eventTypeCode;
 
     if (client && eventType) {
       return `Alerta ${alert.status.toLowerCase()} · ${eventType} desde ${client}`;

@@ -1,6 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
 
-import { EventType } from 'src/domain/entities/event-type';
 import { EventRecipient } from 'src/domain/types/event-payload.type';
 
 import { isRecipientTargetValid } from './resolve-recipient-target.util';
@@ -51,7 +50,7 @@ function pickFirstRecipientText(
 
 export function normalizeEventPayload(
   payloadJson: Record<string, unknown> | undefined,
-  eventType: EventType,
+  eventTypeCode: string,
   title?: string,
   message?: string,
 ): NormalizedEventContent {
@@ -71,17 +70,16 @@ export function normalizeEventPayload(
   const resolvedTitle =
     title?.trim() ||
     pickFirstRecipientText(recipients, 'subject') ||
-    eventType.name;
+    eventTypeCode.trim();
 
   const resolvedMessage =
     message?.trim() ||
     pickFirstRecipientText(recipients, 'message') ||
-    eventType.description?.trim() ||
     resolvedTitle;
 
   if (!resolvedTitle) {
     throw new BadRequestException(
-      'Se requiere title, o recipients con subject, o un tipo de evento con nombre',
+      'Se requiere title, recipients con subject, o eventTypeCode',
     );
   }
 

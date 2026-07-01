@@ -15,6 +15,9 @@ export class NotificationChannelEntity extends BaseAuditColumns {
   @Column({ name: 'webhook_url', type: 'text' })
   webhookUrl: string;
 
+  @Column({ name: 'webhook_token', type: 'varchar', length: 255, nullable: true })
+  webhookToken?: string;
+
   @Column({ nullable: true, length: 500 })
   description?: string;
 

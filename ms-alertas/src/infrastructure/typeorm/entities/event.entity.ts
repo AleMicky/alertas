@@ -8,7 +8,6 @@ import {
 
 import { EventStatus } from 'src/domain/enums/event-status.enum';
 import { ClientSystemEntity } from './client-system.entity';
-import { EventTypeEntity } from './event-type.entity';
 
 @Entity('tevents')
 export class EventEntity {
@@ -19,9 +18,8 @@ export class EventEntity {
   @JoinColumn({ name: 'client_system_id' })
   clientSystem: ClientSystemEntity;
 
-  @ManyToOne(() => EventTypeEntity)
-  @JoinColumn({ name: 'event_type_id' })
-  eventType: EventTypeEntity;
+  @Column({ name: 'event_type_code', length: 100 })
+  eventTypeCode: string;
 
   @Column({ name: 'payload_json', type: 'jsonb', nullable: true })
   payloadJson?: Record<string, any>;

@@ -9,7 +9,6 @@ import { EventEntity } from '../typeorm/entities/event.entity';
 
 type EventPersistenceInput = Partial<EventEntity> & {
   clientSystemId: string;
-  eventTypeId: string;
 };
 
 @Injectable()
@@ -19,7 +18,6 @@ export class EventTypeormRepository
 {
   private static readonly relations = {
     clientSystem: true,
-    eventType: true,
   };
 
   constructor(
@@ -98,7 +96,7 @@ export class EventTypeormRepository
     entity: EventPersistenceInput,
     applyDefaults = false,
   ): DeepPartial<EventEntity> {
-    const { clientSystemId, eventTypeId, ...rest } = entity;
+    const { clientSystemId, ...rest } = entity;
 
     return {
       ...rest,
@@ -106,12 +104,6 @@ export class EventTypeormRepository
       ...(clientSystemId && {
         clientSystem: {
           id: clientSystemId,
-        },
-      }),
-
-      ...(eventTypeId && {
-        eventType: {
-          id: eventTypeId,
         },
       }),
 

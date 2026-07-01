@@ -5,7 +5,6 @@ export * from './client-system-token-typeorm.repository';
 export * from './event-typeorm.repository';
 export * from './alert-typeorm.repository';
 export * from './alert-notification-typeorm.repository';
-export * from './event-type-typeorm.repository';
 export * from './role-typeorm.repository';
 export * from './user-typeorm.repository';
 export * from './login-audit-typeorm.repository';

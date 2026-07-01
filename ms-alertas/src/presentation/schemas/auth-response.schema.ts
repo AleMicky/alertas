@@ -1,19 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 class AuthUserResponseSchema {
-  @ApiProperty({ example: 'admin.alertas' })
-  sub: string;
+  @ApiProperty({ example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479' })
+  id: string;
 
   @ApiProperty({ example: 'admin.alertas' })
   username: string;
 
-  @ApiProperty({ example: 'admin.alertas@local', required: false })
-  email?: string;
+  @ApiProperty({ example: 'admin@alertas.local' })
+  email: string;
 
   @ApiProperty({ example: 'Administrador' })
-  name: string;
+  fullName: string;
 
-  @ApiProperty({ example: ['admin'], type: [String] })
+  @ApiProperty({ example: ['ADMIN'], type: [String] })
   roles: string[];
 }
 
@@ -21,8 +21,8 @@ export class AuthResponseSchema {
   @ApiProperty()
   accessToken: string;
 
-  @ApiProperty({ example: '24h' })
-  expiresIn: string;
+  @ApiProperty()
+  refreshToken: string;
 
   @ApiProperty({ type: AuthUserResponseSchema })
   user: AuthUserResponseSchema;

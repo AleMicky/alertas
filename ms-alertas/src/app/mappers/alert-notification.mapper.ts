@@ -42,16 +42,14 @@ export class AlertNotificationMapper {
   }
 
   private buildAlertTitle(alert: Alert): string {
-    const eventType =
-      alert.event?.eventType?.name ?? alert.event?.eventType?.code ?? 'Alerta';
+    const eventType = alert.event?.eventTypeCode ?? 'Alerta';
     const reference = this.getEventReference(alert);
 
     return reference ? `${eventType} · ${reference}` : eventType;
   }
 
   private buildAlertMessage(alert: Alert): string {
-    const eventType =
-      alert.event?.eventType?.name ?? alert.event?.eventType?.code;
+    const eventType = alert.event?.eventTypeCode;
 
     if (eventType) {
       return `Alerta generada por evento ${eventType}`;
@@ -82,7 +80,7 @@ export class AlertNotificationMapper {
       }
     }
 
-    const eventType = notification.alert?.event?.eventType?.name;
+    const eventType = notification.alert?.event?.eventTypeCode;
 
     if (eventType) {
       return `Entrega para ${eventType}`;

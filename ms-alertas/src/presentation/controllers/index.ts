@@ -3,7 +3,6 @@ export * from './severity-level.controller';
 export * from './client-system.controller';
 export * from './client-system-token.controller';
 export * from './event.controller';
-export * from './event-type.controller';
 export * from './alert.controller';
 export * from './alert-notification.controller';
 export * from './test-n8n.controller';
