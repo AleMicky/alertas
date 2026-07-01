@@ -1,4 +1,5 @@
 export * from './notification-channels.controller';
+export * from './notification-channel-providers.controller';
 export * from './severity-level.controller';
 export * from './client-system.controller';
 export * from './client-system-token.controller';

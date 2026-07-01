@@ -1,4 +1,5 @@
 export * from './notification-channels.service';
+export * from './notification-channel-providers.service';
 export * from './severity-level.service';
 export * from './client-system.service';
 export * from './client-system-token.service';

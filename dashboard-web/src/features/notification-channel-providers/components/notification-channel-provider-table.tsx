@@ -12,8 +12,18 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ArrowUpDown, Edit, Plus, Search, Unplug } from 'lucide-react';
-import Link from 'next/link';
+import {
+  ArrowUpDown,
+  CheckCircle2,
+  Edit,
+  FlaskConical,
+  Plus,
+  Power,
+  PowerOff,
+  Search,
+  ShieldCheck,
+  Webhook,
+} from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,30 +43,49 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { NotificationChannelFormDialog } from '@/features/notification-channels/components/notification-channel-form-dialog';
-import { useNotificationChannelsMutations } from '@/features/notification-channels/hooks/use-notification-channel-mutations';
-import { useNotificationChannelsQuery } from '@/features/notification-channels/hooks/use-notification-channel-query';
-import { CreateNotificationChannelDto } from '@/features/notification-channels/notification-channel.schema';
 import { NotificationChannel } from '@/features/notification-channels/notification-channel.types';
+import { ConfirmDeleteDialog } from '@/shared/components';
 import { cn } from '@/lib/utils';
-import { ConfirmDeleteDialog, EmptyState, LoadingTable } from '@/shared/components';
 import { formatDate } from '@/shared/utils/format-date';
 
-interface NotificationChannelsListSectionProps {
-  data: NotificationChannel[];
+import { NotificationChannelProvider } from '../notification-channel-provider.types';
+
+interface Props {
+  data: NotificationChannelProvider[];
+  channels: NotificationChannel[];
+  onCreate?: () => void;
+  onEdit: (item: NotificationChannelProvider) => void;
   onDelete: (id: string) => void;
-  onEdit: (item: NotificationChannel) => void;
+  onActivate: (id: string) => void;
+  onDeactivate: (id: string) => void;
+  onTest: (item: NotificationChannelProvider) => void;
+  onValidate: (id: string) => void;
+  isActivating?: boolean;
+  isDeactivating?: boolean;
 }
 
-function NotificationChannelsListSection({
+export function NotificationChannelProviderTable({
   data,
-  onDelete,
+  channels,
+  onCreate,
   onEdit,
-}: NotificationChannelsListSectionProps) {
+  onDelete,
+  onActivate,
+  onDeactivate,
+  onTest,
+  onValidate,
+  isActivating,
+  isDeactivating,
+}: Props) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const columns = useMemo<ColumnDef<NotificationChannel>[]>(
+  const channelById = useMemo(
+    () => new Map(channels.map((channel) => [channel.id, channel])),
+    [channels],
+  );
+
+  const columns = useMemo<ColumnDef<NotificationChannelProvider>[]>(
     () => [
       {
         accessorKey: 'code',
@@ -82,17 +111,7 @@ function NotificationChannelsListSection({
       },
       {
         accessorKey: 'name',
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="-ml-2 h-7 px-2 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            Nombre
-            <ArrowUpDown className="ml-1.5 size-3" />
-          </Button>
-        ),
+        header: 'Nombre',
         cell: ({ row }) => (
           <span className="min-w-[120px] font-medium text-foreground">
             {row.original.name}
@@ -100,16 +119,73 @@ function NotificationChannelsListSection({
         ),
       },
       {
-        accessorKey: 'updatedAt',
-        header: () => (
-          <span className="text-xs font-medium text-muted-foreground">Actualizado</span>
+        id: 'channel',
+        header: 'Canal',
+        cell: ({ row }) => {
+          const channel = channelById.get(row.original.notificationChannelId);
+
+          if (!channel) {
+            return (
+              <span className="text-xs text-muted-foreground">
+                Canal no disponible
+              </span>
+            );
+          }
+
+          return (
+            <div className="min-w-[100px]">
+              <p className="text-xs font-medium text-foreground">
+                {channel.name}
+              </p>
+              <p className="font-mono text-[10px] text-muted-foreground">
+                {channel.code}
+              </p>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'webhookUrl',
+        header: 'Webhook',
+        cell: ({ row }) => (
+          <span
+            className="block max-w-[200px] truncate font-mono text-[11px] text-muted-foreground"
+            title={row.original.webhookUrl}
+          >
+            {row.original.webhookUrl}
+          </span>
         ),
+      },
+      {
+        accessorKey: 'authType',
+        header: 'Auth',
+        cell: ({ row }) => (
+          <Badge variant="outline" className="text-[10px]">
+            {row.original.authType}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: 'active',
+        header: 'Estado',
+        cell: ({ row }) =>
+          row.original.active ? (
+            <Badge className="gap-1 bg-emerald-600/90 text-[10px] hover:bg-emerald-600">
+              <CheckCircle2 className="size-3" />
+              Activo
+            </Badge>
+          ) : (
+            <Badge variant="secondary" className="text-[10px]">
+              Inactivo
+            </Badge>
+          ),
+      },
+      {
+        accessorKey: 'updatedAt',
+        header: 'Actualizado',
         cell: ({ row }) => (
           <div className="text-xs text-muted-foreground">
             <p>{formatDate(row.original.updatedAt)}</p>
-            {row.original.updatedBy ? (
-              <p className="text-[11px] opacity-80">{row.original.updatedBy}</p>
-            ) : null}
           </div>
         ),
       },
@@ -124,29 +200,61 @@ function NotificationChannelsListSection({
           const item = row.original;
 
           return (
-            <div className="flex items-center justify-end gap-1">
+            <div className="flex flex-wrap items-center justify-end gap-1">
               <Button
-                nativeButton={false}
                 variant="outline"
                 size="sm"
-                className="h-7 gap-1 px-2.5 text-xs transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring/50"
-                title="Gestionar proveedores"
-                render={
-                  <Link
-                    href={`/notification-channel-providers?channelId=${item.id}`}
-                  />
-                }
+                className="h-7 gap-1 px-2 text-xs transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring/50"
+                onClick={() => onValidate(item.id)}
+                title="Validar configuración"
               >
-                <Unplug className="size-3" />
-                Proveedores
+                <ShieldCheck className="size-3" />
+                Validar
               </Button>
 
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 gap-1 px-2.5 text-xs transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring/50"
+                className="h-7 gap-1 px-2 text-xs transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring/50"
+                onClick={() => onTest(item)}
+                title="Probar webhook"
+              >
+                <FlaskConical className="size-3" />
+                Probar
+              </Button>
+
+              {item.active ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1 px-2 text-xs transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring/50"
+                  onClick={() => onDeactivate(item.id)}
+                  disabled={isDeactivating}
+                  title="Desactivar proveedor"
+                >
+                  <PowerOff className="size-3" />
+                  Desactivar
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1 px-2 text-xs transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring/50"
+                  onClick={() => onActivate(item.id)}
+                  disabled={isActivating}
+                  title="Activar proveedor"
+                >
+                  <Power className="size-3" />
+                  Activar
+                </Button>
+              )}
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 gap-1 px-2 text-xs transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring/50"
                 onClick={() => onEdit(item)}
-                title="Editar canal"
+                title="Editar proveedor"
               >
                 <Edit className="size-3" />
                 Editar
@@ -155,15 +263,15 @@ function NotificationChannelsListSection({
               <div
                 className={cn(
                   '[&_button]:h-7 [&_button]:border-transparent [&_button]:bg-destructive/10',
-                  '[&_button]:px-2.5 [&_button]:text-xs [&_button]:text-destructive [&_button]:shadow-none',
+                  '[&_button]:px-2 [&_button]:text-xs [&_button]:text-destructive [&_button]:shadow-none',
                   '[&_button]:transition-colors [&_button]:duration-150',
                   '[&_button]:focus-visible:ring-2 [&_button]:focus-visible:ring-destructive/30',
                   'hover:[&_button]:bg-destructive/15',
                 )}
               >
                 <ConfirmDeleteDialog
-                  title="¿Eliminar canal?"
-                  description={`Se eliminará el canal "${item.name}" y dejará de recibir alertas.`}
+                  title="¿Eliminar proveedor?"
+                  description={`Se eliminará el proveedor "${item.name}".`}
                   onConfirm={() => onDelete(item.id)}
                 />
               </div>
@@ -172,7 +280,17 @@ function NotificationChannelsListSection({
         },
       },
     ],
-    [onDelete, onEdit],
+    [
+      channelById,
+      isActivating,
+      isDeactivating,
+      onActivate,
+      onDeactivate,
+      onDelete,
+      onEdit,
+      onTest,
+      onValidate,
+    ],
   );
 
   const table = useReactTable({
@@ -187,22 +305,22 @@ function NotificationChannelsListSection({
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  const channelCount = data.length;
-  const channelCountLabel = `${channelCount} canal${channelCount === 1 ? '' : 'es'}`;
+  const providerCount = data.length;
+  const providerCountLabel = `${providerCount} proveedor${providerCount === 1 ? '' : 'es'}`;
 
   return (
     <Card className="overflow-hidden rounded-lg border-border/50 bg-card py-0 shadow-sm shadow-black/3 dark:shadow-black/20">
-      <CardHeader className="gap-2.5 space-y-0 border-b border-border/50 px-4 py-3">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <CardHeader className="gap-2 space-y-0 border-b border-border/50 px-4 py-3">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-sm font-semibold tracking-tight">
-            Canales configurados
+            Proveedores configurados
           </CardTitle>
           <CardDescription className="text-xs tabular-nums text-muted-foreground">
-            {channelCountLabel}
+            {providerCountLabel}
           </CardDescription>
         </div>
 
-        {channelCount > 0 ? (
+        {providerCount > 0 ? (
           <div className="relative">
             <Search
               className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
@@ -221,12 +339,28 @@ function NotificationChannelsListSection({
       </CardHeader>
 
       <CardContent className="p-0">
-        {channelCount === 0 ? (
-          <div className="px-4 py-6">
-            <EmptyState
-              title="Sin canales de notificación"
-              description="Registra el primer canal de notificación para comenzar."
-            />
+        {providerCount === 0 ? (
+          <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
+            <div className="mb-3 flex size-10 items-center justify-center rounded-full border border-border/60 bg-muted/40 shadow-sm">
+              <Webhook className="size-4 text-muted-foreground" />
+            </div>
+            <h3 className="text-sm font-medium text-foreground">
+              Sin proveedores
+            </h3>
+            <p className="mt-1 max-w-sm text-xs leading-relaxed text-muted-foreground">
+              Conecta un canal con su webhook para empezar a enviar
+              notificaciones de alertas.
+            </p>
+            {onCreate ? (
+              <Button
+                size="sm"
+                className="mt-4 gap-1.5 transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring/50"
+                onClick={onCreate}
+              >
+                <Plus className="size-3.5" />
+                Crear proveedor
+              </Button>
+            ) : null}
           </div>
         ) : (
           <>
@@ -256,35 +390,24 @@ function NotificationChannelsListSection({
                 </TableHeader>
 
                 <TableBody>
-                  {table.getRowModel().rows.length ? (
-                    table.getRowModel().rows.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        className="border-b border-border/40 transition-colors duration-150 hover:bg-muted/40"
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell
-                            key={cell.id}
-                            className="px-3 py-2 text-sm align-middle"
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow className="hover:bg-transparent">
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-16 px-3 text-center text-sm text-muted-foreground"
-                      >
-                        Sin registros.
-                      </TableCell>
+                  {table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      className="border-b border-border/40 transition-colors duration-150 hover:bg-muted/40"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          className="px-3 py-2 text-sm align-middle"
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  )}
+                  ))}
                 </TableBody>
               </Table>
             </div>
@@ -321,106 +444,5 @@ function NotificationChannelsListSection({
         )}
       </CardContent>
     </Card>
-  );
-}
-
-export default function NotificationChannelsPage() {
-  const [formOpen, setFormOpen] = useState(false);
-  const [selected, setSelected] = useState<NotificationChannel | null>(null);
-
-  const { data: notificationChannels, isLoading } = useNotificationChannelsQuery();
-  const { create, update, remove, isCreating, isUpdating } =
-    useNotificationChannelsMutations();
-
-  const channels = useMemo(() => notificationChannels ?? [], [notificationChannels]);
-  const isSubmitting = isCreating || isUpdating;
-
-  const handleCreate = () => {
-    setSelected(null);
-    setFormOpen(true);
-  };
-
-  const handleEdit = (channel: NotificationChannel) => {
-    setSelected(channel);
-    setFormOpen(true);
-  };
-
-  const handleSubmit = (values: CreateNotificationChannelDto) => {
-    if (selected) {
-      const { code: _code, ...data } = values;
-
-      update(
-        { id: selected.id, data },
-        {
-          onSuccess: () => {
-            setFormOpen(false);
-            setSelected(null);
-          },
-        },
-      );
-
-      return;
-    }
-
-    create(values, {
-      onSuccess: () => {
-        setFormOpen(false);
-        setSelected(null);
-      },
-    });
-  };
-
-  return (
-    <main className="space-y-3">
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">
-            Canales de notificación
-          </h1>
-          <p className="text-xs text-muted-foreground">
-            Administra los canales disponibles para enviar alertas.
-          </p>
-        </div>
-
-        <Button
-          onClick={handleCreate}
-          size="sm"
-          className="shrink-0 gap-1.5 transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring/50"
-        >
-          <Plus className="size-3.5" />
-          Nuevo canal
-        </Button>
-      </header>
-
-      {isLoading ? (
-        <Card className="overflow-hidden rounded-lg border-border/50 bg-card py-0 shadow-sm shadow-black/3 dark:shadow-black/20">
-          <CardHeader className="border-b border-border/50 px-4 py-3">
-            <div className="h-4 w-36 animate-pulse rounded bg-muted" />
-          </CardHeader>
-          <CardContent className="px-4 py-3">
-            <LoadingTable />
-          </CardContent>
-        </Card>
-      ) : (
-        <NotificationChannelsListSection
-          data={channels}
-          onDelete={(id) => remove(id)}
-          onEdit={handleEdit}
-        />
-      )}
-
-      <NotificationChannelFormDialog
-        open={formOpen}
-        onOpenChange={(open) => {
-          setFormOpen(open);
-          if (!open) {
-            setSelected(null);
-          }
-        }}
-        initialData={selected}
-        isSubmitting={isSubmitting}
-        onSubmit={handleSubmit}
-      />
-    </main>
   );
 }

@@ -2,6 +2,7 @@ export * from './severity-level.entity';
 export * from './client-system.entity';
 export * from './client-system-token.entity';
 export * from './notification-channel.entity';
+export * from './notification-channel-provider.entity';
 export * from './event.entity';
 export * from './alert.entity';
 export * from './alert-notification.entity';

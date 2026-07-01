@@ -1,6 +1,7 @@
 export const QUERY_KEYS = {
     severityLevels: 'severity-levels',
     notificationChannels: 'notification-channels',
+    notificationChannelProviders: 'notification-channel-providers',
     clientSystems: 'client-systems',
     alerts: 'alerts',
     alertNotifications: 'alert-notifications',

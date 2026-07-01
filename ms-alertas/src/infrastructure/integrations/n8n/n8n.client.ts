@@ -12,11 +12,17 @@ export interface N8nNotificationPayload extends Record<string, unknown> {
   payload: Record<string, unknown>;
 }
 
+export type SendNotificationOptions = {
+  headers?: Record<string, string>;
+  timeoutMs?: number;
+};
+
 @Injectable()
 export class N8nClient {
   async sendNotification(
     webhookUrl: string,
     body: N8nNotificationPayload | Record<string, unknown>,
+    options?: SendNotificationOptions,
   ): Promise<unknown> {
     if (!webhookUrl) {
       throw new Error('Webhook URL no configurada');
@@ -24,7 +30,8 @@ export class N8nClient {
 
     try {
       const response = await axios.post(webhookUrl, body, {
-        timeout: 30000,
+        timeout: options?.timeoutMs ?? 30000,
+        headers: options?.headers,
         validateStatus: (status) => status >= 200 && status < 300,
       });
 

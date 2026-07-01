@@ -1,4 +1,5 @@
 export * from './notification-channel-typeorm.repository';
+export * from './notification-channel-provider-typeorm.repository';
 export * from './severity-level-typeorm.repository';
 export * from './client-system-typeorm.repository';
 export * from './client-system-token-typeorm.repository';

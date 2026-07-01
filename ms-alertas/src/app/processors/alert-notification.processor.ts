@@ -4,9 +4,11 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 
 import { buildN8nNotificationPayload } from 'src/app/utils/build-n8n-notification-payload.util';
+import { buildProviderRequestHeaders } from 'src/app/utils/build-provider-request-headers.util';
 import { resolveChannelWebhookUrl } from 'src/app/utils/resolve-channel-webhook-url.util';
 import { AlertNotificationService } from 'src/app/services/alert-notification.service';
 import { AlertOutcomeService } from 'src/app/services/alert-outcome.service';
+import { NotificationChannelProvidersService } from 'src/app/services/notification-channel-providers.service';
 import { N8nClient } from 'src/infrastructure/integrations/n8n/n8n.client';
 import { AlertNotificationStatus } from 'src/domain/enums/alert-notification-status.enum';
 
@@ -18,6 +20,7 @@ export class AlertNotificationProcessor extends WorkerHost {
   constructor(
     private readonly alertNotificationService: AlertNotificationService,
     private readonly alertOutcomeService: AlertOutcomeService,
+    private readonly notificationChannelProvidersService: NotificationChannelProvidersService,
     private readonly n8nClient: N8nClient,
     private readonly configService: ConfigService,
   ) {
@@ -51,10 +54,24 @@ export class AlertNotificationProcessor extends WorkerHost {
         status: AlertNotificationStatus.PROCESSING,
       });
 
-      const webhookUrl = resolveChannelWebhookUrl(
-        notification.notificationChannel.code,
-        this.configService,
-      );
+      const providerCode =
+        typeof notification.payloadJson?.provider === 'string'
+          ? notification.payloadJson.provider
+          : undefined;
+
+      const provider =
+        await this.notificationChannelProvidersService.resolveActiveProvider({
+          notificationChannelId: notification.notificationChannel.id,
+          channelCode: notification.notificationChannel.code,
+          providerCode,
+        });
+
+      const webhookUrl =
+        provider?.webhookUrl ??
+        resolveChannelWebhookUrl(
+          notification.notificationChannel.code,
+          this.configService,
+        );
 
       if (!notification.target) {
         throw new Error(
@@ -66,6 +83,12 @@ export class AlertNotificationProcessor extends WorkerHost {
       const response = await this.n8nClient.sendNotification(
         webhookUrl,
         n8nPayload,
+        provider
+          ? {
+              headers: buildProviderRequestHeaders(provider),
+              timeoutMs: provider.timeoutSeconds * 1000,
+            }
+          : undefined,
       );
 
       await this.alertNotificationService.update(notification.id, {

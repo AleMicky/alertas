@@ -6,6 +6,7 @@ import { APP_GUARD } from '@nestjs/core';
  // Entities
 import {
   NotificationChannelEntity,
+  NotificationChannelProviderEntity,
   SeverityLevelEntity,
   ClientSystemEntity,
   ClientSystemTokenEntity,
@@ -20,6 +21,7 @@ import {
 import { EventMapper, AlertMapper, AlertNotificationMapper } from './app/mappers';
 import {
   NotificationChannelsService,
+  NotificationChannelProvidersService,
   SeverityLevelService,
   ClientSystemService,
   ClientSystemTokenService,
@@ -36,6 +38,7 @@ import {
 // Repositories
 import {
   NotificationChannelRepository,
+  NotificationChannelProviderRepository,
   SeverityLevelRepository,
   ClientSystemRepository,
   ClientSystemTokenRepository,
@@ -50,6 +53,7 @@ import {
 import {
   SeverityLevelController,
   NotificationChannelsController,
+  NotificationChannelProvidersController,
   ClientSystemController,
   EventController,
   AlertController,
@@ -63,6 +67,7 @@ import {
 import {
   SeverityLevelTypeormRepository,
   NotificationChannelTypeormRepository,
+  NotificationChannelProviderTypeormRepository,
   ClientSystemTypeormRepository,
   ClientSystemTokenTypeormRepository,
   EventTypeormRepository,
@@ -89,6 +94,7 @@ import {
   imports: [
     TypeOrmModule.forFeature([
       NotificationChannelEntity,
+      NotificationChannelProviderEntity,
       SeverityLevelEntity,
       ClientSystemEntity,
       ClientSystemTokenEntity,
@@ -121,6 +127,7 @@ import {
   ],
   controllers: [
     NotificationChannelsController,
+    NotificationChannelProvidersController,
     SeverityLevelController,
     ClientSystemController,
     EventController,
@@ -138,6 +145,7 @@ import {
     ClientSystemAuthGuard,
     NotificationService,
     NotificationChannelsService,
+    NotificationChannelProvidersService,
     SeverityLevelService,
     ClientSystemService,
     ClientSystemTokenService,
@@ -159,6 +167,10 @@ import {
     {
       provide: NotificationChannelRepository,
       useClass: NotificationChannelTypeormRepository,
+    },
+    {
+      provide: NotificationChannelProviderRepository,
+      useClass: NotificationChannelProviderTypeormRepository,
     },
     {
       provide: SeverityLevelRepository,

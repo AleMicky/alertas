@@ -3,6 +3,7 @@ import {
   Bell,
   LayoutDashboard,
   Layers,
+  Plug,
   Monitor,
   Radio,
   Shield,
@@ -74,6 +75,11 @@ const navGroups: AppNavGroup[] = [
         icon: Layers,
       },
       {
+        title: "Proveedores de canal",
+        to: "/notification-channel-providers",
+        icon: Plug,
+      },
+      {
         title: "Sistemas cliente",
         to: "/client-systems",
         icon: Monitor,
@@ -112,6 +118,10 @@ const breadcrumbByPath: Record<string, { group?: string; page: string }> = {
   "/notification-channels": {
     group: "Configuración",
     page: "Canales de notificación",
+  },
+  "/notification-channel-providers": {
+    group: "Configuración",
+    page: "Proveedores de canal",
   },
   "/client-systems": {
     group: "Configuración",
