@@ -6,7 +6,7 @@ interface Props {
 
 export function StatusBadge({ active }: Props) {
     return (
-        <Badge variant={active ? 'default' : 'destructive'}>
+        <Badge variant={active ? 'success' : 'info'}>
             {active ? 'Activo' : 'Inactivo'}
         </Badge>
     );

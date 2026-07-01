@@ -25,10 +25,10 @@ export function AppSiteHeader() {
   const { group, page } = getNavBreadcrumb(pathname)
 
   return (
-    <header className="sticky top-0 z-50 flex w-full shrink-0 items-center border-b border-border/60 bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/70">
-      <div className="flex h-(--header-height) w-full items-center gap-2 px-4">
+    <header className="sticky top-0 z-50 flex w-full shrink-0 items-center border-b border-border/60 bg-background">
+      <div className="flex h-(--header-height) w-full items-center gap-3 px-4 md:px-5">
         <Button
-          className="size-8"
+          className="size-8 shrink-0 text-muted-foreground hover:text-foreground"
           variant="ghost"
           size="icon-sm"
           onClick={toggleSidebar}
@@ -37,36 +37,46 @@ export function AppSiteHeader() {
           <PanelLeft className="size-4" aria-hidden />
         </Button>
 
-        <Separator orientation="vertical" className="mr-1 hidden h-4 sm:block" />
+        <Separator
+          orientation="vertical"
+          className="hidden h-4 sm:block"
+        />
 
         <Breadcrumb className="hidden min-w-0 flex-1 sm:block">
-          <BreadcrumbList>
+          <BreadcrumbList className="gap-1 text-[13px]">
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link href={appBrand.homeTo} />}>
+              <BreadcrumbLink
+                className="font-medium text-muted-foreground hover:text-foreground"
+                render={<Link href={appBrand.homeTo} />}
+              >
                 {appBrand.name}
               </BreadcrumbLink>
             </BreadcrumbItem>
             {group ? (
               <>
-                <BreadcrumbSeparator />
+                <BreadcrumbSeparator className="text-muted-foreground/40" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{group}</BreadcrumbPage>
+                  <BreadcrumbPage className="font-normal text-muted-foreground">
+                    {group}
+                  </BreadcrumbPage>
                 </BreadcrumbItem>
               </>
             ) : null}
-            <BreadcrumbSeparator />
+            <BreadcrumbSeparator className="text-muted-foreground/40" />
             <BreadcrumbItem>
-              <BreadcrumbPage>{page}</BreadcrumbPage>
+              <BreadcrumbPage className="font-medium text-foreground">
+                {page}
+              </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
-        <span className="min-w-0 flex-1 truncate text-sm font-medium sm:hidden">
+        <span className="min-w-0 flex-1 truncate text-[13px] font-medium sm:hidden">
           {page}
         </span>
 
-        <div className="flex items-center gap-2 sm:ml-auto">
-          <AppSearchForm className="hidden w-full sm:block sm:max-w-xs" />
+        <div className="flex shrink-0 items-center gap-1.5 sm:ml-auto">
+          <AppSearchForm className="hidden w-full sm:block sm:max-w-[220px] md:max-w-xs" />
           <AppThemeToggle />
         </div>
       </div>

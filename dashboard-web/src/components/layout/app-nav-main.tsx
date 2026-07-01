@@ -20,11 +20,20 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 import type { AppNavGroup, AppNavLink } from "@/navigation/app-nav-config"
 
 type AppNavMainProps = {
   groups: AppNavGroup[]
 }
+
+const navItemClassName = cn(
+  "h-8 gap-2.5 rounded-md px-2.5 text-[13px] font-medium text-sidebar-foreground/75",
+  "hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+  "data-active:bg-primary/10 data-active:text-primary data-active:font-medium",
+  "data-active:[&_svg]:text-primary",
+  "group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2!",
+)
 
 function NavLinkItem({ item }: { item: AppNavLink }) {
   const pathname = usePathname()
@@ -38,9 +47,10 @@ function NavLinkItem({ item }: { item: AppNavLink }) {
         <SidebarMenuButton
           tooltip={item.title}
           isActive={isActive}
+          className={navItemClassName}
           render={<Link href={item.to} />}
         >
-          <item.icon aria-hidden />
+          <item.icon className="size-4 shrink-0 opacity-80" aria-hidden />
           <span>{item.title}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -53,9 +63,10 @@ function NavLinkItem({ item }: { item: AppNavLink }) {
         <SidebarMenuButton
           tooltip={item.title}
           isActive={isActive}
+          className={navItemClassName}
           render={<Link href={item.to} />}
         >
-          <item.icon aria-hidden />
+          <item.icon className="size-4 shrink-0 opacity-80" aria-hidden />
           <span>{item.title}</span>
         </SidebarMenuButton>
         <CollapsibleTrigger
@@ -85,12 +96,18 @@ function NavLinkItem({ item }: { item: AppNavLink }) {
 export function AppNavMain({ groups }: AppNavMainProps) {
   return (
     <>
-      {groups.map((group) => (
-        <SidebarGroup key={group.id} className="px-2 py-1">
-          <SidebarGroupLabel className="text-[11px] font-semibold tracking-wider uppercase text-sidebar-foreground/55">
+      {groups.map((group, index) => (
+        <SidebarGroup
+          key={group.id}
+          className={cn(
+            "px-1.5 py-0",
+            index > 0 && "mt-4 border-t border-sidebar-border/40 pt-4",
+          )}
+        >
+          <SidebarGroupLabel className="mb-1 h-6 px-2.5 text-[10px] font-semibold tracking-[0.08em] uppercase text-sidebar-foreground/45">
             {group.label}
           </SidebarGroupLabel>
-          <SidebarMenu>
+          <SidebarMenu className="gap-0.5">
             {group.items.map((item) => (
               <NavLinkItem key={`${group.id}-${item.to}`} item={item} />
             ))}
