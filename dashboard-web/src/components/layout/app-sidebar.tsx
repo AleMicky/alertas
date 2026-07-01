@@ -38,22 +38,22 @@ export function AppSidebar({
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
       {...props}
     >
-      <SidebarHeader className="border-b border-sidebar-border/50 px-2 py-3">
+      <SidebarHeader className="border-b border-sidebar-border/50 px-2 py-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
-              className="h-auto gap-2.5 rounded-lg px-2 py-1.5 hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-1.5!"
+              className="h-auto gap-2 rounded-md px-1.5 py-1 hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:size-7! group-data-[collapsible=icon]:p-1!"
               render={<Link href={appBrand.homeTo} />}
             >
-              <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <Bell className="size-3.5" aria-hidden />
+              <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <Bell className="size-3" aria-hidden />
               </div>
-              <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
-                <span className="truncate text-[13px] font-semibold tracking-tight text-sidebar-foreground">
+              <div className="grid flex-1 text-left leading-none group-data-[collapsible=icon]:hidden">
+                <span className="truncate text-xs font-semibold tracking-tight text-sidebar-foreground">
                   {appBrand.name}
                 </span>
-                <span className="truncate text-[11px] text-sidebar-foreground/55">
+                <span className="truncate text-[10px] text-sidebar-foreground/50">
                   {appBrand.tagline}
                 </span>
               </div>
@@ -62,11 +62,11 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent className="gap-0 px-1 py-3">
+      <SidebarContent className="gap-0 px-1 py-2">
         <AppNavMain groups={navGroups} />
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border/50 p-2">
+      <SidebarFooter className="border-t border-sidebar-border/50 p-1.5">
         <AppNavUser
           user={{
             name: user?.fullName ?? "Usuario",

@@ -26,9 +26,9 @@ export function AppSiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 flex w-full shrink-0 items-center border-b border-border/60 bg-background">
-      <div className="flex h-(--header-height) w-full items-center gap-3 px-4 md:px-5">
+      <div className="flex h-(--header-height) w-full items-center gap-2 px-3 md:px-4">
         <Button
-          className="size-8 shrink-0 text-muted-foreground hover:text-foreground"
+          className="size-7 shrink-0 text-muted-foreground hover:text-foreground"
           variant="ghost"
           size="icon-sm"
           onClick={toggleSidebar}
@@ -43,7 +43,7 @@ export function AppSiteHeader() {
         />
 
         <Breadcrumb className="hidden min-w-0 flex-1 sm:block">
-          <BreadcrumbList className="gap-1 text-[13px]">
+          <BreadcrumbList className="gap-0.5 text-xs">
             <BreadcrumbItem>
               <BreadcrumbLink
                 className="font-medium text-muted-foreground hover:text-foreground"
@@ -71,7 +71,7 @@ export function AppSiteHeader() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <span className="min-w-0 flex-1 truncate text-[13px] font-medium sm:hidden">
+        <span className="min-w-0 flex-1 truncate text-xs font-medium sm:hidden">
           {page}
         </span>
 

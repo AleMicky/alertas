@@ -59,28 +59,28 @@ export function AppNavUser({ user }: AppNavUserProps) {
             render={
               <SidebarMenuButton
                 size="sm"
-                className="h-9 gap-2 rounded-lg px-2 hover:bg-sidebar-accent/50 data-popup-open:bg-sidebar-accent/50"
+                className="h-8 gap-1.5 rounded-md px-1.5 hover:bg-sidebar-accent/50 data-popup-open:bg-sidebar-accent/50"
               />
             }
           >
-            <Avatar className="size-7 shrink-0 rounded-md">
+            <Avatar className="size-6 shrink-0 rounded-md">
               {user.avatar ? (
                 <AvatarImage src={user.avatar} alt={user.name} />
               ) : null}
-              <AvatarFallback className="rounded-md bg-primary/10 text-[11px] font-medium text-primary">
+              <AvatarFallback className="rounded-md bg-primary/10 text-[10px] font-medium text-primary">
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <div className="grid min-w-0 flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
-              <span className="truncate text-[13px] font-medium text-sidebar-foreground">
+            <div className="grid min-w-0 flex-1 text-left leading-none group-data-[collapsible=icon]:hidden">
+              <span className="truncate text-xs font-medium text-sidebar-foreground">
                 {user.name}
               </span>
-              <span className="truncate text-[11px] text-sidebar-foreground/50">
+              <span className="truncate text-[10px] text-sidebar-foreground/50">
                 {user.email}
               </span>
             </div>
             <ChevronsUpDown
-              className="ml-auto size-3.5 shrink-0 text-sidebar-foreground/40 group-data-[collapsible=icon]:hidden"
+              className="ml-auto size-3 shrink-0 text-sidebar-foreground/40 group-data-[collapsible=icon]:hidden"
               aria-hidden
             />
           </DropdownMenuTrigger>

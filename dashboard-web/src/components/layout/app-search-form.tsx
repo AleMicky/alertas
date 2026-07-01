@@ -15,13 +15,13 @@ export function AppSearchForm({
         Buscar
       </Label>
       <Search
-        className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground/50 select-none"
+        className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-muted-foreground/50 select-none"
         aria-hidden
       />
       <Input
         id="search"
         placeholder="Buscar..."
-        className="h-8 border-transparent bg-muted/60 pl-8 text-[13px] shadow-none placeholder:text-muted-foreground/50 focus-visible:border-border focus-visible:bg-background focus-visible:ring-1"
+        className="h-7 border-transparent bg-muted/60 pl-7 text-xs shadow-none placeholder:text-muted-foreground/50 focus-visible:border-border focus-visible:bg-background focus-visible:ring-1"
       />
     </form>
   )

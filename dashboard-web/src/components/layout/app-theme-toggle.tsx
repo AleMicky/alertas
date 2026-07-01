@@ -34,7 +34,7 @@ export function AppThemeToggle() {
           <Button
             variant="ghost"
             size="icon-sm"
-            className="size-8 text-muted-foreground hover:text-foreground"
+            className="size-7 text-muted-foreground hover:text-foreground"
             aria-label="Cambiar tema"
           />
         }
