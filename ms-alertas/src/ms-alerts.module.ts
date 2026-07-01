@@ -7,6 +7,7 @@ import { APP_GUARD } from '@nestjs/core';
 import {
   NotificationChannelEntity,
   NotificationChannelProviderEntity,
+  NotificationPayloadSchemaEntity,
   SeverityLevelEntity,
   ClientSystemEntity,
   ClientSystemTokenEntity,
@@ -22,6 +23,7 @@ import { EventMapper, AlertMapper, AlertNotificationMapper } from './app/mappers
 import {
   NotificationChannelsService,
   NotificationChannelProvidersService,
+  NotificationPayloadSchemasService,
   SeverityLevelService,
   ClientSystemService,
   ClientSystemTokenService,
@@ -39,6 +41,7 @@ import {
 import {
   NotificationChannelRepository,
   NotificationChannelProviderRepository,
+  NotificationPayloadSchemaRepository,
   SeverityLevelRepository,
   ClientSystemRepository,
   ClientSystemTokenRepository,
@@ -54,6 +57,7 @@ import {
   SeverityLevelController,
   NotificationChannelsController,
   NotificationChannelProvidersController,
+  NotificationPayloadSchemasController,
   ClientSystemController,
   EventController,
   AlertController,
@@ -68,6 +72,7 @@ import {
   SeverityLevelTypeormRepository,
   NotificationChannelTypeormRepository,
   NotificationChannelProviderTypeormRepository,
+  NotificationPayloadSchemaTypeormRepository,
   ClientSystemTypeormRepository,
   ClientSystemTokenTypeormRepository,
   EventTypeormRepository,
@@ -95,6 +100,7 @@ import {
     TypeOrmModule.forFeature([
       NotificationChannelEntity,
       NotificationChannelProviderEntity,
+      NotificationPayloadSchemaEntity,
       SeverityLevelEntity,
       ClientSystemEntity,
       ClientSystemTokenEntity,
@@ -128,6 +134,7 @@ import {
   controllers: [
     NotificationChannelsController,
     NotificationChannelProvidersController,
+    NotificationPayloadSchemasController,
     SeverityLevelController,
     ClientSystemController,
     EventController,
@@ -146,6 +153,7 @@ import {
     NotificationService,
     NotificationChannelsService,
     NotificationChannelProvidersService,
+    NotificationPayloadSchemasService,
     SeverityLevelService,
     ClientSystemService,
     ClientSystemTokenService,
@@ -171,6 +179,10 @@ import {
     {
       provide: NotificationChannelProviderRepository,
       useClass: NotificationChannelProviderTypeormRepository,
+    },
+    {
+      provide: NotificationPayloadSchemaRepository,
+      useClass: NotificationPayloadSchemaTypeormRepository,
     },
     {
       provide: SeverityLevelRepository,

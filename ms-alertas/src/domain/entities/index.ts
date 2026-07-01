@@ -10,3 +10,4 @@ export * from './role';
 export * from './user-role';
 export * from './login-audit';
 export * from './notification-channel-providers';
+export * from './notification-payload-schema';

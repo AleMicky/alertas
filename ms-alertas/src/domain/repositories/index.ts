@@ -1,5 +1,6 @@
 export * from './notification-channel.repository';
 export * from './notification-channel-provider.repository';
+export * from './notification-payload-schema.repository';
 export * from './severity-level.repository';
 export * from './client-system.repository';
 export * from './client-system-token.repository';

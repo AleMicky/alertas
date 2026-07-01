@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ArrowUpDown, Edit, Plus, Search, Unplug } from 'lucide-react';
+import { ArrowUpDown, Braces, Edit, Plus, Search, Unplug } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
@@ -125,6 +125,20 @@ function NotificationChannelsListSection({
 
           return (
             <div className="flex items-center justify-end gap-1">
+              <Button
+                nativeButton={false}
+                variant="outline"
+                size="sm"
+                className="h-7 gap-1 px-2.5 text-xs transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring/50"
+                title="Gestionar schemas de payload"
+                render={
+                  <Link href={`/payload-schemas?channelId=${item.id}`} />
+                }
+              >
+                <Braces className="size-3" />
+                Schemas
+              </Button>
+
               <Button
                 nativeButton={false}
                 variant="outline"

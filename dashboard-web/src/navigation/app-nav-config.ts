@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   Bell,
+  Braces,
   LayoutDashboard,
   Layers,
   Plug,
@@ -80,6 +81,11 @@ const navGroups: AppNavGroup[] = [
         icon: Plug,
       },
       {
+        title: "Schemas de payload",
+        to: "/payload-schemas",
+        icon: Braces,
+      },
+      {
         title: "Sistemas cliente",
         to: "/client-systems",
         icon: Monitor,
@@ -122,6 +128,10 @@ const breadcrumbByPath: Record<string, { group?: string; page: string }> = {
   "/notification-channel-providers": {
     group: "Configuración",
     page: "Proveedores de canal",
+  },
+  "/payload-schemas": {
+    group: "Configuración",
+    page: "Schemas de payload",
   },
   "/client-systems": {
     group: "Configuración",
