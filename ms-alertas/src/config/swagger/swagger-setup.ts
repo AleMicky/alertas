@@ -9,13 +9,7 @@ import {
 const SWAGGER_TAGS = [
   ['Autenticación', 'Login, refresh y cierre de sesión del dashboard'],
   ['Sistemas cliente', 'Registro de sistemas que emiten eventos'],
-  ['Niveles de severidad', 'Catálogo de severidades y prioridades'],
   ['Canales de notificación', 'Webhooks y canales (Telegram, Teams, etc.)'],
-  ['Tipos de evento', 'Catálogo de tipos de evento por sistema'],
-  ['Eventos', 'Eventos recibidos desde sistemas externos'],
-  ['Reglas de alerta', 'Reglas que generan alertas a partir de eventos'],
-  ['Alertas', 'Alertas generadas y su seguimiento'],
-  ['Notificaciones', 'Envíos de alertas a canales'],
   ['Pruebas', 'Endpoints de integración y pruebas'],
 ] as const;
 
@@ -53,7 +47,7 @@ const buildSwaggerConfig = () => {
   const builder = new DocumentBuilder()
     .setTitle('MS Alertas')
     .setDescription(
-      'API para gestión de alertas, eventos, reglas y canales de notificación. ' +
+      'API para gestión de canales de notificación y sistemas cliente. ' +
         'Los cuerpos de solicitud muestran tipos de dato y ejemplos listos para probar.',
     )
     .setVersion('1.0')

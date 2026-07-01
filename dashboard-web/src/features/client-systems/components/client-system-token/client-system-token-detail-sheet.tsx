@@ -70,27 +70,6 @@ export function ClientSystemTokenDetailSheet({
     }
   };
 
-  const handleCopyCurl = async () => {
-    if (!clientSystem) return;
-
-    const snippet = `curl -X POST "${process.env.NEXT_PUBLIC_API_URL}/events" \\
-  -H "Authorization: Bearer <tu_token_msa_...>" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "eventTypeCode": "TIPO_EVENTO",
-    "title": "Título del evento",
-    "message": "Descripción",
-    "payloadJson": { "recipients": [] }
-  }'`;
-
-    try {
-      await navigator.clipboard.writeText(snippet);
-      toast.success('Ejemplo cURL copiado');
-    } catch {
-      toast.error('No se pudo copiar el ejemplo');
-    }
-  };
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -171,18 +150,9 @@ export function ClientSystemTokenDetailSheet({
                 <p className="text-sm font-medium">Uso en integraciones</p>
                 <p className="text-sm text-muted-foreground">
                   Envía el token plano (<code>msa_...</code>) en el header{' '}
-                  <code>Authorization: Bearer</code> al crear eventos.
+                  <code>Authorization: Bearer</code> para autenticar las
+                  solicitudes del sistema cliente.
                 </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={handleCopyCurl}
-                >
-                  <Copy className="size-4" aria-hidden />
-                  Copiar ejemplo cURL
-                </Button>
               </div>
 
               {token.active ? (

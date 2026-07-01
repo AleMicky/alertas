@@ -1,12 +1,9 @@
 import {
-  AlertTriangle,
-  Bell,
   Braces,
   LayoutDashboard,
   Layers,
   Plug,
   Monitor,
-  Radio,
   Shield,
   Users,
   type LucideIcon,
@@ -46,30 +43,9 @@ const navGroups: AppNavGroup[] = [
     ],
   },
   {
-    id: "operaciones",
-    label: "Operaciones",
-    items: [
-      {
-        title: "Alertas",
-        to: "/alerts",
-        icon: Bell,
-      },
-      {
-        title: "Eventos",
-        to: "/events",
-        icon: Radio,
-      },
-    ],
-  },
-  {
     id: "configuracion",
     label: "Configuración",
     items: [
-      {
-        title: "Niveles de severidad",
-        to: "/severity-levels",
-        icon: AlertTriangle,
-      },
       {
         title: "Canales de notificación",
         to: "/notification-channels",
@@ -115,12 +91,6 @@ const navGroups: AppNavGroup[] = [
 
 const breadcrumbByPath: Record<string, { group?: string; page: string }> = {
   "/": { group: "Inicio", page: "Dashboard" },
-  "/alerts": { group: "Operaciones", page: "Alertas" },
-  "/events": { group: "Operaciones", page: "Eventos" },
-  "/severity-levels": {
-    group: "Configuración",
-    page: "Niveles de severidad",
-  },
   "/notification-channels": {
     group: "Configuración",
     page: "Canales de notificación",

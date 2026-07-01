@@ -3,34 +3,24 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
- // Entities
+// Entities
 import {
   NotificationChannelEntity,
   NotificationChannelProviderEntity,
   NotificationPayloadSchemaEntity,
-  SeverityLevelEntity,
   ClientSystemEntity,
   ClientSystemTokenEntity,
-  EventEntity,
-  AlertEntity,
-  AlertNotificationEntity,
   RoleEntity,
   UserEntity,
   LoginAuditEntity,
 } from './infrastructure/typeorm/entities';
 // Services
-import { EventMapper, AlertMapper, AlertNotificationMapper } from './app/mappers';
 import {
   NotificationChannelsService,
   NotificationChannelProvidersService,
   NotificationPayloadSchemasService,
-  SeverityLevelService,
   ClientSystemService,
   ClientSystemTokenService,
-  EventService,
-  AlertService,
-  AlertNotificationService,
-  AlertOutcomeService,
   NotificationService,
   RoleService,
   AuthService,
@@ -42,26 +32,18 @@ import {
   NotificationChannelRepository,
   NotificationChannelProviderRepository,
   NotificationPayloadSchemaRepository,
-  SeverityLevelRepository,
   ClientSystemRepository,
   ClientSystemTokenRepository,
-  EventRepository,
-  AlertRepository,
-  AlertNotificationRepository,
   RoleRepository,
   UserRepository,
   LoginAuditRepository,
 } from './domain/repositories';
 // Controllers
 import {
-  SeverityLevelController,
   NotificationChannelsController,
   NotificationChannelProvidersController,
   NotificationPayloadSchemasController,
   ClientSystemController,
-  EventController,
-  AlertController,
-  AlertNotificationController,
   TestN8nController,
   RoleController,
   AuthController,
@@ -69,22 +51,16 @@ import {
 } from './presentation/controllers';
 // Repositories
 import {
-  SeverityLevelTypeormRepository,
   NotificationChannelTypeormRepository,
   NotificationChannelProviderTypeormRepository,
   NotificationPayloadSchemaTypeormRepository,
   ClientSystemTypeormRepository,
   ClientSystemTokenTypeormRepository,
-  EventTypeormRepository,
-  AlertTypeormRepository,
-  AlertNotificationTypeormRepository,
   RoleTypeormRepository,
   UserTypeormRepository,
   LoginAuditTypeormRepository,
 } from './infrastructure/repositories';
 import { N8nClient } from './infrastructure/integrations/n8n/n8n.client';
-import { BullModule } from '@nestjs/bullmq';
-import { AlertNotificationProcessor } from './app/processors/alert-notification.processor';
 import { TokenGeneratorService } from './infrastructure/security/token-generator.service';
 import { ClientSystemAuthGuard } from './shared/guards/client-system-auth.guard';
 import { PassportModule } from '@nestjs/passport';
@@ -101,12 +77,8 @@ import {
       NotificationChannelEntity,
       NotificationChannelProviderEntity,
       NotificationPayloadSchemaEntity,
-      SeverityLevelEntity,
       ClientSystemEntity,
       ClientSystemTokenEntity,
-      EventEntity,
-      AlertEntity,
-      AlertNotificationEntity,
       UserEntity,
       RoleEntity,
       LoginAuditEntity,
@@ -121,25 +93,12 @@ import {
         } as JwtSignOptions,
       }),
     }),
-    BullModule.registerQueue({
-      name: 'alert-notifications',
-      defaultJobOptions: {
-        attempts: 3,
-        backoff: { type: 'exponential', delay: 2000 },
-        removeOnComplete: 100,
-        removeOnFail: 500,
-      },
-    }),
   ],
   controllers: [
     NotificationChannelsController,
     NotificationChannelProvidersController,
     NotificationPayloadSchemasController,
-    SeverityLevelController,
     ClientSystemController,
-    EventController,
-    AlertController,
-    AlertNotificationController,
     TestN8nController,
     RoleController,
     AuthController,
@@ -147,23 +106,14 @@ import {
   ],
   providers: [
     N8nClient,
-    AlertNotificationProcessor,
     TokenGeneratorService,
     ClientSystemAuthGuard,
     NotificationService,
     NotificationChannelsService,
     NotificationChannelProvidersService,
     NotificationPayloadSchemasService,
-    SeverityLevelService,
     ClientSystemService,
     ClientSystemTokenService,
-    EventMapper,
-    AlertMapper,
-    AlertNotificationMapper,
-    EventService,
-    AlertService,
-    AlertOutcomeService,
-    AlertNotificationService,
     RoleService,
     UserService,
     JwtStrategy,
@@ -185,28 +135,12 @@ import {
       useClass: NotificationPayloadSchemaTypeormRepository,
     },
     {
-      provide: SeverityLevelRepository,
-      useClass: SeverityLevelTypeormRepository,
-    },
-    {
       provide: ClientSystemRepository,
       useClass: ClientSystemTypeormRepository,
     },
     {
       provide: ClientSystemTokenRepository,
       useClass: ClientSystemTokenTypeormRepository,
-    },
-    {
-      provide: EventRepository,
-      useClass: EventTypeormRepository,
-    },
-    {
-      provide: AlertRepository,
-      useClass: AlertTypeormRepository,
-    },
-    {
-      provide: AlertNotificationRepository,
-      useClass: AlertNotificationTypeormRepository,
     },
     {
       provide: RoleRepository,
