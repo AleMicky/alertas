@@ -36,13 +36,4 @@ export class NotificationChannelTypeormRepository
 
     return null;
   }
-
-  findActiveByType(type: string) {
-    return this.repository.find({
-      where: {
-        code: type,
-        active: true,
-      },
-    });
-  }
 }

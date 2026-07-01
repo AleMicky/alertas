@@ -1,8 +1,8 @@
 const CHANNEL_CODE_ALIASES: Record<string, string> = {
-  EMAIL: 'EMAIL_ALERTS',
-  TELEGRAM: 'TELEGRAM_ALERTS',
-  TEAMS: 'TEAMS_ALERTS',
-  WHATSAPP: 'WHATSAPP_ALERTS',
+  EMAIL_ALERTS: 'EMAIL',
+  TELEGRAM_ALERTS: 'TELEGRAM',
+  TEAMS_ALERTS: 'TEAMS',
+  WHATSAPP_ALERTS: 'WHATSAPP',
 };
 
 export function normalizeNotificationChannelCode(code: string): string {
@@ -32,6 +32,10 @@ export function getNotificationChannelKind(
   code: string,
 ): 'EMAIL' | 'TELEGRAM' | 'TEAMS' | 'WHATSAPP' | 'GOOGLE_CALENDAR' | 'GENERIC' {
   const normalized = normalizeNotificationChannelCode(code);
+
+  if (normalized.includes('GMAIL') || normalized.includes('OUTLOOK_EMAIL')) {
+    return 'EMAIL';
+  }
 
   if (normalized.includes('EMAIL')) return 'EMAIL';
   if (normalized.includes('TELEGRAM')) return 'TELEGRAM';

@@ -45,7 +45,6 @@ describe('buildN8nNotificationPayload', () => {
       },
       notificationChannel: {
         code: 'EMAIL_ALERTS',
-        webhookUrl: 'http://localhost/webhook',
       },
       alert: {
         id: 'alert-id',

@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 
 import { buildN8nNotificationPayload } from 'src/app/utils/build-n8n-notification-payload.util';
+import { resolveChannelWebhookUrl } from 'src/app/utils/resolve-channel-webhook-url.util';
 import { AlertNotificationService } from 'src/app/services/alert-notification.service';
 import { AlertOutcomeService } from 'src/app/services/alert-outcome.service';
 import { N8nClient } from 'src/infrastructure/integrations/n8n/n8n.client';
@@ -17,6 +19,7 @@ export class AlertNotificationProcessor extends WorkerHost {
     private readonly alertNotificationService: AlertNotificationService,
     private readonly alertOutcomeService: AlertOutcomeService,
     private readonly n8nClient: N8nClient,
+    private readonly configService: ConfigService,
   ) {
     super();
   }
@@ -48,13 +51,10 @@ export class AlertNotificationProcessor extends WorkerHost {
         status: AlertNotificationStatus.PROCESSING,
       });
 
-      const webhookUrl = notification.notificationChannel.webhookUrl;
-
-      if (!webhookUrl) {
-        throw new Error(
-          `Webhook URL no configurada para el canal ${notification.notificationChannel.code}`,
-        );
-      }
+      const webhookUrl = resolveChannelWebhookUrl(
+        notification.notificationChannel.code,
+        this.configService,
+      );
 
       if (!notification.target) {
         throw new Error(
