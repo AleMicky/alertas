@@ -1,6 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsObject, IsOptional, IsString } from 'class-validator';
-import { NotificationChannelType } from 'src/domain/enums/notification-channel-type.enum';
 
 export class SendTestN8nDto {
   @ApiPropertyOptional({
@@ -12,8 +11,7 @@ export class SendTestN8nDto {
   notificationId?: string;
 
   @ApiPropertyOptional({
-    enum: NotificationChannelType,
-    example: NotificationChannelType.TELEGRAM,
+    example: 'TELEGRAM',
     description: 'Canal de notificación a usar en la prueba',
   })
   @IsOptional()

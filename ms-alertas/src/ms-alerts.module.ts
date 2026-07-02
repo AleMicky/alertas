@@ -3,11 +3,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { BullModule } from '@nestjs/bullmq';
 // Entities
 import {
   NotificationChannelEntity,
   NotificationChannelProviderEntity,
   NotificationPayloadSchemaEntity,
+  NotificationRequestEntity,
+  NotificationRecipientEntity,
+  NotificationAttachmentEntity,
+  NotificationDeliveryEntity,
+  NotificationDeliveryAttemptEntity,
+  NotificationRequestAuditEntity,
   ClientSystemEntity,
   ClientSystemTokenEntity,
   RoleEntity,
@@ -19,6 +26,10 @@ import {
   NotificationChannelsService,
   NotificationChannelProvidersService,
   NotificationPayloadSchemasService,
+  NotificationRequestsService,
+  NotificationRequestProcessor,
+  NotificationRequestAuditService,
+  NotificationCallbacksService,
   ClientSystemService,
   ClientSystemTokenService,
   NotificationService,
@@ -32,6 +43,12 @@ import {
   NotificationChannelRepository,
   NotificationChannelProviderRepository,
   NotificationPayloadSchemaRepository,
+  NotificationRequestRepository,
+  NotificationRecipientRepository,
+  NotificationAttachmentRepository,
+  NotificationDeliveryRepository,
+  NotificationDeliveryAttemptRepository,
+  NotificationRequestAuditRepository,
   ClientSystemRepository,
   ClientSystemTokenRepository,
   RoleRepository,
@@ -43,6 +60,8 @@ import {
   NotificationChannelsController,
   NotificationChannelProvidersController,
   NotificationPayloadSchemasController,
+  NotificationRequestsController,
+  NotificationCallbacksController,
   ClientSystemController,
   TestN8nController,
   RoleController,
@@ -54,6 +73,12 @@ import {
   NotificationChannelTypeormRepository,
   NotificationChannelProviderTypeormRepository,
   NotificationPayloadSchemaTypeormRepository,
+  NotificationRequestTypeormRepository,
+  NotificationRecipientTypeormRepository,
+  NotificationAttachmentTypeormRepository,
+  NotificationDeliveryTypeormRepository,
+  NotificationDeliveryAttemptTypeormRepository,
+  NotificationRequestAuditTypeormRepository,
   ClientSystemTypeormRepository,
   ClientSystemTokenTypeormRepository,
   RoleTypeormRepository,
@@ -70,13 +95,33 @@ import {
   PasswordService,
   RolesGuard,
 } from './infrastructure/security';
+import { NOTIFICATION_REQUEST_QUEUE } from './app/queues/notification-request.queue';
 
 @Module({
   imports: [
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>('REDIS_HOST') ?? 'localhost',
+          port: Number(configService.get<string>('REDIS_PORT') ?? 6379),
+          password: configService.get<string>('REDIS_PASSWORD') || undefined,
+        },
+      }),
+    }),
+    BullModule.registerQueue({
+      name: NOTIFICATION_REQUEST_QUEUE,
+    }),
     TypeOrmModule.forFeature([
       NotificationChannelEntity,
       NotificationChannelProviderEntity,
       NotificationPayloadSchemaEntity,
+      NotificationRequestEntity,
+      NotificationRecipientEntity,
+      NotificationAttachmentEntity,
+      NotificationDeliveryEntity,
+      NotificationDeliveryAttemptEntity,
+      NotificationRequestAuditEntity,
       ClientSystemEntity,
       ClientSystemTokenEntity,
       UserEntity,
@@ -98,6 +143,8 @@ import {
     NotificationChannelsController,
     NotificationChannelProvidersController,
     NotificationPayloadSchemasController,
+    NotificationRequestsController,
+    NotificationCallbacksController,
     ClientSystemController,
     TestN8nController,
     RoleController,
@@ -112,6 +159,10 @@ import {
     NotificationChannelsService,
     NotificationChannelProvidersService,
     NotificationPayloadSchemasService,
+    NotificationRequestsService,
+    NotificationRequestProcessor,
+    NotificationRequestAuditService,
+    NotificationCallbacksService,
     ClientSystemService,
     ClientSystemTokenService,
     RoleService,
@@ -133,6 +184,30 @@ import {
     {
       provide: NotificationPayloadSchemaRepository,
       useClass: NotificationPayloadSchemaTypeormRepository,
+    },
+    {
+      provide: NotificationRequestRepository,
+      useClass: NotificationRequestTypeormRepository,
+    },
+    {
+      provide: NotificationRecipientRepository,
+      useClass: NotificationRecipientTypeormRepository,
+    },
+    {
+      provide: NotificationAttachmentRepository,
+      useClass: NotificationAttachmentTypeormRepository,
+    },
+    {
+      provide: NotificationDeliveryRepository,
+      useClass: NotificationDeliveryTypeormRepository,
+    },
+    {
+      provide: NotificationDeliveryAttemptRepository,
+      useClass: NotificationDeliveryAttemptTypeormRepository,
+    },
+    {
+      provide: NotificationRequestAuditRepository,
+      useClass: NotificationRequestAuditTypeormRepository,
     },
     {
       provide: ClientSystemRepository,

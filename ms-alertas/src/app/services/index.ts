@@ -8,3 +8,6 @@ export * from './role.service';
 export * from './user.service';
 export * from './auth.service';
 export * from './refresh-token.service';
+export * from './notification-requests.service';
+export * from './notification-request-audit.service';
+export * from './notification-callbacks.service';

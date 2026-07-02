@@ -7,3 +7,5 @@ export * from './test-n8n.controller';
 export * from './role.controller';
 export * from './auth.controller';
 export * from './user.controller';
+export * from './notification-requests.controller';
+export * from './notification-callbacks.controller';

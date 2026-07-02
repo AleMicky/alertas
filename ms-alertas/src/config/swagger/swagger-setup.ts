@@ -10,6 +10,8 @@ const SWAGGER_TAGS = [
   ['Autenticación', 'Login, refresh y cierre de sesión del dashboard'],
   ['Sistemas cliente', 'Registro de sistemas que emiten eventos'],
   ['Canales de notificación', 'Webhooks y canales (Telegram, Teams, etc.)'],
+  ['Solicitudes de notificación', 'Recepción y procesamiento de notificaciones'],
+  ['Callbacks de notificación', 'Webhooks de retorno desde n8n'],
   ['Pruebas', 'Endpoints de integración y pruebas'],
 ] as const;
 
