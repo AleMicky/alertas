@@ -20,6 +20,7 @@ import {
   JsonFormField,
   NumberFormField,
   SelectFormField,
+  SwitchFormField,
   TanStackForm,
   TextFormField,
   TextareaFormField,
@@ -288,6 +289,27 @@ export function NotificationPayloadSchemaFormDialog({
                 )}
               </form.Field>
             </FormSection>
+
+            {!isEditing ? (
+              <>
+                <Separator className="bg-border/50" />
+                <FormSection
+                  title="Activación"
+                  description="El schema activo es el que usa AJV al validar solicitudes de notificación."
+                >
+                  <form.Field name="active">
+                    {(field) => (
+                      <SwitchFormField
+                        field={field}
+                        label="Activar al guardar"
+                        description="Si ya hay otro schema activo en el canal, se desactivará automáticamente."
+                        disabled={isSubmitting}
+                      />
+                    )}
+                  </form.Field>
+                </FormSection>
+              </>
+            ) : null}
 
             <Separator className="bg-border/50" />
 

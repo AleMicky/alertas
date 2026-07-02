@@ -38,7 +38,7 @@ export class NotificationPayloadSchemaTypeormRepository
       const schema = await this.repository
         .createQueryBuilder('schema')
         .innerJoin('schema.notificationChannel', 'channel')
-        .where('channel.code = :code', { code: candidate })
+        .where('UPPER(channel.code) = :code', { code: candidate.toUpperCase() })
         .andWhere('schema.active = :active', { active: true })
         .orderBy('schema.version', 'DESC')
         .getOne();

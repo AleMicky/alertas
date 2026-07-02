@@ -73,4 +73,55 @@ describe('validateNotificationPayloadSchemaConfiguration', () => {
     expect(invalidResult.valid).toBe(false);
     expect(invalidResult.errors.length).toBeGreaterThan(0);
   });
+
+  it('valida formatos de ajv-formats como email y date-time', () => {
+    const schemaWithFormats = {
+      type: 'object',
+      required: ['to', 'sentAt'],
+      properties: {
+        to: { type: 'string', format: 'email' },
+        sentAt: { type: 'string', format: 'date-time' },
+      },
+      additionalProperties: false,
+    };
+
+    const validResult = validatePayloadAgainstSchema(schemaWithFormats, {
+      to: 'usuario@empresa.com',
+      sentAt: '2026-07-02T12:00:00Z',
+    });
+
+    expect(validResult.valid).toBe(true);
+
+    const invalidEmail = validatePayloadAgainstSchema(schemaWithFormats, {
+      to: 'no-es-email',
+      sentAt: '2026-07-02T12:00:00Z',
+    });
+
+    expect(invalidEmail.valid).toBe(false);
+    expect(invalidEmail.errors.some((error) => error.includes('/to'))).toBe(
+      true,
+    );
+
+    const invalidDate = validatePayloadAgainstSchema(schemaWithFormats, {
+      to: 'usuario@empresa.com',
+      sentAt: 'ayer',
+    });
+
+    expect(invalidDate.valid).toBe(false);
+    expect(invalidDate.errors.some((error) => error.includes('/sentAt'))).toBe(
+      true,
+    );
+  });
+
+  it('no rechaza campos de transporte como channel en el payload del cliente', () => {
+    const clientPayload = {
+      to: ['usuario@empresa.com'],
+      subject: 'Hola',
+      message: 'Mensaje',
+    };
+
+    const result = validatePayloadAgainstSchema(validSchema, clientPayload);
+
+    expect(result.valid).toBe(true);
+  });
 });

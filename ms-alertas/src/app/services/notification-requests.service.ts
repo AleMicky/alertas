@@ -95,7 +95,7 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
     const request = await this.findOne(id);
 
     if (!request) {
-      throw new NotFoundException('Solicitud de notificación no encontrada');
+      throw new NotFoundException('Solicitud de notificaci?n no encontrada');
     }
 
     const [recipients, attachments, deliveries, audits, attempts] =
@@ -142,7 +142,7 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
 
     if (!recipientValidation.valid) {
       throw new BadRequestException({
-        message: 'Destinatarios inválidos',
+        message: 'Destinatarios inv?lidos',
         errors: recipientValidation.errors,
       });
     }
@@ -153,31 +153,32 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
 
     if (!attachmentValidation.valid) {
       throw new BadRequestException({
-        message: 'Adjuntos inválidos',
+        message: 'Adjuntos inv?lidos',
         errors: attachmentValidation.errors,
       });
     }
 
-    const payload = this.buildStoredPayload(dto, channel.code);
     const schemaValidation =
       await this.notificationPayloadSchemasService.validatePayloadAgainstActiveChannel(
         channel.code,
-        payload,
+        dto.payload,
       );
 
     if (!schemaValidation.valid) {
       throw new BadRequestException({
-        message: 'Payload inválido para el canal indicado',
+        message: 'Payload inv?lido para el canal indicado',
         errors: schemaValidation.errors,
       });
     }
+
+    const payload = this.buildStoredPayload(dto, channel.code);
 
     const scheduledAt = dto.scheduledAt ? new Date(dto.scheduledAt) : null;
     const expiresAt = dto.expiresAt ? new Date(dto.expiresAt) : null;
     const now = new Date();
 
     if (expiresAt && expiresAt.getTime() <= now.getTime()) {
-      throw new BadRequestException('La solicitud ya está expirada (expiresAt)');
+      throw new BadRequestException('La solicitud ya est? expirada (expiresAt)');
     }
 
     const created = await this.notificationRequestRepository.create({
@@ -472,7 +473,7 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
 
     const request = this.toDomain(entity);
     await this.transitionStatus(request, NotificationRequestStatus.CANCELED, {
-      reason: 'Cancelación manual',
+      reason: 'Cancelaci?n manual',
     });
 
     const deliveries =
@@ -516,7 +517,7 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
     }
 
     if (request.isExpired()) {
-      throw new BadRequestException('La solicitud está expirada');
+      throw new BadRequestException('La solicitud est? expirada');
     }
 
     await this.transitionStatus(request, NotificationRequestStatus.QUEUED, {
@@ -575,7 +576,7 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
     const entity = await this.requireRequest(id);
 
     if (entity.expiresAt && entity.expiresAt.getTime() <= Date.now()) {
-      throw new BadRequestException('La solicitud está expirada');
+      throw new BadRequestException('La solicitud est? expirada');
     }
 
     const failedDeliveries =
@@ -624,6 +625,22 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
 
     const nextChannelCode = dto.channel ?? this.resolveChannel(request.payload);
     const channel = await this.assertActiveChannel(nextChannelCode);
+
+    if (dto.payload) {
+      const validation =
+        await this.notificationPayloadSchemasService.validatePayloadAgainstActiveChannel(
+          channel.code,
+          dto.payload,
+        );
+
+      if (!validation.valid) {
+        throw new BadRequestException({
+          message: 'Payload inv?lido para el canal indicado',
+          errors: validation.errors,
+        });
+      }
+    }
+
     const nextPayload = dto.payload
       ? this.buildStoredPayload(
           {
@@ -634,21 +651,6 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
           channel.code,
         )
       : request.payload;
-
-    if (dto.payload) {
-      const validation =
-        await this.notificationPayloadSchemasService.validatePayloadAgainstActiveChannel(
-          channel.code,
-          nextPayload,
-        );
-
-      if (!validation.valid) {
-        throw new BadRequestException({
-          message: 'Payload inválido para el canal indicado',
-          errors: validation.errors,
-        });
-      }
-    }
 
     const updated = await this.notificationRequestRepository.update(id, {
       notificationChannelId: channel.id,
@@ -697,7 +699,7 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
 
     if (request.status !== nextStatus) {
       await this.transitionStatus(request, nextStatus, {
-        reason: 'Recalculado según deliveries',
+        reason: 'Recalculado seg?n deliveries',
         metadata: {
           deliveryStatuses: deliveries.map((delivery) => delivery.status),
         },
@@ -728,13 +730,13 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
 
     if (!channel) {
       throw new BadRequestException(
-        `Canal de notificación no encontrado: ${channelCode}`,
+        `Canal de notificaci?n no encontrado: ${channelCode}`,
       );
     }
 
     if (!channel.active) {
       throw new BadRequestException(
-        `El canal ${channel.code} no está activo`,
+        `El canal ${channel.code} no est? activo`,
       );
     }
 
@@ -745,7 +747,7 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
     const entity = await this.notificationRequestRepository.findOne(id);
 
     if (!entity) {
-      throw new NotFoundException('Solicitud de notificación no encontrada');
+      throw new NotFoundException('Solicitud de notificaci?n no encontrada');
     }
 
     return entity;

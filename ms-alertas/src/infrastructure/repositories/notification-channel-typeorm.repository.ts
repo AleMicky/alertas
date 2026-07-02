@@ -20,9 +20,10 @@ export class NotificationChannelTypeormRepository
   }
 
   findByCode(code: string) {
-    return this.repository.findOne({
-      where: { code },
-    });
+    return this.repository
+      .createQueryBuilder('channel')
+      .where('UPPER(channel.code) = :code', { code: code.trim().toUpperCase() })
+      .getOne();
   }
 
   async findByRecipientChannel(code: string) {

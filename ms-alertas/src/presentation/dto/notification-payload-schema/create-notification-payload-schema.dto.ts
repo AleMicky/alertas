@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
+  IsBoolean,
   IsInt,
   IsNotEmpty,
   IsObject,
@@ -73,4 +74,14 @@ export class CreateNotificationPayloadSchemaDto {
   @IsArray()
   @IsString({ each: true })
   requiredFields: string[];
+
+  @ApiPropertyOptional({
+    type: Boolean,
+    default: true,
+    description:
+      'Si es true, desactiva los demás schemas del canal y deja este como activo',
+  })
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
 }

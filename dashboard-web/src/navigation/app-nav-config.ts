@@ -1,5 +1,6 @@
 import {
   Braces,
+  Bell,
   LayoutDashboard,
   Layers,
   Plug,
@@ -39,6 +40,11 @@ const navGroups: AppNavGroup[] = [
         title: "Dashboard",
         to: "/",
         icon: LayoutDashboard,
+      },
+      {
+        title: "Solicitudes de notificación",
+        to: "/notification-requests",
+        icon: Bell,
       },
     ],
   },
@@ -91,6 +97,10 @@ const navGroups: AppNavGroup[] = [
 
 const breadcrumbByPath: Record<string, { group?: string; page: string }> = {
   "/": { group: "Inicio", page: "Dashboard" },
+  "/notification-requests": {
+    group: "Inicio",
+    page: "Solicitudes de notificación",
+  },
   "/notification-channels": {
     group: "Configuración",
     page: "Canales de notificación",

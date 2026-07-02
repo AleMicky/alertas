@@ -18,6 +18,7 @@ const payloadSchemaFormSchema = z.object({
   schemaJsonText: z.string().min(2, 'Schema JSON requerido'),
   exampleJsonText: z.string().optional(),
   requiredFieldsText: z.string().min(1, 'Indica al menos un campo requerido'),
+  active: z.boolean().optional(),
 });
 
 export const createNotificationPayloadSchemaFormSchema =
@@ -124,6 +125,7 @@ export type CreateNotificationPayloadSchemaDto = {
   schemaJson: Record<string, unknown>;
   example?: Record<string, unknown> | null;
   requiredFields: string[];
+  active?: boolean;
 };
 
 export type UpdateNotificationPayloadSchemaDto = Partial<
@@ -142,6 +144,7 @@ export const defaultNotificationPayloadSchemaForm: NotificationPayloadSchemaForm
     schemaJsonText: '',
     exampleJsonText: '',
     requiredFieldsText: '',
+    active: true,
   };
 
 function toApiDto(
@@ -157,6 +160,7 @@ function toApiDto(
     schemaJson,
     example: parseOptionalJsonObject(values.exampleJsonText, 'example'),
     requiredFields: parseRequiredFieldsText(values.requiredFieldsText),
+    active: values.active ?? true,
   };
 }
 
@@ -194,5 +198,6 @@ export function schemaToFormValues(
       ? JSON.stringify(schema.example, null, 2)
       : '',
     requiredFieldsText: formatRequiredFieldsText(schema.requiredFields),
+    active: schema.active,
   };
 }

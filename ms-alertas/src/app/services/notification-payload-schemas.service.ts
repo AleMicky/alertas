@@ -72,7 +72,11 @@ export class NotificationPayloadSchemasService extends BaseService<NotificationP
       );
     }
 
-    const shouldActivate = entity.active ?? false;
+    const existingActive =
+      await this.notificationPayloadSchemaRepository.findActiveByNotificationChannelId(
+        entity.notificationChannelId!,
+      );
+    const shouldActivate = entity.active ?? !existingActive;
 
     if (shouldActivate) {
       await this.notificationPayloadSchemaRepository.deactivateAllByNotificationChannelId(
