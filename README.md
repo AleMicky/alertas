@@ -54,12 +54,31 @@ make web-dev    # http://localhost:3000
 
 ```bash
 make help           # Lista todos los comandos
-make up / make down # Infra Docker
+make up / make down # Infra Docker (solo Postgres + Redis)
 make seed           # Catálogos iniciales (severidad, canales)
 make build          # Build API + dashboard
 make lint           # ESLint en ambos proyectos
 make test           # Tests del API
 ```
+
+## Modo producción (Docker)
+
+Levanta API, dashboard, PostgreSQL y Redis como contenedores:
+
+```bash
+cp .env.example .env   # Ajusta JWT_SECRET y credenciales
+make prod-up           # Build + arranque del stack completo
+make prod-seed         # Primera vez: catálogos y usuarios del dashboard
+```
+
+| Comando        | Descripción |
+|----------------|-------------|
+| `make prod-up` | Construye imágenes y levanta todo |
+| `make prod-down` | Detiene el stack |
+| `make prod-logs` | Logs de todos los servicios |
+| `make prod-build` | Solo reconstruye imágenes |
+
+`NEXT_PUBLIC_API_URL` en `.env` debe ser la URL del API **vista desde el navegador** (por defecto `http://localhost:4001/api/v1`).
 
 ## Variables de entorno
 

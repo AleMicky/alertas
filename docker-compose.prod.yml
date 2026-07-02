@@ -1,0 +1,57 @@
+# Stack completo en modo producción (API + dashboard + infra).
+# Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# o: make prod-up
+
+services:
+  api:
+    build:
+      context: ./ms-alertas
+      dockerfile: Dockerfile
+    image: alertas-api:prod
+    container_name: ms-alertas-api
+    restart: unless-stopped
+    ports:
+      - "${PORT:-4001}:4001"
+    environment:
+      NODE_ENV: production
+      PORT: 4001
+      API_PREFIX: ${API_PREFIX:-api/v1}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_LOGGING: "false"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      TZ: ${TZ:-America/La_Paz}
+      N8N_WEBHOOK_TEST_URL: ${N8N_WEBHOOK_TEST_URL:-}
+      DASHBOARD_ADMIN_USERNAME: ${DASHBOARD_ADMIN_USERNAME}
+      DASHBOARD_ADMIN_PASSWORD: ${DASHBOARD_ADMIN_PASSWORD}
+      DASHBOARD_OPERATOR_USERNAME: ${DASHBOARD_OPERATOR_USERNAME}
+      DASHBOARD_OPERATOR_PASSWORD: ${DASHBOARD_OPERATOR_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  web:
+    build:
+      context: ./dashboard-web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4001/api/v1}
+    image: alertas-web:prod
+    container_name: alertas-dashboard
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - api

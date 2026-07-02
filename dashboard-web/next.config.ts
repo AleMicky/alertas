@@ -32,6 +32,7 @@ function loadSharedEnvOnce() {
 loadSharedEnvOnce();
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   turbopack: {
     root: __dirname,
   },

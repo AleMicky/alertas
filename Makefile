@@ -3,7 +3,8 @@
 ROOT_DIR   := $(CURDIR)
 API_DIR    := ms-alertas
 WEB_DIR    := dashboard-web
-COMPOSE    := docker compose
+COMPOSE      := docker compose
+COMPOSE_PROD := $(COMPOSE) -f docker-compose.yml -f docker-compose.prod.yml
 
 # ── Ayuda ──────────────────────────────────────────────────────────────────────
 
@@ -57,6 +58,36 @@ logs: ## Logs de todos los servicios (Ctrl+C para salir)
 
 logs-api-db: ## Logs solo de Postgres
 	$(COMPOSE) logs -f db
+
+# ── Producción (Docker) ───────────────────────────────────────────────────────
+
+.PHONY: prod-build prod-up prod-down prod-restart prod-ps prod-logs prod-seed
+prod-build: env ## Construye imágenes Docker de API y dashboard
+	$(COMPOSE_PROD) build
+
+prod-up: env ## Levanta stack completo en modo producción
+	$(COMPOSE_PROD) up -d --build
+	@echo "✓ Stack de producción arriba"
+	@echo "  Dashboard → http://localhost:$${WEB_PORT:-3000}"
+	@echo "  API       → http://localhost:$${PORT:-4001}/$${API_PREFIX:-api/v1}"
+	@echo "  Swagger   → http://localhost:$${PORT:-4001}/$${API_PREFIX:-api/v1}/docs"
+	@echo ""
+	@echo "  Primera vez: make prod-seed"
+
+prod-down: ## Detiene el stack de producción
+	$(COMPOSE_PROD) down
+
+prod-restart: ## Reinicia el stack de producción
+	$(COMPOSE_PROD) restart
+
+prod-ps: ## Estado de contenedores (modo producción)
+	$(COMPOSE_PROD) ps
+
+prod-logs: ## Logs del stack de producción (Ctrl+C para salir)
+	$(COMPOSE_PROD) logs -f
+
+prod-seed: ## Ejecuta seeds contra la BD expuesta por Docker
+	cd $(API_DIR) && pnpm seed
 
 # ── Backend (ms-alertas / NestJS) ───────────────────────────────────────────
 
