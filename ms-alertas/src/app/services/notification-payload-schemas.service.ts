@@ -35,9 +35,20 @@ export class NotificationPayloadSchemasService extends BaseService<NotificationP
   }
 
   findActiveByChannelCode(channelCode: string) {
-    return this.notificationPayloadSchemaRepository.findActiveByChannelCode(
-      channelCode,
-    );
+    return this.findActiveByChannelCodeResolved(channelCode);
+  }
+
+  private async findActiveByChannelCodeResolved(channelCode: string) {
+    const channel =
+      await this.notificationChannelRepository.findByRecipientChannel(
+        channelCode,
+      );
+
+    if (!channel) {
+      return null;
+    }
+
+    return this.findActiveByNotificationChannelId(channel.id);
   }
 
   async create(entity: Partial<NotificationPayloadSchema>) {

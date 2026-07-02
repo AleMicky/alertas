@@ -30,6 +30,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
             const exceptionResponse = exception.getResponse();
 
+            if (status === HttpStatus.NOT_FOUND) {
+                errorCode = ErrorCode.NOT_FOUND;
+            } else if (status === HttpStatus.BAD_REQUEST) {
+                errorCode = ErrorCode.BAD_REQUEST;
+            } else if (status === HttpStatus.UNAUTHORIZED) {
+                errorCode = ErrorCode.UNAUTHORIZED;
+            } else if (status === HttpStatus.FORBIDDEN) {
+                errorCode = ErrorCode.FORBIDDEN;
+            }
+
             if (typeof exceptionResponse === 'string') {
                 message = exceptionResponse;
             } else if (
@@ -62,10 +72,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
         }
 
         const logStack = exception instanceof Error ? exception.stack : undefined;
-        this.logger.error(
-            `[${request.method}] ${request.url} -> ${status} (${errorCode}) ${message}`,
-            logStack,
-        );
+        const logMessage = `[${request.method}] ${request.url} -> ${status} (${errorCode}) ${message}`;
+
+        if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+            this.logger.error(logMessage, logStack);
+        } else if (status === HttpStatus.NOT_FOUND) {
+            this.logger.warn(logMessage);
+        } else {
+            this.logger.log(logMessage);
+        }
 
         const body: ApiResponse = {
             success: false,

@@ -250,18 +250,38 @@ export function NotificationRequestDetailSheet({
               </dl>
 
               <Tabs defaultValue="payload">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="payload">Payload</TabsTrigger>
-                  <TabsTrigger value="recipients">
+                <TabsList
+                  variant="line"
+                  className="flex h-auto w-full max-w-full justify-start overflow-x-auto"
+                >
+                  <TabsTrigger
+                    value="payload"
+                    className="shrink-0 flex-none px-2 text-xs"
+                  >
+                    Payload
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="recipients"
+                    className="shrink-0 flex-none px-2 text-xs"
+                  >
                     Destinatarios ({detail.recipients.length})
                   </TabsTrigger>
-                  <TabsTrigger value="deliveries">
+                  <TabsTrigger
+                    value="deliveries"
+                    className="shrink-0 flex-none px-2 text-xs"
+                  >
                     Deliveries ({detail.deliveries.length})
                   </TabsTrigger>
-                  <TabsTrigger value="audits">
+                  <TabsTrigger
+                    value="audits"
+                    className="shrink-0 flex-none px-2 text-xs"
+                  >
                     Auditoría ({detail.audits.length})
                   </TabsTrigger>
-                  <TabsTrigger value="attempts">
+                  <TabsTrigger
+                    value="attempts"
+                    className="shrink-0 flex-none px-2 text-xs"
+                  >
                     Intentos ({detail.attempts.length})
                   </TabsTrigger>
                 </TabsList>
