@@ -38,6 +38,7 @@ import {
   SchemaBuilderState,
   buildExampleFromBuilderState,
   createDefaultSchemaBuilderState,
+  ensureSchemaFieldOrder,
   formatJson,
   formatRequiredFieldsText,
   getRequiredFieldsFromSchema,
@@ -137,13 +138,16 @@ function resolveFormValuesForSubmit(
     };
   }
 
-  // Modo JSON: alinear requiredFields con schemaJson.required automáticamente.
+  // Modo JSON: sincroniza required + preserva orden de campos (jsonb no lo guarda solo).
   try {
-    const schemaJson = parseJsonObject(values.schemaJsonText, 'schemaJson');
+    const schemaJson = ensureSchemaFieldOrder(
+      parseJsonObject(values.schemaJsonText, 'schemaJson'),
+    );
     const schemaRequired = getRequiredFieldsFromSchema(schemaJson);
 
     return {
       ...values,
+      schemaJsonText: formatJson(schemaJson),
       requiredFieldsText: formatRequiredFieldsText(schemaRequired),
     };
   } catch {

@@ -382,7 +382,10 @@ export function schemaJsonToBuilderState(
       createEmptySchemaField({ name, type: 'string', required: true }),
     );
 
-  const fields = [...fieldsFromProperties, ...missingRequired];
+  const fields = orderFieldsBySchema(
+    [...fieldsFromProperties, ...missingRequired],
+    normalized,
+  );
 
   if (fields.length === 0 && requiredList.length > 0) {
     return {
@@ -400,6 +403,83 @@ export function schemaJsonToBuilderState(
   return {
     fields,
     additionalProperties: normalized.additionalProperties === true,
+  };
+}
+
+/** PostgreSQL jsonb no preserva orden de claves; usamos esta extensión. */
+export const SCHEMA_FIELD_ORDER_KEY = 'x-field-order';
+
+function readFieldOrder(schemaJson: Record<string, unknown>): string[] {
+  const order = schemaJson[SCHEMA_FIELD_ORDER_KEY];
+
+  if (!Array.isArray(order)) {
+    return [];
+  }
+
+  return [
+    ...new Set(
+      order
+        .filter((item): item is string => typeof item === 'string')
+        .map((item) => item.trim())
+        .filter(Boolean),
+    ),
+  ];
+}
+
+function orderFieldsBySchema(
+  fields: SchemaFieldDefinition[],
+  schemaJson: Record<string, unknown>,
+): SchemaFieldDefinition[] {
+  const savedOrder = readFieldOrder(schemaJson);
+
+  if (savedOrder.length === 0) {
+    return fields;
+  }
+
+  const byName = new Map(
+    fields.map((field) => [field.name.trim(), field] as const),
+  );
+  const ordered: SchemaFieldDefinition[] = [];
+
+  for (const name of savedOrder) {
+    const field = byName.get(name);
+
+    if (field) {
+      ordered.push(field);
+      byName.delete(name);
+    }
+  }
+
+  for (const field of byName.values()) {
+    ordered.push(field);
+  }
+
+  return ordered;
+}
+
+/**
+ * Asegura x-field-order en un schema editado como JSON crudo,
+ * usando el orden actual de properties si no viene definido.
+ */
+export function ensureSchemaFieldOrder(
+  schemaJson: Record<string, unknown>,
+): Record<string, unknown> {
+  const properties = isPlainObject(schemaJson.properties)
+    ? schemaJson.properties
+    : {};
+  const propertyNames = Object.keys(properties);
+  const existingOrder = readFieldOrder(schemaJson);
+  const order =
+    existingOrder.length > 0
+      ? [
+          ...existingOrder.filter((name) => propertyNames.includes(name)),
+          ...propertyNames.filter((name) => !existingOrder.includes(name)),
+        ]
+      : propertyNames;
+
+  return {
+    ...schemaJson,
+    ...(order.length > 0 ? { [SCHEMA_FIELD_ORDER_KEY]: order } : {}),
   };
 }
 
@@ -446,6 +526,7 @@ export function builderStateToSchemaJson(
 ): Record<string, unknown> {
   const properties: Record<string, unknown> = {};
   const required: string[] = [];
+  const fieldOrder: string[] = [];
 
   for (const field of state.fields) {
     const name = field.name.trim();
@@ -454,6 +535,7 @@ export function builderStateToSchemaJson(
       continue;
     }
 
+    fieldOrder.push(name);
     properties[name] = buildPropertySchema(field);
 
     if (field.required) {
@@ -466,6 +548,9 @@ export function builderStateToSchemaJson(
     ...(required.length > 0 ? { required } : {}),
     properties,
     additionalProperties: state.additionalProperties,
+    ...(fieldOrder.length > 0
+      ? { [SCHEMA_FIELD_ORDER_KEY]: fieldOrder }
+      : {}),
   };
 }
 

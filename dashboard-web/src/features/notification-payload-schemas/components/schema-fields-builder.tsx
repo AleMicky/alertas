@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -94,6 +94,25 @@ export function SchemaFieldsBuilder({
     });
   };
 
+  const moveField = (id: string, direction: -1 | 1) => {
+    const index = value.fields.findIndex((field) => field.id === id);
+
+    if (index < 0) {
+      return;
+    }
+
+    const targetIndex = index + direction;
+
+    if (targetIndex < 0 || targetIndex >= value.fields.length) {
+      return;
+    }
+
+    const fields = [...value.fields];
+    const [item] = fields.splice(index, 1);
+    fields.splice(targetIndex, 0, item);
+    onChange({ ...value, fields });
+  };
+
   const addField = () => {
     onChange({
       ...value,
@@ -140,17 +159,41 @@ export function SchemaFieldsBuilder({
                   <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                     Campo {index + 1}
                   </p>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 gap-1.5 px-2 text-xs text-muted-foreground hover:text-destructive"
-                    disabled={disabled || value.fields.length <= 1}
-                    onClick={() => removeField(field.id)}
-                  >
-                    <Trash2 className="size-3" />
-                    Quitar
-                  </Button>
+                  <div className="flex items-center gap-0.5">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="size-7 p-0 text-muted-foreground"
+                      disabled={disabled || index === 0}
+                      title="Subir"
+                      onClick={() => moveField(field.id, -1)}
+                    >
+                      <ChevronUp className="size-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="size-7 p-0 text-muted-foreground"
+                      disabled={disabled || index === value.fields.length - 1}
+                      title="Bajar"
+                      onClick={() => moveField(field.id, 1)}
+                    >
+                      <ChevronDown className="size-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 gap-1.5 px-2 text-xs text-muted-foreground hover:text-destructive"
+                      disabled={disabled || value.fields.length <= 1}
+                      onClick={() => removeField(field.id)}
+                    >
+                      <Trash2 className="size-3" />
+                      Quitar
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="grid gap-2.5 sm:grid-cols-[1fr_140px]">
