@@ -34,6 +34,7 @@ async function refreshAccessToken(): Promise<string | null> {
 
 export const http = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
+  timeout: 15_000,
 });
 
 http.interceptors.request.use((config) => {

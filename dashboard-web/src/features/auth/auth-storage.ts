@@ -9,6 +9,16 @@ function isBrowser() {
   return typeof window !== 'undefined';
 }
 
+const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
+
+function writeSessionCookie() {
+  document.cookie = `${SESSION_COOKIE}=1; path=/; max-age=${SESSION_MAX_AGE_SECONDS}; SameSite=Lax`;
+}
+
+function clearSessionCookie() {
+  document.cookie = `${SESSION_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
+}
+
 export const authStorage = {
   getAccessToken(): string | null {
     if (!isBrowser()) return null;
@@ -32,13 +42,19 @@ export const authStorage = {
     }
   },
 
+  ensureSessionCookie() {
+    if (!isBrowser()) return;
+    if (!this.getAccessToken() || !this.getUser()) return;
+    writeSessionCookie();
+  },
+
   setSession(accessToken: string, refreshToken: string, user: AuthUser) {
     if (!isBrowser()) return;
 
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
     localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
-    document.cookie = `${SESSION_COOKIE}=1; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+    writeSessionCookie();
   },
 
   setAccessToken(accessToken: string) {
@@ -57,6 +73,6 @@ export const authStorage = {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(AUTH_USER_KEY);
-    document.cookie = `${SESSION_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
+    clearSessionCookie();
   },
 };

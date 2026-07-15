@@ -44,6 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authStorage.clearSession();
       setUser(null);
     } else {
+      // Sin cookie el proxy redirige a /login y la UI queda en bucle.
+      authStorage.ensureSessionCookie();
       setUser(storedUser);
     }
 
@@ -64,9 +66,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         response.user,
       );
       setUser(response.user);
-      router.replace(options?.redirectTo ?? '/');
+
+      const redirectTo = options?.redirectTo ?? '/';
+      window.location.assign(redirectTo);
     },
-    [router],
+    [],
   );
 
   const logout = useCallback(async () => {

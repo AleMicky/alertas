@@ -19,6 +19,13 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  if (hasSession && pathname.startsWith('/login')) {
+    const from = request.nextUrl.searchParams.get('from');
+    const destination =
+      from && from.startsWith('/') && !from.startsWith('/login') ? from : '/';
+    return NextResponse.redirect(new URL(destination, request.url));
+  }
+
   return NextResponse.next();
 }
 

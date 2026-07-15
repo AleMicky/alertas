@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Loader2, Lock, User } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -22,7 +22,6 @@ import {
 
 export function LoginForm() {
   const { login, isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -30,9 +29,11 @@ export function LoginForm() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace(redirectTo && redirectTo !== '/login' ? redirectTo : '/');
+      const destination =
+        redirectTo && redirectTo !== '/login' ? redirectTo : '/';
+      window.location.assign(destination);
     }
-  }, [isAuthenticated, isLoading, redirectTo, router]);
+  }, [isAuthenticated, isLoading, redirectTo]);
 
   const form = useForm({
     defaultValues: defaultLoginValues,
