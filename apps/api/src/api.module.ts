@@ -239,4 +239,4 @@ import { NOTIFICATION_REQUEST_QUEUE } from './app/queues/notification-request.qu
     },
   ],
 })
-export class MsAlertsModule {}
+export class ApiModule {}

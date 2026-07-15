@@ -21,8 +21,8 @@ Frontend para la gestión de alertas: niveles de severidad, reglas, eventos, can
 1. Clona el repositorio:
 
 ```bash
-git clone https://github.com/<tu-org>/dashboard-web.git
-cd dashboard-web
+git clone https://github.com/<tu-org>/web.git
+cd web
 ```
 
 2. Instala dependencias:
@@ -67,10 +67,10 @@ src/
 Si aún no tienes remoto configurado:
 
 ```bash
-git remote add origin https://github.com/<tu-org>/dashboard-web.git
+git remote add origin https://github.com/<tu-org>/web.git
 git add .
 git commit -m "chore: inicializar Dashboard Web"
 git push -u origin main
 ```
 
-Crea el repositorio vacío `dashboard-web` en GitHub antes del primer push.
+Crea el repositorio vacío `web` en GitHub antes del primer push.

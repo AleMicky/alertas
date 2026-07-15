@@ -42,7 +42,7 @@ services:
 
   web:
     build:
-      context: ./dashboard-web
+      context: ./apps/web
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4001/api/v1}

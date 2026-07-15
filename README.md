@@ -6,8 +6,9 @@ Sistema de gestión y notificación de alertas. Monorepo con API NestJS, dashboa
 
 ```
 alertas/
-├── ms-alertas/       # API NestJS (puerto 4001)
-├── dashboard-web/    # Dashboard Next.js (puerto 3000)
+├── apps/
+│   ├── api/          # API NestJS (puerto 4001)
+│   └── web/          # Dashboard Next.js (puerto 3000)
 ├── docker-compose.yml
 ├── Makefile
 └── .env.example
@@ -82,7 +83,7 @@ make prod-seed         # Primera vez: catálogos y usuarios del dashboard
 
 ## Variables de entorno
 
-Copiar `.env.example` a `.env` en la raíz. Es compartido por Docker Compose, `ms-alertas` y `dashboard-web`.
+Copiar `.env.example` a `.env` en la raíz. Es compartido por Docker Compose, `apps/api` y `apps/web`.
 
 **No subir `.env` a Git** — contiene secretos locales.
 

@@ -1,8 +1,8 @@
 .DEFAULT_GOAL := help
 
 ROOT_DIR   := $(CURDIR)
-API_DIR    := ms-alertas
-WEB_DIR    := dashboard-web
+API_DIR    := apps/api
+WEB_DIR    := apps/web
 COMPOSE      := docker compose
 COMPOSE_PROD := $(COMPOSE) -f docker-compose.yml -f docker-compose.prod.yml
 
@@ -29,10 +29,10 @@ env: ## Crea .env desde .env.example si no existe
 
 install: install-api install-web ## Instala dependencias de backend y frontend
 
-install-api: ## pnpm install en ms-alertas
+install-api: ## pnpm install en apps/api
 	cd $(API_DIR) && pnpm install
 
-install-web: ## pnpm install en dashboard-web
+install-web: ## pnpm install en apps/web
 	cd $(WEB_DIR) && pnpm install
 
 # ── Infraestructura (Docker) ──────────────────────────────────────────────────
@@ -89,7 +89,7 @@ prod-logs: ## Logs del stack de producción (Ctrl+C para salir)
 prod-seed: ## Ejecuta seeds contra la BD expuesta por Docker
 	cd $(API_DIR) && pnpm seed
 
-# ── Backend (ms-alertas / NestJS) ───────────────────────────────────────────
+# ── Backend (apps/api / NestJS) ───────────────────────────────────────────────
 
 .PHONY: api-dev api-build api-start api-seed api-test api-lint
 api-dev: ## Servidor de desarrollo NestJS (puerto 4001)
@@ -110,7 +110,7 @@ api-test: ## Tests unitarios del API
 api-lint: ## ESLint del API
 	cd $(API_DIR) && pnpm lint
 
-# ── Frontend (dashboard-web / Next.js) ────────────────────────────────────────
+# ── Frontend (apps/web / Next.js) ─────────────────────────────────────────────
 
 .PHONY: web-dev web-dev-turbo web-build web-start web-clean web-lint
 web-dev: ## Servidor de desarrollo Next.js (puerto 3000, webpack)
