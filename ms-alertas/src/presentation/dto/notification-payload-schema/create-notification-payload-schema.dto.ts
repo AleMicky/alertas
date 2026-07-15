@@ -9,6 +9,7 @@ import {
   IsString,
   IsUUID,
   Min,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateNotificationPayloadSchemaDto {
@@ -31,6 +32,7 @@ export class CreateNotificationPayloadSchemaDto {
     example: 'Schema para notificaciones de correo',
   })
   @IsOptional()
+  @ValidateIf((_, value) => value !== null)
   @IsString()
   description?: string | null;
 
@@ -64,6 +66,7 @@ export class CreateNotificationPayloadSchemaDto {
     },
   })
   @IsOptional()
+  @ValidateIf((_, value) => value !== null)
   @IsObject()
   example?: Record<string, unknown> | null;
 

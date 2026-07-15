@@ -116,7 +116,7 @@ export class NotificationPayloadSchemasService extends BaseService<NotificationP
     const nextSchemaJson = entity.schemaJson ?? current.schemaJson;
     const nextRequiredFields = entity.requiredFields ?? current.requiredFields;
 
-    if (entity.schemaJson || entity.requiredFields) {
+    if (entity.schemaJson !== undefined || entity.requiredFields !== undefined) {
       this.assertValidConfiguration({
         schemaJson: nextSchemaJson,
         requiredFields: nextRequiredFields,
@@ -130,12 +130,31 @@ export class NotificationPayloadSchemasService extends BaseService<NotificationP
       );
     }
 
-    return super.update(id, {
-      ...entity,
-      requiredFields: entity.requiredFields
-        ? this.normalizeRequiredFields(entity.requiredFields)
-        : undefined,
-    });
+    const patch: Partial<NotificationPayloadSchema> = {};
+
+    if (entity.description !== undefined) {
+      patch.description = entity.description;
+    }
+
+    if (entity.schemaJson !== undefined) {
+      patch.schemaJson = entity.schemaJson;
+    }
+
+    if (entity.example !== undefined) {
+      patch.example = entity.example;
+    }
+
+    if (entity.requiredFields !== undefined) {
+      patch.requiredFields = this.normalizeRequiredFields(
+        entity.requiredFields,
+      );
+    }
+
+    if (entity.active !== undefined) {
+      patch.active = entity.active;
+    }
+
+    return super.update(id, patch);
   }
 
   async activate(id: string) {

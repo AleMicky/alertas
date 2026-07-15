@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Filter, Plus } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -109,28 +110,36 @@ export default function PayloadSchemasPage() {
   };
 
   const handleSubmit = (values: NotificationPayloadSchemaFormValues) => {
-    if (selected) {
-      update(
-        {
-          id: selected.id,
-          data: toUpdateNotificationPayloadSchemaDto(values),
-        },
-        {
-          onSuccess: () => {
-            setFormOpen(false);
-            setSelected(null);
+    try {
+      if (selected) {
+        update(
+          {
+            id: selected.id,
+            data: toUpdateNotificationPayloadSchemaDto(values),
           },
-        },
-      );
-      return;
-    }
+          {
+            onSuccess: () => {
+              setFormOpen(false);
+              setSelected(null);
+            },
+          },
+        );
+        return;
+      }
 
-    create(toCreateNotificationPayloadSchemaDto(values), {
-      onSuccess: () => {
-        setFormOpen(false);
-        setSelected(null);
-      },
-    });
+      create(toCreateNotificationPayloadSchemaDto(values), {
+        onSuccess: () => {
+          setFormOpen(false);
+          setSelected(null);
+        },
+      });
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'No se pudo preparar el schema para guardar',
+      );
+    }
   };
 
   const handleValidate = (schema: NotificationPayloadSchema) => {

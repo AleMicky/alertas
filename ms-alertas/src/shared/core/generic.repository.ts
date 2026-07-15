@@ -24,15 +24,18 @@ export abstract class GenericRepository<
   }
 
   async update(id: string, entity: Partial<T>): Promise<T> {
-    await this.repository.update(id, entity as any);
+    const existing = await this.findOne(id);
 
-    const updated = await this.findOne(id);
-
-    if (!updated) {
+    if (!existing) {
       throw new Error('Registro no encontrado');
     }
 
-    return updated;
+    const merged = this.repository.merge(
+      existing,
+      entity as DeepPartial<T>,
+    );
+
+    return await this.repository.save(merged);
   }
 
   async delete(id: string): Promise<void> {

@@ -1,8 +1,9 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { FormEvent, ReactNode, useRef, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { Braces, Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
@@ -14,14 +15,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NotificationChannel } from '@/features/notification-channels/notification-channel.types';
 import {
   JsonFormField,
   NumberFormField,
   SelectFormField,
   SwitchFormField,
-  TanStackForm,
   TextFormField,
   TextareaFormField,
 } from '@/shared/components/form';
@@ -32,6 +31,7 @@ import {
   createNotificationPayloadSchemaFormSchema,
   defaultNotificationPayloadSchemaForm,
   schemaToFormValues,
+  updateNotificationPayloadSchemaFormSchema,
 } from '../notification-payload-schema.schema';
 import { NotificationPayloadSchema } from '../notification-payload-schema.types';
 import {
@@ -124,6 +124,54 @@ function getInitialFormValues(
   };
 }
 
+/** Une la vista activa (interfaz o JSON) en los textos que consume la API. */
+function resolveFormValuesForSubmit(
+  values: NotificationPayloadSchemaFormValues,
+  editorMode: EditorMode,
+  builderState: SchemaBuilderState,
+): NotificationPayloadSchemaFormValues {
+  if (editorMode === 'visual') {
+    return {
+      ...values,
+      ...syncFormTextsFromBuilderState(builderState),
+    };
+  }
+
+  // Modo JSON: alinear requiredFields con schemaJson.required automáticamente.
+  try {
+    const schemaJson = parseJsonObject(values.schemaJsonText, 'schemaJson');
+    const schemaRequired = getRequiredFieldsFromSchema(schemaJson);
+
+    return {
+      ...values,
+      requiredFieldsText: formatRequiredFieldsText(schemaRequired),
+    };
+  } catch {
+    // La validación posterior reportará el error de JSON.
+  }
+
+  return values;
+}
+
+function getSubmitValidationMessage(
+  values: NotificationPayloadSchemaFormValues,
+  isEditing: boolean,
+): string | null {
+  const schema = isEditing
+    ? updateNotificationPayloadSchemaFormSchema
+    : createNotificationPayloadSchemaFormSchema;
+  const parsed = schema.safeParse(values);
+
+  if (parsed.success) {
+    return null;
+  }
+
+  return (
+    parsed.error.issues.map((issue) => issue.message).join(' · ') ||
+    'Revisa el formulario'
+  );
+}
+
 interface FormBodyProps {
   initialData?: NotificationPayloadSchema | null;
   channels: NotificationChannel[];
@@ -149,6 +197,11 @@ function NotificationPayloadSchemaFormBody({
   const [editorMode, setEditorMode] = useState<EditorMode>('visual');
   const [builderError, setBuilderError] = useState<string | undefined>();
 
+  const builderStateRef = useRef(builderState);
+  const editorModeRef = useRef(editorMode);
+  builderStateRef.current = builderState;
+  editorModeRef.current = editorMode;
+
   const channelOptions = channels.map((channel) => ({
     label: `${channel.name} (${channel.code})`,
     value: channel.id,
@@ -160,16 +213,84 @@ function NotificationPayloadSchemaFormBody({
       defaultChannelId,
       initialBuilder,
     ),
-    validators: {
-      onSubmit: createNotificationPayloadSchemaFormSchema,
-    },
     onSubmit: async ({ value }) => {
-      onSubmit(value);
+      const lockedValues = initialData
+        ? {
+            ...value,
+            notificationChannelId: initialData.notificationChannelId,
+            name: initialData.name,
+            version: initialData.version,
+          }
+        : value;
+
+      const finalValues = resolveFormValuesForSubmit(
+        lockedValues,
+        editorModeRef.current,
+        builderStateRef.current,
+      );
+      onSubmit(finalValues);
     },
   });
 
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const currentValues: NotificationPayloadSchemaFormValues = {
+      notificationChannelId: initialData
+        ? initialData.notificationChannelId
+        : form.getFieldValue('notificationChannelId'),
+      name: initialData ? initialData.name : form.getFieldValue('name'),
+      description: form.getFieldValue('description'),
+      version: initialData
+        ? initialData.version
+        : form.getFieldValue('version'),
+      schemaJsonText: form.getFieldValue('schemaJsonText'),
+      exampleJsonText: form.getFieldValue('exampleJsonText'),
+      requiredFieldsText: form.getFieldValue('requiredFieldsText'),
+      active: form.getFieldValue('active'),
+    };
+
+    const finalValues = resolveFormValuesForSubmit(
+      currentValues,
+      editorModeRef.current,
+      builderStateRef.current,
+    );
+
+    // Mantener form + builder alineados con lo que se envía.
+    form.setFieldValue('schemaJsonText', finalValues.schemaJsonText);
+    form.setFieldValue('requiredFieldsText', finalValues.requiredFieldsText);
+
+    if (editorModeRef.current === 'json') {
+      try {
+        const parsedBuilder = schemaJsonToBuilderState(
+          parseJsonObject(finalValues.schemaJsonText, 'schemaJson'),
+          parseRequiredFieldsText(finalValues.requiredFieldsText),
+        );
+        setBuilderState(parsedBuilder);
+        builderStateRef.current = parsedBuilder;
+      } catch {
+        // Si el JSON es inválido, la validación lo reporta abajo.
+      }
+    }
+
+    const validationMessage = getSubmitValidationMessage(
+      finalValues,
+      isEditing,
+    );
+
+    if (validationMessage) {
+      setBuilderError(validationMessage);
+      toast.error(validationMessage);
+      return;
+    }
+
+    setBuilderError(undefined);
+    onSubmit(finalValues);
+  };
+
   const applyBuilderState = (next: SchemaBuilderState) => {
     setBuilderState(next);
+    builderStateRef.current = next;
     setBuilderError(undefined);
 
     const synced = syncFormTextsFromBuilderState(next);
@@ -187,15 +308,15 @@ function NotificationPayloadSchemaFormBody({
         form.getFieldValue('requiredFieldsText'),
       );
       const parsed = schemaJsonToBuilderState(schemaJson, requiredFields);
+      const schemaRequired = getRequiredFieldsFromSchema(schemaJson);
 
       setBuilderState(parsed);
+      builderStateRef.current = parsed;
       setBuilderError(undefined);
       form.setFieldValue(
         'requiredFieldsText',
         formatRequiredFieldsText(
-          getRequiredFieldsFromSchema(schemaJson).length > 0
-            ? getRequiredFieldsFromSchema(schemaJson)
-            : requiredFields,
+          schemaRequired.length > 0 ? schemaRequired : requiredFields,
         ),
       );
       return true;
@@ -210,42 +331,46 @@ function NotificationPayloadSchemaFormBody({
   const handleEditorModeChange = (value: string | number | null) => {
     const nextMode = value === 'json' ? 'json' : 'visual';
 
-    if (nextMode === editorMode) {
+    if (nextMode === editorModeRef.current) {
       return;
     }
 
     if (nextMode === 'visual') {
       if (!syncBuilderFromJsonText()) {
+        toast.error(
+          builderError ??
+            'No se pudo leer el JSON. Corrígelo antes de volver a Interfaz.',
+        );
         return;
       }
     } else {
-      applyBuilderState(builderState);
+      applyBuilderState(builderStateRef.current);
     }
 
     setEditorMode(nextMode);
+    editorModeRef.current = nextMode;
+    setBuilderError(undefined);
   };
 
   const generateExample = () => {
-    if (editorMode === 'json') {
-      syncBuilderFromJsonText();
-    }
-
     const currentBuilder =
-      editorMode === 'visual'
-        ? builderState
-        : schemaJsonToBuilderState(
-            (() => {
-              try {
-                return parseJsonObject(
+      editorModeRef.current === 'visual'
+        ? builderStateRef.current
+        : (() => {
+            try {
+              return schemaJsonToBuilderState(
+                parseJsonObject(
                   form.getFieldValue('schemaJsonText'),
                   'schemaJson',
-                );
-              } catch {
-                return null;
-              }
-            })(),
-            parseRequiredFieldsText(form.getFieldValue('requiredFieldsText')),
-          );
+                ),
+                parseRequiredFieldsText(
+                  form.getFieldValue('requiredFieldsText'),
+                ),
+              );
+            } catch {
+              return builderStateRef.current;
+            }
+          })();
 
     form.setFieldValue(
       'exampleJsonText',
@@ -254,7 +379,10 @@ function NotificationPayloadSchemaFormBody({
   };
 
   return (
-    <TanStackForm form={form} className="flex min-h-0 flex-1 flex-col">
+    <form
+      className="flex min-h-0 flex-1 flex-col"
+      onSubmit={handleFormSubmit}
+    >
       <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
         <FormSection
           title="Información básica"
@@ -322,35 +450,55 @@ function NotificationPayloadSchemaFormBody({
 
         <FormSection
           title="Campos del payload"
-          description="Configura los campos por interfaz o edita el JSON Schema directamente."
+          description="Usa la interfaz o JSON. Al guardar siempre se envía schemaJson + requiredFields."
         >
-          <Tabs
-            value={editorMode}
-            onValueChange={handleEditorModeChange}
-            className="gap-3"
-          >
-            <TabsList className="h-8">
-              <TabsTrigger value="visual" className="px-3 text-xs">
+          <div className="flex flex-col gap-3">
+            <div className="inline-flex h-8 w-fit items-center rounded-lg bg-muted p-[3px]">
+              <button
+                type="button"
+                className={`inline-flex h-[calc(100%-2px)] items-center rounded-md px-3 text-xs font-medium transition-colors ${
+                  editorMode === 'visual'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-foreground/60 hover:text-foreground'
+                }`}
+                disabled={isSubmitting}
+                onClick={() => handleEditorModeChange('visual')}
+              >
                 Interfaz
-              </TabsTrigger>
-              <TabsTrigger value="json" className="px-3 text-xs">
+              </button>
+              <button
+                type="button"
+                className={`inline-flex h-[calc(100%-2px)] items-center rounded-md px-3 text-xs font-medium transition-colors ${
+                  editorMode === 'json'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-foreground/60 hover:text-foreground'
+                }`}
+                disabled={isSubmitting}
+                onClick={() => handleEditorModeChange('json')}
+              >
                 JSON
-              </TabsTrigger>
-            </TabsList>
+              </button>
+            </div>
 
-            <TabsContent value="visual" className="space-y-3 outline-none">
+            {editorMode === 'visual' ? (
               <SchemaFieldsBuilder
                 value={builderState}
                 onChange={applyBuilderState}
                 disabled={isSubmitting}
                 error={builderError}
               />
-            </TabsContent>
+            ) : null}
 
-            <TabsContent value="json" className="space-y-3 outline-none">
+            {/* Campos JSON siempre montados para no perder el valor al cambiar de pestaña. */}
+            <div
+              className={
+                editorMode === 'json' ? 'space-y-3' : 'hidden'
+              }
+              aria-hidden={editorMode !== 'json'}
+            >
               <p className="text-[11px] leading-relaxed text-muted-foreground">
-                Edición directa del JSON Schema. Al volver a Interfaz se
-                sincronizan los campos.
+                Edición directa del JSON Schema. Es el mismo formato que recibe
+                la API al crear o actualizar.
               </p>
 
               <form.Field name="schemaJsonText">
@@ -375,14 +523,19 @@ function NotificationPayloadSchemaFormBody({
                       className="h-8 rounded-md border-border/60 font-mono text-xs"
                     />
                     <p className="text-[11px] leading-relaxed text-muted-foreground">
-                      Separados por coma. Deben coincidir con el array{' '}
-                      <code className="text-[10px]">required</code>.
+                      Se sincroniza desde{' '}
+                      <code className="text-[10px]">required</code> del JSON al
+                      guardar.
                     </p>
                   </div>
                 )}
               </form.Field>
-            </TabsContent>
-          </Tabs>
+
+              {builderError && editorMode === 'json' ? (
+                <p className="text-[11px] text-destructive">{builderError}</p>
+              ) : null}
+            </div>
+          </div>
         </FormSection>
 
         {!isEditing ? (
@@ -456,11 +609,6 @@ function NotificationPayloadSchemaFormBody({
           size="sm"
           disabled={isSubmitting}
           className="gap-1.5"
-          onClick={() => {
-            if (editorMode === 'visual') {
-              applyBuilderState(builderState);
-            }
-          }}
         >
           <Braces className="size-3.5" />
           {isSubmitting
@@ -472,7 +620,7 @@ function NotificationPayloadSchemaFormBody({
               : 'Guardar schema'}
         </Button>
       </div>
-    </TanStackForm>
+    </form>
   );
 }
 
@@ -499,8 +647,8 @@ export function NotificationPayloadSchemaFormDialog({
             {isEditing ? 'Editar schema de payload' : 'Nuevo schema de payload'}
           </SheetTitle>
           <SheetDescription className="text-xs leading-relaxed">
-            Define los campos por interfaz o con JSON. Ambas vistas se
-            mantienen sincronizadas.
+            Define los campos por interfaz o JSON. Al crear o actualizar siempre
+            se guarda como JSON Schema.
           </SheetDescription>
         </SheetHeader>
 

@@ -48,7 +48,11 @@ export const createNotificationPayloadSchemaFormSchema =
       });
     }
 
-    const requiredFields = parseRequiredFieldsText(values.requiredFieldsText);
+    const schemaRequired = getRequiredFieldsFromSchema(schemaJson);
+    const requiredFields =
+      schemaRequired.length > 0
+        ? schemaRequired
+        : parseRequiredFieldsText(values.requiredFieldsText);
 
     if (requiredFields.length === 0) {
       context.addIssue({
@@ -60,8 +64,6 @@ export const createNotificationPayloadSchemaFormSchema =
     }
 
     if (!requiredFieldsMatchSchema(schemaJson, requiredFields)) {
-      const schemaRequired = getRequiredFieldsFromSchema(schemaJson);
-
       context.addIssue({
         code: 'custom',
         message: `Los campos obligatorios no coinciden (${schemaRequired.join(', ') || 'ninguno'}). Revisa el editor de campos.`,
@@ -70,49 +72,66 @@ export const createNotificationPayloadSchemaFormSchema =
     }
   });
 
-export const updateNotificationPayloadSchemaFormSchema =
-  payloadSchemaFormSchema
-    .omit({
-      notificationChannelId: true,
-      name: true,
-      version: true,
-    })
-    .partial()
-    .extend({
-      schemaJsonText: z.string().min(2, 'Schema JSON requerido'),
-      requiredFieldsText: z.string().min(1, 'Indica al menos un campo requerido'),
-    })
-    .superRefine((values, context) => {
-      if (!values.schemaJsonText || !values.requiredFieldsText) {
-        return;
-      }
+/** Validación al editar: canal/nombre/versión no bloquean el guardado. */
+export const updateNotificationPayloadSchemaFormSchema = z
+  .object({
+    description: z.string().optional(),
+    schemaJsonText: z.string().min(2, 'Schema JSON requerido'),
+    exampleJsonText: z.string().optional(),
+    requiredFieldsText: z.string().min(1, 'Indica al menos un campo requerido'),
+    active: z.boolean().optional(),
+    notificationChannelId: z.string().optional(),
+    name: z.string().optional(),
+    version: z.number().int().min(1).optional(),
+  })
+  .superRefine((values, context) => {
+    let schemaJson: Record<string, unknown>;
 
-      let schemaJson: Record<string, unknown>;
+    try {
+      schemaJson = parseJsonObject(values.schemaJsonText, 'schemaJson');
+    } catch (error) {
+      context.addIssue({
+        code: 'custom',
+        message:
+          error instanceof Error ? error.message : 'schemaJson inválido',
+        path: ['schemaJsonText'],
+      });
+      return;
+    }
 
-      try {
-        schemaJson = parseJsonObject(values.schemaJsonText, 'schemaJson');
-      } catch (error) {
-        context.addIssue({
-          code: 'custom',
-          message:
-            error instanceof Error ? error.message : 'schemaJson inválido',
-          path: ['schemaJsonText'],
-        });
-        return;
-      }
+    try {
+      parseOptionalJsonObject(values.exampleJsonText, 'example');
+    } catch (error) {
+      context.addIssue({
+        code: 'custom',
+        message: error instanceof Error ? error.message : 'example inválido',
+        path: ['exampleJsonText'],
+      });
+    }
 
-      const requiredFields = parseRequiredFieldsText(values.requiredFieldsText);
+    const schemaRequired = getRequiredFieldsFromSchema(schemaJson);
+    const requiredFields =
+      schemaRequired.length > 0
+        ? schemaRequired
+        : parseRequiredFieldsText(values.requiredFieldsText ?? '');
 
-      if (!requiredFieldsMatchSchema(schemaJson, requiredFields)) {
-        const schemaRequired = getRequiredFieldsFromSchema(schemaJson);
+    if (requiredFields.length === 0) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Indica al menos un campo requerido',
+        path: ['requiredFieldsText'],
+      });
+      return;
+    }
 
-        context.addIssue({
-          code: 'custom',
-          message: `Los campos obligatorios no coinciden (${schemaRequired.join(', ') || 'ninguno'}). Revisa el editor de campos.`,
-          path: ['requiredFieldsText'],
-        });
-      }
-    });
+    if (!requiredFieldsMatchSchema(schemaJson, requiredFields)) {
+      context.addIssue({
+        code: 'custom',
+        message: `Los campos obligatorios no coinciden (${schemaRequired.join(', ') || 'ninguno'}). Revisa el editor de campos.`,
+        path: ['requiredFieldsText'],
+      });
+    }
+  });
 
 export type NotificationPayloadSchemaFormValues = z.infer<
   typeof payloadSchemaFormSchema
@@ -152,6 +171,11 @@ function toApiDto(
   values: NotificationPayloadSchemaFormValues,
 ): CreateNotificationPayloadSchemaDto {
   const schemaJson = parseJsonObject(values.schemaJsonText, 'schemaJson');
+  const schemaRequired = getRequiredFieldsFromSchema(schemaJson);
+  const requiredFields =
+    schemaRequired.length > 0
+      ? schemaRequired
+      : parseRequiredFieldsText(values.requiredFieldsText);
 
   return {
     notificationChannelId: values.notificationChannelId,
@@ -160,7 +184,7 @@ function toApiDto(
     version: values.version,
     schemaJson,
     example: parseOptionalJsonObject(values.exampleJsonText, 'example'),
-    requiredFields: parseRequiredFieldsText(values.requiredFieldsText),
+    requiredFields,
     active: values.active ?? true,
   };
 }
@@ -175,15 +199,38 @@ export function toCreateNotificationPayloadSchemaDto(
 export function toUpdateNotificationPayloadSchemaDto(
   values: NotificationPayloadSchemaFormValues,
 ): UpdateNotificationPayloadSchemaDto {
-  const parsed = createNotificationPayloadSchemaFormSchema.parse(values);
-  const {
-    notificationChannelId: _channelId,
-    name: _name,
-    version: _version,
-    ...updateDto
-  } = toApiDto(parsed);
+  // En update no revalidamos canal/nombre/versión (son inmutables).
+  const schemaJson = parseJsonObject(values.schemaJsonText, 'schemaJson');
+  const schemaRequired = getRequiredFieldsFromSchema(schemaJson);
+  const requiredFields =
+    schemaRequired.length > 0
+      ? schemaRequired
+      : parseRequiredFieldsText(values.requiredFieldsText);
 
-  return updateDto;
+  if (requiredFields.length === 0) {
+    throw new Error('Indica al menos un campo requerido en el schema');
+  }
+
+  if (!requiredFieldsMatchSchema(schemaJson, requiredFields)) {
+    throw new Error(
+      `Los campos obligatorios no coinciden (${schemaRequired.join(', ') || 'ninguno'})`,
+    );
+  }
+
+  try {
+    parseOptionalJsonObject(values.exampleJsonText, 'example');
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : 'example inválido',
+    );
+  }
+
+  return {
+    description: values.description?.trim() || null,
+    schemaJson,
+    example: parseOptionalJsonObject(values.exampleJsonText, 'example'),
+    requiredFields,
+  };
 }
 
 export function schemaToFormValues(

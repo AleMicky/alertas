@@ -41,8 +41,7 @@ export function JsonFormField({
   placeholder,
   ...props
 }: Props) {
-  const isInvalid =
-    field.state.meta.isTouched && !field.state.meta.isValid;
+  const isInvalid = field.state.meta.errors.length > 0;
 
   return (
     <Field data-invalid={isInvalid}>
