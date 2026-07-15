@@ -146,7 +146,8 @@ export default function PayloadSchemasPage() {
             Schemas de payload
           </h1>
           <p className="max-w-xl text-xs leading-relaxed text-muted-foreground">
-            Define y versiona el JSON Schema de cada canal de notificación.
+            Define los campos del payload de cada canal. Internamente se guarda
+            como JSON Schema.
           </p>
         </div>
 

@@ -324,8 +324,8 @@ export function NotificationPayloadSchemaTable({
               Sin schemas de payload
             </h3>
             <p className="mt-1 max-w-sm text-xs leading-relaxed text-muted-foreground">
-              Define el JSON Schema que validará los payloads enviados por cada
-              canal de notificación.
+              Define los campos que debe incluir el payload de cada canal de
+              notificación.
             </p>
             {onCreate ? (
               <Button size="sm" className="mt-4 gap-1.5" onClick={onCreate}>

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import {
   formatRequiredFieldsText,
   getRequiredFieldsFromSchema,
+  normalizeSchemaJson,
   parseJsonObject,
   parseOptionalJsonObject,
   parseRequiredFieldsText,
@@ -63,7 +64,7 @@ export const createNotificationPayloadSchemaFormSchema =
 
       context.addIssue({
         code: 'custom',
-        message: `requiredFields debe coincidir con schemaJson.required (${schemaRequired.join(', ') || 'vacío'})`,
+        message: `Los campos obligatorios no coinciden (${schemaRequired.join(', ') || 'ninguno'}). Revisa el editor de campos.`,
         path: ['requiredFieldsText'],
       });
     }
@@ -107,7 +108,7 @@ export const updateNotificationPayloadSchemaFormSchema =
 
         context.addIssue({
           code: 'custom',
-          message: `requiredFields debe coincidir con schemaJson.required (${schemaRequired.join(', ') || 'vacío'})`,
+          message: `Los campos obligatorios no coinciden (${schemaRequired.join(', ') || 'ninguno'}). Revisa el editor de campos.`,
           path: ['requiredFieldsText'],
         });
       }
@@ -188,16 +189,19 @@ export function toUpdateNotificationPayloadSchemaDto(
 export function schemaToFormValues(
   schema: NotificationPayloadSchema,
 ): NotificationPayloadSchemaFormValues {
+  const schemaJson =
+    normalizeSchemaJson(schema.schemaJson) ?? schema.schemaJson;
+
   return {
     notificationChannelId: schema.notificationChannelId,
     name: schema.name,
     description: schema.description ?? '',
     version: schema.version,
-    schemaJsonText: JSON.stringify(schema.schemaJson, null, 2),
+    schemaJsonText: JSON.stringify(schemaJson, null, 2),
     exampleJsonText: schema.example
       ? JSON.stringify(schema.example, null, 2)
       : '',
-    requiredFieldsText: formatRequiredFieldsText(schema.requiredFields),
+    requiredFieldsText: formatRequiredFieldsText(schema.requiredFields ?? []),
     active: schema.active,
   };
 }
