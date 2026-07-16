@@ -3,7 +3,8 @@ import { join } from "path";
 import type { NextConfig } from "next";
 
 function loadSharedEnvOnce() {
-  const envPath = join(__dirname, "../.env");
+  // Monorepo: apps/web → ../../.env (raíz)
+  const envPath = join(__dirname, "../../.env");
   if (!existsSync(envPath)) return;
 
   for (const line of readFileSync(envPath, "utf8").split("\n")) {
@@ -33,6 +34,12 @@ loadSharedEnvOnce();
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL ?? "",
+    NEXT_PUBLIC_KEYCLOAK_ISSUER: process.env.NEXT_PUBLIC_KEYCLOAK_ISSUER ?? "",
+    NEXT_PUBLIC_KEYCLOAK_CLIENT_ID:
+      process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ?? "alertas-web",
+  },
   turbopack: {
     root: __dirname,
   },

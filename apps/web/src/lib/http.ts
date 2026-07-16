@@ -4,11 +4,8 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios';
 import { authStorage } from '@/features/auth/auth-storage';
-import {
-  type ApiResponse,
-  unwrapApiResponse,
-} from '@/lib/api-response';
-
+import { keycloakToken } from '@/features/auth/keycloak-token';
+import { unwrapApiResponse } from '@/lib/api-response';
 type RetryableRequest = InternalAxiosRequestConfig & {
   _retry?: boolean;
 };
@@ -19,17 +16,22 @@ async function refreshAccessToken(): Promise<string | null> {
   const refreshToken = authStorage.getRefreshToken();
   if (!refreshToken) return null;
 
-  const baseURL = process.env.NEXT_PUBLIC_API_URL;
-  const response = await axios.post<ApiResponse<{ accessToken: string }>>(
-    `${baseURL}/auth/refresh`,
-    { refreshToken },
-  );
-
-  const accessToken = unwrapApiResponse<{ accessToken: string }>(
-    response.data,
-  ).accessToken;
-  authStorage.setAccessToken(accessToken);
-  return accessToken;
+  try {
+    const tokens = await keycloakToken.refresh(refreshToken);
+    authStorage.setAccessToken(tokens.access_token);
+    // Keycloak rota refresh tokens; persistimos el nuevo.
+    const user = authStorage.getUser();
+    if (user) {
+      authStorage.setSession(
+        tokens.access_token,
+        tokens.refresh_token,
+        user,
+      );
+    }
+    return tokens.access_token;
+  } catch {
+    return null;
+  }
 }
 
 export const http = axios.create({
@@ -62,7 +64,7 @@ http.interceptors.response.use(
     }
 
     const url = originalRequest.url ?? '';
-    if (url.includes('/auth/login') || url.includes('/auth/refresh')) {
+    if (url.includes('/auth/me') && !authStorage.getRefreshToken()) {
       return Promise.reject(error);
     }
 

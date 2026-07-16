@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { AuthUser } from '../auth.types';
-import { ChangePasswordForm } from './change-password-form';
 
 type ProfileViewProps = {
   user: AuthUser;
@@ -150,11 +149,15 @@ export function ProfileView({ user }: ProfileViewProps) {
           <CardHeader className="border-b">
             <CardTitle className="text-base">Seguridad</CardTitle>
             <CardDescription>
-              Actualiza tu contraseña para mantener tu cuenta protegida.
+              La contraseña se gestiona en Keycloak (Account Console o
+              administrador del realm).
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            <ChangePasswordForm embedded />
+            <p className="text-sm text-muted-foreground">
+              Para cambiar tu contraseña, contacta al administrador o usa la
+              consola de cuenta de Keycloak asociada a este entorno.
+            </p>
           </CardContent>
         </Card>
       </div>

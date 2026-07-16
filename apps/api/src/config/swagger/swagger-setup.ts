@@ -7,7 +7,7 @@ import {
 } from '@nestjs/swagger';
 
 const SWAGGER_TAGS = [
-  ['Autenticación', 'Login, refresh y cierre de sesión del dashboard'],
+  ['Autenticación', 'Perfil y sesión del dashboard (Keycloak)'],
   ['Sistemas cliente', 'Registro de sistemas que emiten eventos'],
   ['Canales de notificación', 'Webhooks y canales (Telegram, Teams, etc.)'],
   ['Solicitudes de notificación', 'Recepción y procesamiento de notificaciones'],
@@ -59,7 +59,8 @@ const buildSwaggerConfig = () => {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        description: 'JWT de usuario del dashboard',
+        description:
+          'Access token de Keycloak (Bearer JWT RS256)',
       },
       'jwt',
     )

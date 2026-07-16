@@ -3,8 +3,9 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from './public.decorator';
 
+/** Autenticación del dashboard únicamente con access token de Keycloak. */
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
+export class JwtAuthGuard extends AuthGuard('keycloak') {
   constructor(private readonly reflector: Reflector) {
     super();
   }

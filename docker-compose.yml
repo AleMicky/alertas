@@ -27,6 +27,20 @@ services:
     volumes:
       - redis_data:/data
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: ms-alertas-keycloak
+    profiles: ["keycloak"]
+    command: ["start-dev", "--import-realm"]
+    ports:
+      - "${KEYCLOAK_PORT:-8080}:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HTTP_PORT: 8080
+    volumes:
+      - ./docker/keycloak:/opt/keycloak/data/import:ro
+
 volumes:
   postgres_data:
   redis_data:

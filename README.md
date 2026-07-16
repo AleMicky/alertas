@@ -41,15 +41,16 @@ make web-dev    # http://localhost:3000
 | Dashboard  | http://localhost:3000 |
 | API        | http://localhost:4001/api/v1 |
 | Swagger    | http://localhost:4001/api/v1/docs |
+| Keycloak   | http://localhost:8080 |
 
-## Credenciales de desarrollo (dashboard)
+## Credenciales de desarrollo (Keycloak)
 
 | Usuario            | Contraseña     | Rol      |
 |--------------------|----------------|----------|
-| `admin.alertas`    | `Admin123*`    | admin    |
-| `operador.alertas` | `Operador123*` | operador |
+| `admin.alertas`    | `Admin123*`    | ADMIN    |
+| `operador.alertas` | `Operador123*` | OPERADOR |
 
-> Configurables con `DASHBOARD_*` en `.env`. Solo para desarrollo local.
+> Definidos en el realm importado (`docker/keycloak/alertas-realm.json`). Consola: http://localhost:8080
 
 ## Comandos útiles
 
@@ -67,7 +68,7 @@ make test           # Tests del API
 Levanta API, dashboard, PostgreSQL y Redis como contenedores:
 
 ```bash
-cp .env.example .env   # Ajusta JWT_SECRET y credenciales
+cp .env.example .env   # Ajusta KEYCLOAK_* y credenciales
 make prod-up           # Build + arranque del stack completo
 make prod-seed         # Primera vez: catálogos y usuarios del dashboard
 ```
@@ -93,6 +94,33 @@ Copiar `.env.example` a `.env` en la raíz. Es compartido por Docker Compose, `a
 2. El API crea la alerta y encola notificaciones (BullMQ + Redis)
 3. Un worker envía cada notificación al webhook del canal configurado
 4. El dashboard permite configurar sistemas, canales, severidades y monitorear eventos
+
+## Autenticación (dashboard)
+
+El dashboard se autentica **solo con Keycloak** (Resource Owner Password Grant). El API valida el access token (RS256 / JWKS).
+
+```bash
+make up   # Postgres + Redis + Keycloak (realm alertas)
+```
+
+En `.env` (obligatorio):
+
+```env
+KEYCLOAK_ISSUER=http://localhost:8080/realms/alertas
+KEYCLOAK_CLIENT_ID=alertas-api
+NEXT_PUBLIC_KEYCLOAK_ISSUER=http://localhost:8080/realms/alertas
+NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=alertas-web
+```
+
+El login del dashboard pide tokens a Keycloak (`alertas-web`) y llama al API con `Authorization: Bearer <access_token>`.
+
+Roles: `realm_access.roles` y/o `resource_access[KEYCLOAK_CLIENT_ID].roles` (`ADMIN`, `OPERADOR`, …).
+
+Cambio de contraseña: en Keycloak (Account Console / admin del realm), no en el dashboard.
+
+Los tokens de sistemas cliente (`msa_...`) no cambian.
+
+Consola Keycloak: http://localhost:8080 (`KEYCLOAK_ADMIN` / `KEYCLOAK_ADMIN_PASSWORD`). Usuarios de prueba del realm: `admin.alertas` / `Admin123*`, `operador.alertas` / `Operador123*`.
 
 ## Subir a Git
 
