@@ -5,8 +5,6 @@ import {
   Layers,
   Plug,
   Monitor,
-  Shield,
-  Users,
   type LucideIcon,
 } from "lucide-react"
 
@@ -74,25 +72,6 @@ const navGroups: AppNavGroup[] = [
       },
     ],
   },
-  {
-    id: "administracion",
-    label: "Administración",
-    roles: ["ADMIN"],
-    items: [
-      {
-        title: "Usuarios",
-        to: "/users",
-        icon: Users,
-        roles: ["ADMIN"],
-      },
-      {
-        title: "Roles",
-        to: "/roles",
-        icon: Shield,
-        roles: ["ADMIN"],
-      },
-    ],
-  },
 ]
 
 const breadcrumbByPath: Record<string, { group?: string; page: string }> = {
@@ -116,14 +95,6 @@ const breadcrumbByPath: Record<string, { group?: string; page: string }> = {
   "/client-systems": {
     group: "Configuración",
     page: "Sistemas cliente",
-  },
-  "/users": {
-    group: "Administración",
-    page: "Usuarios",
-  },
-  "/roles": {
-    group: "Administración",
-    page: "Roles",
   },
   "/profile": { group: "Cuenta", page: "Perfil" },
   "/login": { page: "Iniciar sesión" },

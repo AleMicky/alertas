@@ -25,11 +25,10 @@ export class AuthController {
   @ApiOperation({
     summary: 'Perfil del usuario autenticado',
     description:
-      'Devuelve el perfil asociado al access token de Keycloak. ' +
-      'Si existe un usuario local con el mismo username, usa esos datos.',
+      'Devuelve el perfil a partir de los claims del access token de Keycloak.',
   })
   @ApiOkResponse({ type: AuthUserResponseDto })
-  @ApiUnauthorizedResponse({ description: 'Token inválido o usuario inactivo' })
+  @ApiUnauthorizedResponse({ description: 'Token inválido o ausente' })
   me(@CurrentUser() user: DashboardAuthUser) {
     return this.authService.me(user);
   }
