@@ -12,3 +12,5 @@ export * from './notification-attachment';
 export * from './notification-delivery';
 export * from './notification-delivery-attempt';
 export * from './notification-request-audit';
+export * from './system-notification';
+export * from './system-notification-read';

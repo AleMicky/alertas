@@ -1,0 +1,3 @@
+export enum SystemNotificationType {
+  NOTIFICATION_REQUEST_CREATED = 'NOTIFICATION_REQUEST_CREATED',
+}

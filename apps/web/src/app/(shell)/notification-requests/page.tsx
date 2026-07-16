@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Archive,
   Bell,
@@ -238,6 +239,7 @@ function FilterField({ label, children }: FilterFieldProps) {
 }
 
 export default function NotificationRequestsPage() {
+  const searchParams = useSearchParams();
   const [filters, setFilters] =
     useState<NotificationRequestSearchFilters>(DEFAULT_FILTERS);
   const [selectedId, setSelectedId] = useState<string | undefined>();
@@ -249,6 +251,17 @@ export default function NotificationRequestsPage() {
     channelCode?: string;
     payload?: Record<string, unknown>;
   }>({});
+
+  useEffect(() => {
+    const requestId = searchParams.get('requestId')?.trim();
+
+    if (!requestId) {
+      return;
+    }
+
+    setSelectedId(requestId);
+    setDetailOpen(true);
+  }, [searchParams]);
 
   const { data: channels } = useNotificationChannelsQuery();
   const { data: clientSystems } = useClientSystemsQuery();

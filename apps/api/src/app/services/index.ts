@@ -11,3 +11,4 @@ export * from './refresh-token.service';
 export * from './notification-requests.service';
 export * from './notification-request-audit.service';
 export * from './notification-callbacks.service';
+export * from './system-notifications.service';

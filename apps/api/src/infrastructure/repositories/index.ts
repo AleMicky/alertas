@@ -11,3 +11,4 @@ export * from './notification-attachment-typeorm.repository';
 export * from './notification-delivery-typeorm.repository';
 export * from './notification-delivery-attempt-typeorm.repository';
 export * from './notification-request-audit-typeorm.repository';
+export * from './system-notification-typeorm.repository';

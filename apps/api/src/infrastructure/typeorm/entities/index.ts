@@ -11,3 +11,5 @@ export * from './notification-attachment.entity';
 export * from './notification-delivery.entity';
 export * from './notification-delivery-attempt.entity';
 export * from './notification-request-audit.entity';
+export * from './system-notification.entity';
+export * from './system-notification-read.entity';

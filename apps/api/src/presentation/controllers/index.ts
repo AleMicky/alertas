@@ -9,3 +9,4 @@ export * from './auth.controller';
 export * from './user.controller';
 export * from './notification-requests.controller';
 export * from './notification-callbacks.controller';
+export * from './system-notifications.controller';

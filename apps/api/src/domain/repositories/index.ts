@@ -11,3 +11,4 @@ export * from './notification-attachment.repository';
 export * from './notification-delivery.repository';
 export * from './notification-delivery-attempt.repository';
 export * from './notification-request-audit.repository';
+export * from './system-notification.repository';

@@ -2,6 +2,7 @@ import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Job, Queue } from 'bullmq';
@@ -47,6 +48,7 @@ import {
 import { NotificationChannelProvidersService } from './notification-channel-providers.service';
 import { NotificationPayloadSchemasService } from './notification-payload-schemas.service';
 import { NotificationRequestAuditService } from './notification-request-audit.service';
+import { SystemNotificationsService } from './system-notifications.service';
 import {
   NOTIFICATION_REQUEST_JOB,
   NOTIFICATION_REQUEST_QUEUE,
@@ -54,6 +56,8 @@ import {
 
 @Injectable()
 export class NotificationRequestsService extends BaseService<NotificationRequestData> {
+  private readonly logger = new Logger(NotificationRequestsService.name);
+
   constructor(
     private readonly notificationRequestRepository: NotificationRequestRepository,
     private readonly notificationAttachmentRepository: NotificationAttachmentRepository,
@@ -63,6 +67,7 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
     private readonly notificationPayloadSchemasService: NotificationPayloadSchemasService,
     private readonly notificationChannelProvidersService: NotificationChannelProvidersService,
     private readonly notificationRequestAuditService: NotificationRequestAuditService,
+    private readonly systemNotificationsService: SystemNotificationsService,
     private readonly n8nClient: N8nClient,
     @InjectQueue(NOTIFICATION_REQUEST_QUEUE)
     private readonly notificationRequestQueue: Queue,
@@ -227,6 +232,21 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
     });
 
     await this.enqueueRequest(created.id, scheduledAt);
+
+    try {
+      await this.systemNotificationsService.notifyNotificationRequestCreated({
+        notificationRequestId: created.id,
+        clientSystemId,
+        channelCode: channel.code,
+        title: dto.title,
+        externalReference: dto.externalReference,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `No se pudo crear la notificación in-app para la solicitud ${created.id}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
 
     return this.getDetail(created.id);
   }
