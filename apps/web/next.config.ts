@@ -3,8 +3,14 @@ import { join } from "path";
 import type { NextConfig } from "next";
 
 function loadSharedEnvOnce() {
-  const envPath = join(__dirname, "../.env");
-  if (!existsSync(envPath)) return;
+  // Monorepo: .env vive en la raíz (apps/web → ../../.env).
+  // También se prueba apps/.env por compatibilidad.
+  const candidates = [
+    join(__dirname, "../../.env"),
+    join(__dirname, "../.env"),
+  ];
+  const envPath = candidates.find((path) => existsSync(path));
+  if (!envPath) return;
 
   for (const line of readFileSync(envPath, "utf8").split("\n")) {
     const trimmed = line.trim();
