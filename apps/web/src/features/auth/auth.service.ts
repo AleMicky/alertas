@@ -1,51 +1,56 @@
 import { http } from '@/lib/http';
 import { unwrapApiResponse } from '@/lib/api-response';
-import type { ChangePasswordDto, LoginDto } from './auth.schema';
-import type {
-  AuthUser,
-  ChangePasswordResponse,
-  LoginResponse,
-  RefreshResponse,
-} from './auth.types';
+import type { LoginDto } from './auth.schema';
+import type { AuthUser, LoginResponse } from './auth.types';
+import { keycloakToken } from './keycloak-token';
 
 const endpoint = '/auth';
 
 export const authService = {
   login: async (payload: LoginDto): Promise<LoginResponse> => {
-    // http ya desenvuelve ApiResponse en el interceptor
-    const { data } = await http.post<LoginResponse>(
-      `${endpoint}/login`,
-      payload,
+    const tokens = await keycloakToken.login(
+      payload.username,
+      payload.password,
     );
 
-    if (!data?.accessToken || !data?.refreshToken || !data?.user) {
-      throw new Error('Respuesta de login inválida');
+    const { data } = await http.get(`${endpoint}/me`, {
+      headers: {
+        Authorization: `Bearer ${tokens.access_token}`,
+      },
+    });
+    const user = unwrapApiResponse<AuthUser>(data);
+
+    if (!user?.id || !user?.username) {
+      throw new Error('Respuesta de perfil inválida');
     }
 
-    return data;
+    return {
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
+      user,
+    };
   },
 
-  refresh: async (refreshToken: string): Promise<RefreshResponse> => {
-    const { data } = await http.post(`${endpoint}/refresh`, {
-      refreshToken,
-    });
-
-    return unwrapApiResponse<RefreshResponse>(data);
+  refresh: async (
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> => {
+    const tokens = await keycloakToken.refresh(refreshToken);
+    return {
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
+    };
   },
 
   logout: async (): Promise<void> => {
-    await http.post(`${endpoint}/logout`);
+    try {
+      await http.post(`${endpoint}/logout`);
+    } catch {
+      // El cierre real de sesión es local; el API solo confirma.
+    }
   },
 
   me: async (): Promise<AuthUser> => {
     const { data } = await http.get(`${endpoint}/me`);
     return unwrapApiResponse<AuthUser>(data);
-  },
-
-  changePassword: async (
-    payload: ChangePasswordDto,
-  ): Promise<ChangePasswordResponse> => {
-    const { data } = await http.post(`${endpoint}/change-password`, payload);
-    return unwrapApiResponse<ChangePasswordResponse>(data);
   },
 };

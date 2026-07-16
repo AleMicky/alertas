@@ -1,0 +1,124 @@
+{
+  "realm": "alertas",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN",
+        "description": "Administrador del dashboard"
+      },
+      {
+        "name": "OPERADOR",
+        "description": "Operador del dashboard"
+      },
+      {
+        "name": "VISUALIZADOR",
+        "description": "Solo lectura"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "alertas-api",
+      "name": "MS Alertas API",
+      "enabled": true,
+      "publicClient": false,
+      "bearerOnly": true,
+      "protocol": "openid-connect",
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": false
+    },
+    {
+      "clientId": "alertas-web",
+      "name": "MS Alertas Dashboard",
+      "enabled": true,
+      "publicClient": true,
+      "bearerOnly": false,
+      "protocol": "openid-connect",
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "redirectUris": [
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "client.use.lightweight.access.token.enabled": "false"
+      },
+      "fullScopeAllowed": true,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ],
+      "protocolMappers": [
+        {
+          "name": "sub",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "id",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "sub",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin.alertas",
+      "enabled": true,
+      "email": "admin@alertas.local",
+      "emailVerified": true,
+      "firstName": "Administrador",
+      "lastName": "Alertas",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Admin123*",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ADMIN"]
+    },
+    {
+      "username": "operador.alertas",
+      "enabled": true,
+      "email": "operador@alertas.local",
+      "emailVerified": true,
+      "firstName": "Operador",
+      "lastName": "Alertas",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Operador123*",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["OPERADOR"]
+    }
+  ]
+}

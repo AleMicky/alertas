@@ -39,6 +39,12 @@ loadSharedEnvOnce();
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL ?? "",
+    NEXT_PUBLIC_KEYCLOAK_ISSUER: process.env.NEXT_PUBLIC_KEYCLOAK_ISSUER ?? "",
+    NEXT_PUBLIC_KEYCLOAK_CLIENT_ID:
+      process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ?? "alertas-web",
+  },
   turbopack: {
     root: __dirname,
   },

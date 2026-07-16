@@ -1,31 +1,38 @@
-# ── Secretos y entorno ────────────────────────────────────────────────────────
+# Secrets / env
 .env
 .env.*
 !.env.example
 
-# ── Dependencias ──────────────────────────────────────────────────────────────
+# Dependencies
 node_modules/
 .pnpm-store/
+.pnp
+.pnp.*
 
-# ── Artefactos de build ───────────────────────────────────────────────────────
+# Build
 dist/
 build/
 .next/
 out/
+.turbo/
 
-# ── Logs y depuración ─────────────────────────────────────────────────────────
+# Logs
+logs/
 *.log
 npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 
-# ── Sistema operativo ─────────────────────────────────────────────────────────
+# OS
 .DS_Store
 Thumbs.db
 
-# ── IDEs ──────────────────────────────────────────────────────────────────────
+# IDEs
 .idea/
+.project
+.classpath
 *.sublime-workspace
 .vscode/*
 !.vscode/settings.json
@@ -33,14 +40,14 @@ Thumbs.db
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# ── Tests ─────────────────────────────────────────────────────────────────────
+# Tests
 coverage/
 .nyc_output/
 
-# ── TypeScript ────────────────────────────────────────────────────────────────
+# TypeScript
 *.tsbuildinfo
 
-# ── Runtime / temporales ──────────────────────────────────────────────────────
+# Runtime / temp
 .temp/
 .tmp/
 pids/
@@ -48,5 +55,9 @@ pids/
 *.seed
 *.pid.lock
 
-# ── Despliegue ────────────────────────────────────────────────────────────────
+# Certs / diagnostics
+*.pem
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Deploy
 .vercel

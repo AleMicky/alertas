@@ -38,14 +38,16 @@ install-web: ## pnpm install en apps/web
 # ── Infraestructura (Docker) ──────────────────────────────────────────────────
 
 .PHONY: up down restart ps logs
-up: env ## Levanta Postgres y Redis
-	$(COMPOSE) up -d
+up: env ## Levanta Postgres, Redis y Keycloak
+	$(COMPOSE) --profile keycloak up -d
 	@echo "✓ Infra arriba"
 	@echo "  Postgres  → localhost:$${DB_PORT:-5432}"
 	@echo "  Redis     → localhost:$${REDIS_PORT:-6379}"
+	@echo "  Keycloak  → http://localhost:$${KEYCLOAK_PORT:-8080} (admin/admin)"
+	@echo "  Realm     → alertas  |  Issuer → http://localhost:$${KEYCLOAK_PORT:-8080}/realms/alertas"
 
 down: ## Detiene y elimina contenedores (conserva volúmenes)
-	$(COMPOSE) down
+	$(COMPOSE) --profile keycloak down
 
 restart: ## Reinicia todos los servicios Docker
 	$(COMPOSE) restart

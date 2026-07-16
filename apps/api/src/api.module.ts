@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { BullModule } from '@nestjs/bullmq';
@@ -38,7 +37,6 @@ import {
   RoleService,
   AuthService,
   UserService,
-  RefreshTokenService,
 } from './app/services';
 // Repositories
 import {
@@ -94,7 +92,7 @@ import { ClientSystemAuthGuard } from './shared/guards/client-system-auth.guard'
 import { PassportModule } from '@nestjs/passport';
 import {
   JwtAuthGuard,
-  JwtStrategy,
+  KeycloakJwtStrategy,
   PasswordService,
   RolesGuard,
 } from './infrastructure/security';
@@ -133,15 +131,6 @@ import { NOTIFICATION_REQUEST_QUEUE } from './app/queues/notification-request.qu
       LoginAuditEntity,
     ]),
     PassportModule,
-    JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.getOrThrow<string>('JWT_SECRET'),
-        signOptions: {
-          expiresIn: configService.get('JWT_EXPIRES_IN') ?? '24h',
-        } as JwtSignOptions,
-      }),
-    }),
   ],
   controllers: [
     NotificationChannelsController,
@@ -173,12 +162,11 @@ import { NOTIFICATION_REQUEST_QUEUE } from './app/queues/notification-request.qu
     ClientSystemTokenService,
     RoleService,
     UserService,
-    JwtStrategy,
+    KeycloakJwtStrategy,
     PasswordService,
     JwtAuthGuard,
     RolesGuard,
     AuthService,
-    RefreshTokenService,
     {
       provide: NotificationChannelRepository,
       useClass: NotificationChannelTypeormRepository,
