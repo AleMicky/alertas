@@ -6,7 +6,5 @@ export const QUERY_KEYS = {
     systemNotifications: 'system-notifications',
     clientSystems: 'client-systems',
     clientSystemTokens: 'client-system-tokens',
-    users: 'users',
-    roles: 'roles',
     profile: 'profile',
 } as const;

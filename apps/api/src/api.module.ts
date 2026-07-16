@@ -17,9 +17,6 @@ import {
   SystemNotificationReadEntity,
   ClientSystemEntity,
   ClientSystemTokenEntity,
-  RoleEntity,
-  UserEntity,
-  LoginAuditEntity,
 } from './infrastructure/typeorm/entities';
 // Services
 import {
@@ -34,9 +31,7 @@ import {
   ClientSystemService,
   ClientSystemTokenService,
   NotificationService,
-  RoleService,
   AuthService,
-  UserService,
 } from './app/services';
 // Repositories
 import {
@@ -51,9 +46,6 @@ import {
   SystemNotificationRepository,
   ClientSystemRepository,
   ClientSystemTokenRepository,
-  RoleRepository,
-  UserRepository,
-  LoginAuditRepository,
 } from './domain/repositories';
 // Controllers
 import {
@@ -65,9 +57,7 @@ import {
   SystemNotificationsController,
   ClientSystemController,
   TestN8nController,
-  RoleController,
   AuthController,
-  UserController,
 } from './presentation/controllers';
 // Repositories
 import {
@@ -82,9 +72,6 @@ import {
   SystemNotificationTypeormRepository,
   ClientSystemTypeormRepository,
   ClientSystemTokenTypeormRepository,
-  RoleTypeormRepository,
-  UserTypeormRepository,
-  LoginAuditTypeormRepository,
 } from './infrastructure/repositories';
 import { N8nClient } from './infrastructure/integrations/n8n/n8n.client';
 import { TokenGeneratorService } from './infrastructure/security/token-generator.service';
@@ -93,7 +80,6 @@ import { PassportModule } from '@nestjs/passport';
 import {
   JwtAuthGuard,
   KeycloakJwtStrategy,
-  PasswordService,
   RolesGuard,
 } from './infrastructure/security';
 import { NOTIFICATION_REQUEST_QUEUE } from './app/queues/notification-request.queue';
@@ -126,9 +112,6 @@ import { NOTIFICATION_REQUEST_QUEUE } from './app/queues/notification-request.qu
       SystemNotificationReadEntity,
       ClientSystemEntity,
       ClientSystemTokenEntity,
-      UserEntity,
-      RoleEntity,
-      LoginAuditEntity,
     ]),
     PassportModule,
   ],
@@ -141,9 +124,7 @@ import { NOTIFICATION_REQUEST_QUEUE } from './app/queues/notification-request.qu
     SystemNotificationsController,
     ClientSystemController,
     TestN8nController,
-    RoleController,
     AuthController,
-    UserController,
   ],
   providers: [
     N8nClient,
@@ -160,10 +141,7 @@ import { NOTIFICATION_REQUEST_QUEUE } from './app/queues/notification-request.qu
     SystemNotificationsService,
     ClientSystemService,
     ClientSystemTokenService,
-    RoleService,
-    UserService,
     KeycloakJwtStrategy,
-    PasswordService,
     JwtAuthGuard,
     RolesGuard,
     AuthService,
@@ -210,18 +188,6 @@ import { NOTIFICATION_REQUEST_QUEUE } from './app/queues/notification-request.qu
     {
       provide: ClientSystemTokenRepository,
       useClass: ClientSystemTokenTypeormRepository,
-    },
-    {
-      provide: RoleRepository,
-      useClass: RoleTypeormRepository,
-    },
-    {
-      provide: UserRepository,
-      useClass: UserTypeormRepository,
-    },
-    {
-      provide: LoginAuditRepository,
-      useClass: LoginAuditTypeormRepository,
     },
     {
       provide: APP_GUARD,

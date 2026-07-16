@@ -4,8 +4,6 @@ export * from './notification-payload-schemas.service';
 export * from './client-system.service';
 export * from './client-system-token.service';
 export * from './notification.service';
-export * from './role.service';
-export * from './user.service';
 export * from './auth.service';
 export * from './notification-requests.service';
 export * from './notification-request-audit.service';

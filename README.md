@@ -71,8 +71,10 @@ Levanta API, dashboard, PostgreSQL y Redis como contenedores:
 ```bash
 cp .env.example .env   # Ajusta KEYCLOAK_* y credenciales
 make prod-up           # Build + arranque del stack completo
-make prod-seed         # Primera vez: catálogos y usuarios del dashboard
+make prod-seed         # Primera vez: catálogos (canales, etc.)
 ```
+
+Usuarios y roles del dashboard se gestionan en **Keycloak**, no en seeds ni en el dashboard.
 
 | Comando        | Descripción |
 |----------------|-------------|
@@ -115,7 +117,7 @@ NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=alertas-web
 
 El login del dashboard pide tokens a Keycloak (`alertas-web`) y llama al API con `Authorization: Bearer <access_token>`.
 
-Roles: `realm_access.roles` y/o `resource_access[KEYCLOAK_CLIENT_ID].roles` (`ADMIN`, `OPERADOR`, …).
+Roles: `realm_access.roles` y/o `resource_access[KEYCLOAK_CLIENT_ID].roles` (`ADMIN`, `OPERADOR`, …). Alta/edición de usuarios y roles: consola Keycloak (Administración → Usuarios / Roles).
 
 Cambio de contraseña: en Keycloak (Account Console / admin del realm), no en el dashboard.
 
