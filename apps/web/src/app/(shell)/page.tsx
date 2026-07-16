@@ -1,14 +1,7 @@
 'use client';
 
-import { PageHeader } from '@/shared/components';
+import { DashboardOverview } from '@/features/dashboard/components/dashboard-overview';
 
 export default function HomePage() {
-  return (
-    <main className="space-y-6">
-      <PageHeader
-        title="Dashboard"
-        description="Panel de administración del sistema de notificaciones."
-      />
-    </main>
-  );
+  return <DashboardOverview />;
 }
