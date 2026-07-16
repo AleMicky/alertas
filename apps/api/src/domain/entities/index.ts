@@ -8,7 +8,6 @@ export * from './login-audit';
 export * from './notification-channel-providers';
 export * from './notification-payload-schema';
 export * from './notification-request';
-export * from './notification-recipient';
 export * from './notification-attachment';
 export * from './notification-delivery';
 export * from './notification-delivery-attempt';

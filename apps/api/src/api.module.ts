@@ -10,7 +10,6 @@ import {
   NotificationChannelProviderEntity,
   NotificationPayloadSchemaEntity,
   NotificationRequestEntity,
-  NotificationRecipientEntity,
   NotificationAttachmentEntity,
   NotificationDeliveryEntity,
   NotificationDeliveryAttemptEntity,
@@ -44,7 +43,6 @@ import {
   NotificationChannelProviderRepository,
   NotificationPayloadSchemaRepository,
   NotificationRequestRepository,
-  NotificationRecipientRepository,
   NotificationAttachmentRepository,
   NotificationDeliveryRepository,
   NotificationDeliveryAttemptRepository,
@@ -74,7 +72,6 @@ import {
   NotificationChannelProviderTypeormRepository,
   NotificationPayloadSchemaTypeormRepository,
   NotificationRequestTypeormRepository,
-  NotificationRecipientTypeormRepository,
   NotificationAttachmentTypeormRepository,
   NotificationDeliveryTypeormRepository,
   NotificationDeliveryAttemptTypeormRepository,
@@ -117,7 +114,6 @@ import { NOTIFICATION_REQUEST_QUEUE } from './app/queues/notification-request.qu
       NotificationChannelProviderEntity,
       NotificationPayloadSchemaEntity,
       NotificationRequestEntity,
-      NotificationRecipientEntity,
       NotificationAttachmentEntity,
       NotificationDeliveryEntity,
       NotificationDeliveryAttemptEntity,
@@ -188,10 +184,6 @@ import { NOTIFICATION_REQUEST_QUEUE } from './app/queues/notification-request.qu
     {
       provide: NotificationRequestRepository,
       useClass: NotificationRequestTypeormRepository,
-    },
-    {
-      provide: NotificationRecipientRepository,
-      useClass: NotificationRecipientTypeormRepository,
     },
     {
       provide: NotificationAttachmentRepository,

@@ -3,10 +3,11 @@ import axios, { isAxiosError } from 'axios';
 
 export interface N8nNotificationPayload extends Record<string, unknown> {
   notificationId: string;
+  deliveryId?: string;
   alertId?: string;
   eventId?: string;
   channel: string;
-  target: string;
+  target?: string;
   title: string;
   message: string;
   payload: Record<string, unknown>;

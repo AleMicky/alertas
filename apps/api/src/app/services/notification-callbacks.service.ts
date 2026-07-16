@@ -4,9 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { NotificationDeliveryStatus, NotificationRecipientStatus } from 'src/domain/enums';
+import { NotificationDeliveryStatus } from 'src/domain/enums';
 import { NotificationDeliveryRepository } from 'src/domain/repositories/notification-delivery.repository';
-import { NotificationRecipientRepository } from 'src/domain/repositories/notification-recipient.repository';
 import { NotificationDeliveryAttemptRepository } from 'src/domain/repositories/notification-delivery-attempt.repository';
 import { N8nDeliveryCallbackDto } from 'src/presentation/dto/notification-request';
 import { NotificationRequestsService } from './notification-requests.service';
@@ -15,7 +14,6 @@ import { NotificationRequestsService } from './notification-requests.service';
 export class NotificationCallbacksService {
   constructor(
     private readonly notificationDeliveryRepository: NotificationDeliveryRepository,
-    private readonly notificationRecipientRepository: NotificationRecipientRepository,
     private readonly notificationDeliveryAttemptRepository: NotificationDeliveryAttemptRepository,
     private readonly notificationRequestsService: NotificationRequestsService,
   ) {}
@@ -65,18 +63,6 @@ export class NotificationCallbacksService {
       attemptedAt: now,
     });
 
-    const recipientStatus =
-      nextDeliveryStatus === NotificationDeliveryStatus.DELIVERED
-        ? NotificationRecipientStatus.DELIVERED
-        : nextDeliveryStatus === NotificationDeliveryStatus.FAILED
-          ? NotificationRecipientStatus.FAILED
-          : NotificationRecipientStatus.SENT;
-
-    await this.notificationRecipientRepository.update(
-      delivery.notificationRecipientId,
-      { status: recipientStatus, updatedAt: now },
-    );
-
     return this.notificationRequestsService.recalculateStatusFromDeliveries(
       delivery.notificationRequestId,
     );
@@ -94,7 +80,9 @@ export class NotificationCallbacksService {
       case 'SENT':
         return NotificationDeliveryStatus.SENT;
       default:
-        throw new BadRequestException(`Estado de callback no soportado: ${status}`);
+        throw new BadRequestException(
+          `Estado de callback no soportado: ${status}`,
+        );
     }
   }
 }

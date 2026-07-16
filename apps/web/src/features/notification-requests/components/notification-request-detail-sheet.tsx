@@ -261,12 +261,6 @@ export function NotificationRequestDetailSheet({
                     Payload
                   </TabsTrigger>
                   <TabsTrigger
-                    value="recipients"
-                    className="shrink-0 flex-none px-2 text-xs"
-                  >
-                    Destinatarios ({detail.recipients.length})
-                  </TabsTrigger>
-                  <TabsTrigger
                     value="deliveries"
                     className="shrink-0 flex-none px-2 text-xs"
                   >
@@ -354,23 +348,6 @@ export function NotificationRequestDetailSheet({
                       </div>
                     </div>
                   ) : null}
-                </TabsContent>
-
-                <TabsContent value="recipients" className="pt-3">
-                  <div className="space-y-2">
-                    {detail.recipients.map((recipient) => (
-                      <div key={recipient.id} className="rounded-md border p-3 text-sm">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-medium">{recipient.address}</span>
-                          <Badge variant="outline">{recipient.status}</Badge>
-                        </div>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {recipient.type}
-                          {recipient.label ? ` · ${recipient.label}` : ''}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
                 </TabsContent>
 
                 <TabsContent value="deliveries" className="pt-3">

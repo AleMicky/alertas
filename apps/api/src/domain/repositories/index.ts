@@ -7,7 +7,6 @@ export * from './role.repository';
 export * from './user.repository';
 export * from './login-audit.repository';
 export * from './notification-request.repository';
-export * from './notification-recipient.repository';
 export * from './notification-attachment.repository';
 export * from './notification-delivery.repository';
 export * from './notification-delivery-attempt.repository';

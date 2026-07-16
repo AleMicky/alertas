@@ -81,7 +81,7 @@ export function canRetryFailedNotificationRequest(
 export function extractClientPayloadFromStoredPayload(
   storedPayload: Record<string, unknown>,
 ): Record<string, unknown> {
-  const { channel: _channel, target: _target, ...clientPayload } = storedPayload;
+  const { channel: _channel, ...clientPayload } = storedPayload;
 
   return clientPayload;
 }

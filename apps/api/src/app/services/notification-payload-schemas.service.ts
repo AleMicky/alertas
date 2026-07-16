@@ -40,7 +40,7 @@ export class NotificationPayloadSchemasService extends BaseService<NotificationP
 
   private async findActiveByChannelCodeResolved(channelCode: string) {
     const channel =
-      await this.notificationChannelRepository.findByRecipientChannel(
+      await this.notificationChannelRepository.findByCode(
         channelCode,
       );
 
@@ -202,7 +202,7 @@ export class NotificationPayloadSchemasService extends BaseService<NotificationP
     payload: Record<string, unknown>,
   ) {
     const channel =
-      await this.notificationChannelRepository.findByRecipientChannel(
+      await this.notificationChannelRepository.findByCode(
         channelCode,
       );
 

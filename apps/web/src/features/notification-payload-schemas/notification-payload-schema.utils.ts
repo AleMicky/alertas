@@ -190,6 +190,21 @@ export function createDefaultSchemaBuilderState(): SchemaBuilderState {
         type: 'array',
         required: true,
         itemsType: 'string',
+        format: 'email',
+      }),
+      createEmptySchemaField({
+        name: 'cc',
+        type: 'array',
+        required: false,
+        itemsType: 'string',
+        format: 'email',
+      }),
+      createEmptySchemaField({
+        name: 'bcc',
+        type: 'array',
+        required: false,
+        itemsType: 'string',
+        format: 'email',
       }),
       createEmptySchemaField({
         name: 'subject',

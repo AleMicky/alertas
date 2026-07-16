@@ -7,7 +7,6 @@ export * from './role.entity';
 export * from './user.entity';
 export * from './login-audit.entity';
 export * from './notification-request.entity';
-export * from './notification-recipient.entity';
 export * from './notification-attachment.entity';
 export * from './notification-delivery.entity';
 export * from './notification-delivery-attempt.entity';

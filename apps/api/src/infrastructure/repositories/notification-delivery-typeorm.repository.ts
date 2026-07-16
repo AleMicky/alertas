@@ -26,13 +26,6 @@ export class NotificationDeliveryTypeormRepository
     });
   }
 
-  findAllByRecipientId(notificationRecipientId: string) {
-    return this.repository.find({
-      where: { notificationRecipientId },
-      order: { createdAt: 'ASC' },
-    });
-  }
-
   findFailedByNotificationRequestId(notificationRequestId: string) {
     return this.repository.find({
       where: {

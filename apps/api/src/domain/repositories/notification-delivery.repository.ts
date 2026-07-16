@@ -6,10 +6,6 @@ export abstract class NotificationDeliveryRepository extends BaseRepository<Noti
     notificationRequestId: string,
   ): Promise<NotificationDeliveryData[]>;
 
-  abstract findAllByRecipientId(
-    notificationRecipientId: string,
-  ): Promise<NotificationDeliveryData[]>;
-
   abstract findFailedByNotificationRequestId(
     notificationRequestId: string,
   ): Promise<NotificationDeliveryData[]>;
