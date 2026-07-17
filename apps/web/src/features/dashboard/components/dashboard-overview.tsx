@@ -10,6 +10,7 @@ import { useNotificationChannelsQuery } from '@/features/notification-channels/h
 import { useNotificationPayloadSchemasQuery } from '@/features/notification-payload-schemas/hooks/use-notification-payload-schema-query';
 import { useNotificationRequestSearchQuery } from '@/features/notification-requests/hooks/use-notification-request-search-query';
 import { useNotificationRequestStatsQuery } from '@/features/notification-requests/hooks/use-notification-request-stats-query';
+import { NOTIFICATION_REQUEST_DASHBOARD_POLL_MS } from '@/features/notification-requests/notification-request.utils';
 import { PageHeader } from '@/shared/components';
 
 import {
@@ -20,25 +21,38 @@ import { DashboardMetrics } from './dashboard-metrics';
 import { DashboardQuickLinks } from './dashboard-quick-links';
 import { DashboardRequestList } from './dashboard-request-list';
 
+const dashboardPoll = {
+  refetchIntervalMs: NOTIFICATION_REQUEST_DASHBOARD_POLL_MS,
+} as const;
+
 export function DashboardOverview() {
   const statsFrom = useMemo(() => getDashboardStatsFromDate(), []);
 
   const { data: profile, isLoading: isLoadingProfile } = useProfileQuery();
   const { data: stats, isLoading: isLoadingStats } =
-    useNotificationRequestStatsQuery({
-      requestedFrom: statsFrom,
-    });
+    useNotificationRequestStatsQuery(
+      {
+        requestedFrom: statsFrom,
+      },
+      dashboardPoll,
+    );
   const { data: recentResult, isLoading: isLoadingRecent } =
-    useNotificationRequestSearchQuery({
-      page: 1,
-      size: DASHBOARD_RECENT_LIMIT,
-    });
+    useNotificationRequestSearchQuery(
+      {
+        page: 1,
+        size: DASHBOARD_RECENT_LIMIT,
+      },
+      dashboardPoll,
+    );
   const { data: failedResult, isLoading: isLoadingFailed } =
-    useNotificationRequestSearchQuery({
-      status: 'FAILED',
-      page: 1,
-      size: DASHBOARD_RECENT_LIMIT,
-    });
+    useNotificationRequestSearchQuery(
+      {
+        status: 'FAILED',
+        page: 1,
+        size: DASHBOARD_RECENT_LIMIT,
+      },
+      dashboardPoll,
+    );
   const { data: clientSystems, isLoading: isLoadingSystems } =
     useClientSystemsQuery();
   const { data: channels, isLoading: isLoadingChannels } =

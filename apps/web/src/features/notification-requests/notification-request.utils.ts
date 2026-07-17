@@ -3,6 +3,28 @@ import {
   NotificationRequestStatus,
 } from './notification-request.types';
 
+/** Polling en listado/stats de solicitudes (página operativa). */
+export const NOTIFICATION_REQUEST_LIST_POLL_MS = 20_000;
+
+/** Polling más espaciado para el dashboard. */
+export const NOTIFICATION_REQUEST_DASHBOARD_POLL_MS = 30_000;
+
+/** Polling del detalle solo mientras la solicitud sigue en vuelo. */
+export const NOTIFICATION_REQUEST_DETAIL_POLL_MS = 20_000;
+
+const IN_FLIGHT_STATUSES: NotificationRequestStatus[] = [
+  'RECEIVED',
+  'QUEUED',
+  'PROCESSING',
+  'PARTIAL',
+];
+
+export function isNotificationRequestInFlight(
+  status: NotificationRequestStatus,
+): boolean {
+  return IN_FLIGHT_STATUSES.includes(status);
+}
+
 export const NOTIFICATION_REQUEST_STATUS_LABELS: Record<
   NotificationRequestStatus,
   string
