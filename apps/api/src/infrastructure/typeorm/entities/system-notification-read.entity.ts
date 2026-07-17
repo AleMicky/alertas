@@ -10,7 +10,6 @@ import {
 } from 'typeorm';
 
 import { SystemNotificationEntity } from './system-notification.entity';
-import { UserEntity } from './user.entity';
 
 @Entity({ name: 'tsystem_notification_reads' })
 @Unique(['systemNotificationId', 'userId'])
@@ -26,12 +25,8 @@ export class SystemNotificationReadEntity {
   @JoinColumn({ name: 'system_notification_id' })
   systemNotification: SystemNotificationEntity;
 
-  @Column({ name: 'user_id' })
+  @Column({ name: 'user_id', type: 'varchar', length: 255 })
   userId: string;
-
-  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
-  user: UserEntity;
 
   @CreateDateColumn({ name: 'read_at', type: 'timestamp' })
   readAt: Date;

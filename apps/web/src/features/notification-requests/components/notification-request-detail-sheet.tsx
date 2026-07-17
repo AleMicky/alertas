@@ -130,7 +130,7 @@ export function NotificationRequestDetailSheet({
           </div>
         ) : (
           <>
-            <SheetHeader className="space-y-4 border-b bg-gradient-to-br from-primary/5 via-muted/30 to-background p-6">
+            <SheetHeader className="space-y-4 border-b bg-linear-to-br from-primary/5 via-muted/30 to-background p-6">
               <div className="flex flex-wrap items-center gap-2 pr-8">
                 <Badge
                   className={`text-[10px] ${getNotificationRequestStatusClass(request.status)}`}
