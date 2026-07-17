@@ -11,12 +11,10 @@ import {
 
 import { NotificationDeliveryStatus } from 'src/domain/enums';
 import { NotificationChannelProviderEntity } from './notification-channel-provider.entity';
-import { NotificationRecipientEntity } from './notification-recipient.entity';
 import { NotificationRequestEntity } from './notification-request.entity';
 
 @Entity({ name: 'tnotification_deliveries' })
 @Index(['notificationRequestId'])
-@Index(['notificationRecipientId'])
 @Index(['status'])
 export class NotificationDeliveryEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -28,13 +26,6 @@ export class NotificationDeliveryEntity {
   @ManyToOne(() => NotificationRequestEntity, { nullable: false })
   @JoinColumn({ name: 'notification_request_id' })
   notificationRequest: NotificationRequestEntity;
-
-  @Column({ name: 'notification_recipient_id' })
-  notificationRecipientId: string;
-
-  @ManyToOne(() => NotificationRecipientEntity, { nullable: false })
-  @JoinColumn({ name: 'notification_recipient_id' })
-  notificationRecipient: NotificationRecipientEntity;
 
   @Column({ name: 'notification_channel_provider_id', nullable: true })
   notificationChannelProviderId: string | null;
@@ -53,7 +44,12 @@ export class NotificationDeliveryEntity {
   @Column({ name: 'attempt_count', type: 'int', default: 0 })
   attemptCount: number;
 
-  @Column({ name: 'provider_message_id', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'provider_message_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   providerMessageId: string | null;
 
   @Column({ name: 'error_message', type: 'text', nullable: true })

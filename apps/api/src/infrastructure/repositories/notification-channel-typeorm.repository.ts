@@ -19,16 +19,14 @@ export class NotificationChannelTypeormRepository
     super(repository);
   }
 
-  findByCode(code: string) {
-    return this.repository
-      .createQueryBuilder('channel')
-      .where('UPPER(channel.code) = :code', { code: code.trim().toUpperCase() })
-      .getOne();
-  }
-
-  async findByRecipientChannel(code: string) {
+  async findByCode(code: string) {
     for (const candidate of notificationChannelLookupCodes(code)) {
-      const channel = await this.findByCode(candidate);
+      const channel = await this.repository
+        .createQueryBuilder('channel')
+        .where('UPPER(channel.code) = :code', {
+          code: candidate.trim().toUpperCase(),
+        })
+        .getOne();
 
       if (channel) {
         return channel;

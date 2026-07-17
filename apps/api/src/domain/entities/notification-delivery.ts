@@ -3,7 +3,6 @@ import { NotificationDeliveryStatus } from '../enums';
 export type NotificationDeliveryData = {
   id: string;
   notificationRequestId: string;
-  notificationRecipientId: string;
   notificationChannelProviderId: string | null;
   status: NotificationDeliveryStatus;
   attemptCount: number;
@@ -20,7 +19,6 @@ export type NotificationDeliveryData = {
 export class NotificationDelivery implements NotificationDeliveryData {
   id: string;
   notificationRequestId: string;
-  notificationRecipientId: string;
   notificationChannelProviderId: string | null;
   status: NotificationDeliveryStatus;
   attemptCount: number;

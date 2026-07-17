@@ -12,14 +12,17 @@ const endpoint = '/auth';
 
 export const authService = {
   login: async (payload: LoginDto): Promise<LoginResponse> => {
-    const { data } = await http.post(`${endpoint}/login`, payload);
-    const response = unwrapApiResponse<LoginResponse>(data);
+    // http ya desenvuelve ApiResponse en el interceptor
+    const { data } = await http.post<LoginResponse>(
+      `${endpoint}/login`,
+      payload,
+    );
 
-    if (!response?.accessToken || !response?.refreshToken || !response?.user) {
+    if (!data?.accessToken || !data?.refreshToken || !data?.user) {
       throw new Error('Respuesta de login inválida');
     }
 
-    return response;
+    return data;
   },
 
   refresh: async (refreshToken: string): Promise<RefreshResponse> => {

@@ -1,15 +1,16 @@
-# Alertas
+# ms-notificaciones
 
-Sistema de gestión y notificación de alertas. Monorepo con API NestJS, dashboard Next.js e infraestructura Docker (PostgreSQL, Redis).
+Sistema de gestión y notificación. Monorepo con API NestJS, dashboard Next.js e infraestructura Docker (PostgreSQL, Redis).
 
 ## Estructura
 
 ```
-alertas/
+ms-notificaciones/
 ├── apps/
 │   ├── api/          # API NestJS (puerto 4001)
 │   └── web/          # Dashboard Next.js (puerto 3000)
 ├── docker-compose.yml
+├── docker-compose.prod.yml
 ├── Makefile
 └── .env.example
 ```

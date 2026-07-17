@@ -5,10 +5,10 @@
 services:
   api:
     build:
-      context: ./ms-alertas
+      context: ./apps/api
       dockerfile: Dockerfile
-    image: alertas-api:prod
-    container_name: ms-alertas-api
+    image: ms-notificaciones-api:prod
+    container_name: ms-notificaciones-api
     restart: unless-stopped
     ports:
       - "${PORT:-4001}:4001"
@@ -46,8 +46,8 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4001/api/v1}
-    image: alertas-web:prod
-    container_name: alertas-dashboard
+    image: ms-notificaciones-web:prod
+    container_name: ms-notificaciones-web
     restart: unless-stopped
     ports:
       - "${WEB_PORT:-3000}:3000"

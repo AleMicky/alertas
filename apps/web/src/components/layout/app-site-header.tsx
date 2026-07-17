@@ -18,6 +18,7 @@ import { useSidebar } from "@/components/ui/sidebar"
 import { appBrand, getNavBreadcrumb } from "@/navigation/app-nav-config"
 import { AppSearchForm } from "@/components/layout/app-search-form"
 import { AppThemeToggle } from "@/components/layout/app-theme-toggle"
+import { SystemNotificationsBell } from "@/features/system-notifications/components/system-notifications-bell"
 
 export function AppSiteHeader() {
   const { toggleSidebar } = useSidebar()
@@ -77,6 +78,7 @@ export function AppSiteHeader() {
 
         <div className="flex shrink-0 items-center gap-1.5 sm:ml-auto">
           <AppSearchForm className="hidden w-full sm:block sm:max-w-[220px] md:max-w-xs" />
+          <SystemNotificationsBell />
           <AppThemeToggle />
         </div>
       </div>

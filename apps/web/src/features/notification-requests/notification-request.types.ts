@@ -9,22 +9,6 @@ export type NotificationRequestStatus =
 
 export type NotificationPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
 
-export type NotificationRecipientType =
-  | 'EMAIL'
-  | 'PHONE'
-  | 'CHAT_ID'
-  | 'USER_ID'
-  | 'WEBHOOK'
-  | 'CUSTOM';
-
-export type NotificationRecipientStatus =
-  | 'PENDING'
-  | 'QUEUED'
-  | 'SENT'
-  | 'DELIVERED'
-  | 'FAILED'
-  | 'SKIPPED';
-
 export type NotificationDeliveryStatus =
   | 'PENDING'
   | 'QUEUED'
@@ -54,18 +38,6 @@ export interface NotificationRequest {
   updatedAt: string;
 }
 
-export interface NotificationRecipient {
-  id: string;
-  notificationRequestId: string;
-  type: NotificationRecipientType;
-  address: string;
-  label: string | null;
-  status: NotificationRecipientStatus;
-  metadata: Record<string, unknown> | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface NotificationAttachment {
   id: string;
   notificationRequestId: string;
@@ -82,7 +54,6 @@ export interface NotificationAttachment {
 export interface NotificationDelivery {
   id: string;
   notificationRequestId: string;
-  notificationRecipientId: string;
   notificationChannelProviderId: string | null;
   status: NotificationDeliveryStatus;
   attemptCount: number;
@@ -121,7 +92,6 @@ export interface NotificationRequestAudit {
 
 export interface NotificationRequestDetail {
   request: NotificationRequest;
-  recipients: NotificationRecipient[];
   attachments: NotificationAttachment[];
   deliveries: NotificationDelivery[];
   audits: NotificationRequestAudit[];

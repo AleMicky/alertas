@@ -14,31 +14,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import {
-  NotificationPriority,
-  NotificationRecipientType,
-} from 'src/domain/enums';
-
-export class CreateNotificationRecipientDto {
-  @ApiProperty({ enum: NotificationRecipientType })
-  @IsEnum(NotificationRecipientType)
-  type: NotificationRecipientType;
-
-  @ApiProperty({ example: 'usuario@empresa.com' })
-  @IsString()
-  @IsNotEmpty()
-  address: string;
-
-  @ApiPropertyOptional({ example: 'Usuario principal' })
-  @IsOptional()
-  @IsString()
-  label?: string;
-
-  @ApiPropertyOptional({ type: Object })
-  @IsOptional()
-  @IsObject()
-  metadata?: Record<string, unknown>;
-}
+import { NotificationPriority } from 'src/domain/enums';
 
 export class CreateNotificationAttachmentDto {
   @ApiProperty({ example: 'comprobante.pdf' })
@@ -72,22 +48,10 @@ export class CreateNotificationAttachmentDto {
 }
 
 export class CreateNotificationRequestDto {
-  @ApiProperty({ example: 'TELEGRAM' })
+  @ApiProperty({ example: 'GMAIL' })
   @IsString()
   @IsNotEmpty()
   channel: string;
-
-  @ApiPropertyOptional({ example: 'chat-123456' })
-  @IsOptional()
-  @IsString()
-  target?: string;
-
-  @ApiPropertyOptional({ type: [CreateNotificationRecipientDto] })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateNotificationRecipientDto)
-  recipients?: CreateNotificationRecipientDto[];
 
   @ApiPropertyOptional({ type: [CreateNotificationAttachmentDto] })
   @IsOptional()
@@ -127,7 +91,13 @@ export class CreateNotificationRequestDto {
 
   @ApiProperty({
     type: Object,
-    example: { severity: 'HIGH', eventType: 'ORDER_APPROVED' },
+    example: {
+      to: ['usuario@empresa.com'],
+      cc: [],
+      bcc: [],
+      subject: 'Prueba',
+      message: 'Hola',
+    },
   })
   @IsObject()
   @IsNotEmpty()
@@ -138,7 +108,10 @@ export class CreateNotificationRequestDto {
   @IsObject()
   metadata?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ enum: NotificationPriority, default: NotificationPriority.NORMAL })
+  @ApiPropertyOptional({
+    enum: NotificationPriority,
+    default: NotificationPriority.NORMAL,
+  })
   @IsOptional()
   @IsEnum(NotificationPriority)
   priority?: NotificationPriority;

@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1
+# Imagen de producción del API (NestJS). No usar en desarrollo.
 
 FROM node:22-slim AS base
 ENV PNPM_HOME="/pnpm"
@@ -15,17 +16,20 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 FROM base AS build
+ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm build
 
 FROM base AS prod-deps
+ENV NODE_ENV=production
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --prod
 
 FROM node:22-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV PORT=4001
 RUN groupadd --system --gid 1001 nodejs \
   && useradd --system --uid 1001 --gid nodejs nestjs
 COPY --from=prod-deps --chown=nestjs:nodejs /app/node_modules ./node_modules

@@ -81,9 +81,6 @@ export class NotificationRequestDetailResponseDto {
   request: NotificationRequestResponseDto;
 
   @ApiProperty({ type: Array })
-  recipients: unknown[];
-
-  @ApiProperty({ type: Array })
   attachments: unknown[];
 
   @ApiProperty({ type: Array })

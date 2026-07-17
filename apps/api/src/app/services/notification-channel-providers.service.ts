@@ -215,7 +215,7 @@ export class NotificationChannelProvidersService extends BaseService<Notificatio
       return null;
     }
 
-    const channel = await this.notificationChannelRepository.findByRecipientChannel(
+    const channel = await this.notificationChannelRepository.findByCode(
       input.channelCode,
     );
 
