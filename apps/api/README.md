@@ -65,10 +65,6 @@ src/
 └── config/           # Base de datos, Swagger, seeds
 ```
 
-## Documentación adicional
-
-Informes técnicos en la carpeta [`docs/`](./docs/).
-
 ## Subir a GitHub
 
 ```bash
