@@ -15,6 +15,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { StatusBadge } from '@/shared/components';
+import { copyToClipboard } from '@/shared/utils/clipboard';
 
 import { ClientSystem } from '../../types/client-system.types';
 import { ClientSystemToken } from '../../types/client-system-token.types';
@@ -62,12 +63,14 @@ export function ClientSystemTokenDetailSheet({
   const handleCopyReference = async () => {
     if (!token?.token) return;
 
-    try {
-      await navigator.clipboard.writeText(token.token);
-      toast.success('Referencia copiada');
-    } catch {
+    const ok = await copyToClipboard(token.token);
+
+    if (!ok) {
       toast.error('No se pudo copiar');
+      return;
     }
+
+    toast.success('Referencia copiada');
   };
 
   return (
