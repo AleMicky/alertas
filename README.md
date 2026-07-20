@@ -63,7 +63,7 @@ make lint           # ESLint en ambos proyectos
 make test           # Tests del API
 ```
 
-## Modo producción (Docker)
+## Modo producción (Docker local, stack completo)
 
 Levanta API, dashboard, PostgreSQL y Redis como contenedores:
 
@@ -81,6 +81,38 @@ make prod-seed         # Primera vez: catálogos y usuarios del dashboard
 | `make prod-build` | Solo reconstruye imágenes |
 
 `NEXT_PUBLIC_API_URL` en `.env` debe ser la URL del API **vista desde el navegador** (por defecto `http://localhost:4001/api/v1`).
+
+## Despliegue en VPS (Postgres + Redis externos)
+
+En el VPS solo se levantan **API** y **dashboard**. PostgreSQL y Redis deben existir ya (p. ej. Redis como contenedor `infraestructura-redis` en la red Docker `infraestructura`).
+
+```bash
+# En el VPS, dentro del repo:
+cp .env.vps.example .env.vps
+# Editar: DB_*, REDIS_PASSWORD, JWT_SECRET, ALLOWED_ORIGINS, NEXT_PUBLIC_API_URL
+
+# Redis debe estar en la misma red Docker (ajusta DOCKER_NETWORK si hace falta)
+docker network ls | grep infraestructura
+
+make vps-up      # build + arranque
+make vps-seed    # primera vez (catálogos + usuarios dashboard)
+make vps-logs    # seguir logs
+```
+
+| Comando         | Descripción |
+|-----------------|-------------|
+| `make vps-up`   | Construye y levanta API + web |
+| `make vps-down` | Detiene API + web |
+| `make vps-logs` | Logs |
+| `make vps-seed` | Seeds usando `DB_*` de `.env.vps` |
+
+Variables clave en `.env.vps`:
+
+- `NEXT_PUBLIC_API_URL` — URL pública del API (ej. `http://TU_IP:4001/api/v1`)
+- `ALLOWED_ORIGINS` — URL del dashboard (ej. `http://TU_IP:3000`)
+- `REDIS_HOST` — nombre del contenedor Redis en la red (`infraestructura-redis`)
+- `DB_HOST` — IP del VPS o hostname/contenedor de Postgres
+- `DOCKER_NETWORK` — red externa de Docker (default `infraestructura`)
 
 ## Variables de entorno
 

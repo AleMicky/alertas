@@ -1,9 +1,16 @@
-# Stack completo en modo producción (API + dashboard + Postgres + Redis).
-# Uso local / servidor sin infra compartida:
-#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-#   make prod-up
+# Despliegue en VPS: solo API + dashboard.
+# Usa PostgreSQL y Redis ya existentes en el servidor (no levanta db/redis).
 #
-# En VPS con Postgres/Redis externos, usa docker-compose.vps.yml (make vps-up).
+# Requisitos:
+#   1. Red Docker externa donde vive Redis (p. ej. contenedor infraestructura-redis)
+#   2. Archivo .env.vps con DB_*, REDIS_*, JWT_*, URLs públicas, etc.
+#
+# Uso:
+#   cp .env.vps.example .env.vps   # editar secretos y URLs
+#   make vps-up
+#   make vps-seed                 # primera vez
+
+name: ms-notificaciones
 
 services:
   api:
@@ -15,40 +22,40 @@ services:
     restart: unless-stopped
     ports:
       - "${PORT:-4001}:4001"
+    env_file:
+      - .env.vps
     environment:
       NODE_ENV: production
       PORT: 4001
       API_PREFIX: ${API_PREFIX:-api/v1}
-      DB_HOST: db
-      DB_PORT: 5432
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-5432}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_DATABASE: ${DB_DATABASE}
       DB_LOGGING: "false"
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_HOST: ${REDIS_HOST:-infraestructura-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
       TZ: ${TZ:-America/La_Paz}
       N8N_WEBHOOK_TEST_URL: ${N8N_WEBHOOK_TEST_URL:-}
       DASHBOARD_ADMIN_USERNAME: ${DASHBOARD_ADMIN_USERNAME}
       DASHBOARD_ADMIN_PASSWORD: ${DASHBOARD_ADMIN_PASSWORD}
       DASHBOARD_OPERATOR_USERNAME: ${DASHBOARD_OPERATOR_USERNAME}
       DASHBOARD_OPERATOR_PASSWORD: ${DASHBOARD_OPERATOR_PASSWORD}
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
+    networks:
+      - default
+      - infraestructura
 
   web:
     build:
       context: ./apps/web
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4001/api/v1}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     image: ms-notificaciones-web:prod
     container_name: ms-notificaciones-web
     restart: unless-stopped
@@ -58,3 +65,13 @@ services:
       NODE_ENV: production
     depends_on:
       - api
+    networks:
+      - default
+
+networks:
+  # Red donde corre Redis (y opcionalmente Postgres) en el VPS.
+  # Crear si no existe: docker network create infraestructura
+  # Ajustar nombre con DOCKER_NETWORK en .env.vps
+  infraestructura:
+    external: true
+    name: ${DOCKER_NETWORK:-infraestructura}
