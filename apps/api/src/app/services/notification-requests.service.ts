@@ -154,7 +154,7 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
 
     if (!schemaValidation.valid) {
       throw new BadRequestException({
-        message: 'Payload inválido para el canal indicado',
+        message: `Payload inválido para el canal ${channel.code}: ${schemaValidation.errors.join('; ')}`,
         errors: schemaValidation.errors,
       });
     }
@@ -632,7 +632,7 @@ export class NotificationRequestsService extends BaseService<NotificationRequest
 
       if (!validation.valid) {
         throw new BadRequestException({
-          message: 'Payload inválido para el canal indicado',
+          message: `Payload inválido para el canal ${channel.code}: ${validation.errors.join('; ')}`,
           errors: validation.errors,
         });
       }
