@@ -57,9 +57,11 @@ services:
       context: ./apps/web
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        # Mismo origen que el dashboard (:7000) → evita firewall/CORS hacia :4001
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://172.31.32.208:7000/backend/api/v1}
         NEXT_PUBLIC_KEYCLOAK_ISSUER: ${NEXT_PUBLIC_KEYCLOAK_ISSUER}
         NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID:-alertas-web}
+        API_INTERNAL_URL: ${API_INTERNAL_URL:-http://ms-notificaciones-api-pruebas:4001}
     image: ms-notificaciones-web:pruebas
     container_name: ms-notificaciones-web-pruebas
     restart: unless-stopped

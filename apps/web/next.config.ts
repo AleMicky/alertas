@@ -37,6 +37,14 @@ function loadSharedEnvOnce() {
 
 loadSharedEnvOnce();
 
+// Proxy same-origin opcional: el navegador llama a /backend/* en el web (:7000)
+// y Next reenvía al API en la red Docker (útil si el puerto 4001 no es alcanzable).
+const apiInternalUrl = (
+  process.env.API_INTERNAL_URL ||
+  process.env.NEXT_PUBLIC_API_INTERNAL_URL ||
+  ""
+).replace(/\/$/, "");
+
 const nextConfig: NextConfig = {
   output: "standalone",
   env: {
@@ -44,6 +52,15 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_KEYCLOAK_ISSUER: process.env.NEXT_PUBLIC_KEYCLOAK_ISSUER ?? "",
     NEXT_PUBLIC_KEYCLOAK_CLIENT_ID:
       process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ?? "alertas-web",
+  },
+  async rewrites() {
+    if (!apiInternalUrl) return [];
+    return [
+      {
+        source: "/backend/:path*",
+        destination: `${apiInternalUrl}/:path*`,
+      },
+    ];
   },
   turbopack: {
     root: __dirname,
