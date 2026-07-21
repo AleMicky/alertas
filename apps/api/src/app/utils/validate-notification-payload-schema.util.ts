@@ -22,11 +22,64 @@ function createAjv(): Ajv {
   return ajv;
 }
 
-function formatAjvError(error: ErrorObject): string {
-  const path = error.instancePath || '/';
-  const message = error.message ?? 'valor inválido';
+function formatInstancePath(instancePath: string): string {
+  if (!instancePath || instancePath === '/') {
+    return 'payload';
+  }
 
-  return `${path}: ${message}`;
+  return instancePath.startsWith('/')
+    ? `payload${instancePath.replace(/\//g, '.')}`
+    : `payload.${instancePath}`;
+}
+
+function formatAjvError(error: ErrorObject): string {
+  const location = formatInstancePath(error.instancePath || '/');
+  const params = error.params as Record<string, unknown>;
+
+  switch (error.keyword) {
+    case 'additionalProperties': {
+      const property = String(params.additionalProperty ?? 'desconocida');
+      return `${location}: la propiedad "${property}" no está permitida por el schema del canal`;
+    }
+    case 'required': {
+      const property = String(params.missingProperty ?? 'desconocida');
+      return `${location}: falta la propiedad requerida "${property}"`;
+    }
+    case 'type': {
+      return `${location}: debe ser de tipo "${String(params.type ?? 'desconocido')}"`;
+    }
+    case 'enum': {
+      const allowed = Array.isArray(params.allowedValues)
+        ? params.allowedValues.map(String).join(', ')
+        : 'valores permitidos';
+      return `${location}: debe ser uno de: ${allowed}`;
+    }
+    case 'format': {
+      return `${location}: formato inválido (se espera "${String(params.format ?? 'válido')}")`;
+    }
+    case 'minItems': {
+      return `${location}: debe tener al menos ${String(params.limit)} elemento(s)`;
+    }
+    case 'maxItems': {
+      return `${location}: debe tener como máximo ${String(params.limit)} elemento(s)`;
+    }
+    case 'minLength': {
+      return `${location}: debe tener al menos ${String(params.limit)} carácter(es)`;
+    }
+    case 'maxLength': {
+      return `${location}: debe tener como máximo ${String(params.limit)} carácter(es)`;
+    }
+    case 'minimum': {
+      return `${location}: debe ser >= ${String(params.limit)}`;
+    }
+    case 'maximum': {
+      return `${location}: debe ser <= ${String(params.limit)}`;
+    }
+    default: {
+      const message = error.message ?? 'valor inválido';
+      return `${location}: ${message}`;
+    }
+  }
 }
 
 function normalizeRequiredFields(requiredFields: string[]): string[] {

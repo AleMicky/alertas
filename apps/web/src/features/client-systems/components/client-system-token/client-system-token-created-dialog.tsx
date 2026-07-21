@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { copyToClipboard } from '@/shared/utils/clipboard';
 
 interface Props {
   open: boolean;
@@ -30,13 +31,15 @@ export function ClientSystemTokenCreatedDialog({
   const handleCopy = async () => {
     if (!token) return;
 
-    try {
-      await navigator.clipboard.writeText(token);
-      setCopied(true);
-      toast.success('Token copiado al portapapeles');
-    } catch {
+    const ok = await copyToClipboard(token);
+
+    if (!ok) {
       toast.error('No se pudo copiar el token');
+      return;
     }
+
+    setCopied(true);
+    toast.success('Token copiado al portapapeles');
   };
 
   return (

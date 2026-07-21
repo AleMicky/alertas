@@ -71,7 +71,29 @@ describe('validateNotificationPayloadSchemaConfiguration', () => {
     });
 
     expect(invalidResult.valid).toBe(false);
-    expect(invalidResult.errors.length).toBeGreaterThan(0);
+    expect(invalidResult.errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('falta la propiedad requerida "message"'),
+      ]),
+    );
+  });
+
+  it('indica qué propiedad adicional no está permitida', () => {
+    const result = validatePayloadAgainstSchema(validSchema, {
+      to: ['usuario@empresa.com'],
+      subject: 'Hola',
+      message: 'Mensaje',
+      channel: 'GMAIL',
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          'la propiedad "channel" no está permitida por el schema del canal',
+        ),
+      ]),
+    );
   });
 
   it('valida formatos de ajv-formats como email y date-time', () => {
@@ -98,9 +120,9 @@ describe('validateNotificationPayloadSchemaConfiguration', () => {
     });
 
     expect(invalidEmail.valid).toBe(false);
-    expect(invalidEmail.errors.some((error) => error.includes('/to'))).toBe(
-      true,
-    );
+    expect(
+      invalidEmail.errors.some((error) => error.includes('payload.to')),
+    ).toBe(true);
 
     const invalidDate = validatePayloadAgainstSchema(schemaWithFormats, {
       to: 'usuario@empresa.com',
@@ -108,9 +130,9 @@ describe('validateNotificationPayloadSchemaConfiguration', () => {
     });
 
     expect(invalidDate.valid).toBe(false);
-    expect(invalidDate.errors.some((error) => error.includes('/sentAt'))).toBe(
-      true,
-    );
+    expect(
+      invalidDate.errors.some((error) => error.includes('payload.sentAt')),
+    ).toBe(true);
   });
 
   it('no rechaza campos de transporte como channel en el payload del cliente', () => {

@@ -5,6 +5,7 @@ API_DIR    := apps/api
 WEB_DIR    := apps/web
 COMPOSE      := docker compose
 COMPOSE_PROD := $(COMPOSE) -f docker-compose.yml -f docker-compose.prod.yml
+COMPOSE_VPS  := $(COMPOSE) --env-file .env.vps -f docker-compose.vps.yml
 
 # ── Ayuda ──────────────────────────────────────────────────────────────────────
 
@@ -90,6 +91,41 @@ prod-logs: ## Logs del stack de producción (Ctrl+C para salir)
 
 prod-seed: ## Ejecuta seeds contra la BD expuesta por Docker
 	cd $(API_DIR) && pnpm seed
+
+# ── VPS (API + web; Postgres/Redis externos) ─────────────────────────────────
+
+.PHONY: vps-env vps-build vps-up vps-down vps-restart vps-ps vps-logs vps-seed
+vps-env: ## Crea .env.vps desde .env.vps.example si no existe
+	@test -f .env.vps || (cp .env.vps.example .env.vps && echo "✓ Creado .env.vps — edita secretos y URLs")
+	@test -f .env.vps && echo "✓ .env.vps OK"
+
+vps-build: vps-env ## Construye imágenes para el VPS
+	$(COMPOSE_VPS) build
+
+vps-up: vps-env ## Levanta API + dashboard en el VPS (infra externa)
+	@docker network inspect $$(grep -E '^DOCKER_NETWORK=' .env.vps 2>/dev/null | cut -d= -f2 || echo infraestructura) >/dev/null 2>&1 \
+		|| docker network create $$(grep -E '^DOCKER_NETWORK=' .env.vps 2>/dev/null | cut -d= -f2 || echo infraestructura)
+	$(COMPOSE_VPS) up -d --build
+	@echo "✓ Stack VPS arriba"
+	@echo "  Dashboard → $$(grep -E '^ALLOWED_ORIGINS=' .env.vps | cut -d= -f2 | cut -d, -f1)"
+	@echo "  API       → $$(grep -E '^NEXT_PUBLIC_API_URL=' .env.vps | cut -d= -f2)"
+	@echo ""
+	@echo "  Primera vez: make vps-seed"
+
+vps-down: ## Detiene API y dashboard del VPS
+	$(COMPOSE_VPS) down
+
+vps-restart: ## Reinicia API y dashboard del VPS
+	$(COMPOSE_VPS) restart
+
+vps-ps: ## Estado de contenedores VPS
+	$(COMPOSE_VPS) ps
+
+vps-logs: ## Logs del stack VPS (Ctrl+C para salir)
+	$(COMPOSE_VPS) logs -f
+
+vps-seed: vps-env ## Seeds contra la BD del VPS (usa DB_* de .env.vps)
+	@set -a && . ./.env.vps && set +a && cd $(API_DIR) && pnpm seed
 
 # ── Backend (apps/api / NestJS) ───────────────────────────────────────────────
 
