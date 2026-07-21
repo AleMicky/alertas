@@ -3,9 +3,10 @@
 ROOT_DIR   := $(CURDIR)
 API_DIR    := apps/api
 WEB_DIR    := apps/web
-COMPOSE      := docker compose
-COMPOSE_PROD := $(COMPOSE) -f docker-compose.yml -f docker-compose.prod.yml
-COMPOSE_VPS  := $(COMPOSE) --env-file .env.vps -f docker-compose.vps.yml
+COMPOSE         := docker compose
+COMPOSE_PROD    := $(COMPOSE) -f docker-compose.yml -f docker-compose.prod.yml
+COMPOSE_VPS     := $(COMPOSE) --env-file .env.vps -f docker-compose.vps.yml
+COMPOSE_PRUEBAS := $(COMPOSE) --env-file .env.pruebas -f docker-compose.pruebas.yml
 
 # ── Ayuda ──────────────────────────────────────────────────────────────────────
 
@@ -126,6 +127,41 @@ vps-logs: ## Logs del stack VPS (Ctrl+C para salir)
 
 vps-seed: vps-env ## Seeds contra la BD del VPS (usa DB_* de .env.vps)
 	@set -a && . ./.env.vps && set +a && cd $(API_DIR) && pnpm seed
+
+# ── Servidor de pruebas (API + web; infra externa) ───────────────────────────
+
+.PHONY: pruebas-env pruebas-build pruebas-up pruebas-down pruebas-restart pruebas-ps pruebas-logs pruebas-seed
+pruebas-env: ## Crea .env.pruebas desde .env.pruebas.example si no existe
+	@test -f .env.pruebas || (cp .env.pruebas.example .env.pruebas && echo "✓ Creado .env.pruebas — edita secretos y URLs")
+	@test -f .env.pruebas && echo "✓ .env.pruebas OK"
+
+pruebas-build: pruebas-env ## Construye imágenes para el servidor de pruebas
+	$(COMPOSE_PRUEBAS) build
+
+pruebas-up: pruebas-env ## Levanta API + dashboard en pruebas (Postgres/Redis/Keycloak externos)
+	@docker network inspect $$(grep -E '^DOCKER_NETWORK=' .env.pruebas 2>/dev/null | cut -d= -f2 || echo infraestructura) >/dev/null 2>&1 \
+		|| (echo "✗ Red Docker 'infraestructura' no existe en este host" && exit 1)
+	$(COMPOSE_PRUEBAS) up -d --build
+	@echo "✓ Stack de pruebas arriba"
+	@echo "  Dashboard → http://172.31.32.208:$${WEB_PORT:-7000}"
+	@echo "  API       → $$(grep -E '^NEXT_PUBLIC_API_URL=' .env.pruebas | cut -d= -f2)"
+	@echo ""
+	@echo "  Primera vez: make pruebas-seed"
+
+pruebas-down: ## Detiene API y dashboard de pruebas
+	$(COMPOSE_PRUEBAS) down
+
+pruebas-restart: ## Reinicia API y dashboard de pruebas
+	$(COMPOSE_PRUEBAS) restart
+
+pruebas-ps: ## Estado de contenedores de pruebas
+	$(COMPOSE_PRUEBAS) ps
+
+pruebas-logs: ## Logs del stack de pruebas (Ctrl+C para salir)
+	$(COMPOSE_PRUEBAS) logs -f
+
+pruebas-seed: pruebas-env ## Seeds contra la BD de pruebas (usa DB_* de .env.pruebas)
+	@set -a && . ./.env.pruebas && set +a && cd $(API_DIR) && pnpm seed
 
 # ── Backend (apps/api / NestJS) ───────────────────────────────────────────────
 

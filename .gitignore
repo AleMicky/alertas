@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 !.env.vps.example
+!.env.pruebas.example
 
 # Dependencies
 node_modules/

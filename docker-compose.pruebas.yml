@@ -1,0 +1,79 @@
+# Despliegue en servidor de pruebas: solo API + dashboard.
+# Usa Postgres / Redis / Keycloak de la red Docker "infraestructura".
+#
+# Contenedores externos esperados:
+#   infraestructura-postgres  → 172.18.0.2
+#   infraestructura-keycloak  → 172.18.0.3
+#   infraestructura-redis     → 172.18.0.6
+#
+# Uso:
+#   cp .env.pruebas.example .env.pruebas   # editar secretos y puertos Keycloak
+#   make pruebas-up
+#   make pruebas-seed                     # primera vez
+
+name: ms-notificaciones-pruebas
+
+services:
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    image: ms-notificaciones-api:pruebas
+    container_name: ms-notificaciones-api-pruebas
+    restart: unless-stopped
+    ports:
+      - "${PORT:-4001}:4001"
+    env_file:
+      - .env.pruebas
+    environment:
+      NODE_ENV: production
+      PORT: 4001
+      API_PREFIX: ${API_PREFIX:-api/v1}
+      DB_HOST: ${DB_HOST:-infraestructura-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_LOGGING: ${DB_LOGGING:-false}
+      REDIS_HOST: ${REDIS_HOST:-infraestructura-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}
+      KEYCLOAK_JWKS_URI: ${KEYCLOAK_JWKS_URI:-}
+      KEYCLOAK_AUDIENCE: ${KEYCLOAK_AUDIENCE:-}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-alertas-api}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      TZ: ${TZ:-America/La_Paz}
+      N8N_WEBHOOK_TEST_URL: ${N8N_WEBHOOK_TEST_URL:-}
+      DASHBOARD_ADMIN_USERNAME: ${DASHBOARD_ADMIN_USERNAME}
+      DASHBOARD_ADMIN_PASSWORD: ${DASHBOARD_ADMIN_PASSWORD}
+      DASHBOARD_OPERATOR_USERNAME: ${DASHBOARD_OPERATOR_USERNAME}
+      DASHBOARD_OPERATOR_PASSWORD: ${DASHBOARD_OPERATOR_PASSWORD}
+    networks:
+      - default
+      - infraestructura
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_KEYCLOAK_ISSUER: ${NEXT_PUBLIC_KEYCLOAK_ISSUER}
+        NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID:-alertas-web}
+    image: ms-notificaciones-web:pruebas
+    container_name: ms-notificaciones-web-pruebas
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-7000}:3000"
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - api
+    networks:
+      - default
+
+networks:
+  infraestructura:
+    external: true
+    name: ${DOCKER_NETWORK:-infraestructura}
