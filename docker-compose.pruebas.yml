@@ -1,5 +1,5 @@
 # Despliegue en servidor de pruebas: solo API + dashboard.
-# Usa Postgres / Redis / Keycloak de la red Docker "infraestructura".
+# Usa Postgres / Redis / Keycloak de la red Docker "infraestructura-network".
 #
 # Contenedores externos esperados:
 #   infraestructura-postgres  → 172.18.0.2
@@ -50,8 +50,7 @@ services:
       DASHBOARD_OPERATOR_USERNAME: ${DASHBOARD_OPERATOR_USERNAME}
       DASHBOARD_OPERATOR_PASSWORD: ${DASHBOARD_OPERATOR_PASSWORD}
     networks:
-      - default
-      - infraestructura
+      - infraestructura-network
 
   web:
     build:
@@ -71,9 +70,8 @@ services:
     depends_on:
       - api
     networks:
-      - default
+      - infraestructura-network
 
 networks:
-  infraestructura:
+  infraestructura-network:
     external: true
-    name: ${DOCKER_NETWORK:-infraestructura}

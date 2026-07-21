@@ -139,8 +139,8 @@ pruebas-build: pruebas-env ## Construye imágenes para el servidor de pruebas
 	$(COMPOSE_PRUEBAS) build
 
 pruebas-up: pruebas-env ## Levanta API + dashboard en pruebas (Postgres/Redis/Keycloak externos)
-	@docker network inspect $$(grep -E '^DOCKER_NETWORK=' .env.pruebas 2>/dev/null | cut -d= -f2 || echo infraestructura) >/dev/null 2>&1 \
-		|| (echo "✗ Red Docker 'infraestructura' no existe en este host" && exit 1)
+	@docker network inspect infraestructura-network >/dev/null 2>&1 \
+		|| (echo "✗ Red Docker 'infraestructura-network' no existe en este host" && exit 1)
 	$(COMPOSE_PRUEBAS) up -d --build
 	@echo "✓ Stack de pruebas arriba"
 	@echo "  Dashboard → http://172.31.32.208:$${WEB_PORT:-7000}"
