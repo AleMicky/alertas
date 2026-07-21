@@ -45,13 +45,13 @@
       "directAccessGrantsEnabled": true,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
+      "rootUrl": "http://172.31.32.208:7000",
+      "baseUrl": "/",
       "redirectUris": [
-        "http://localhost:3000/*",
-        "http://localhost:3001/*"
+        "http://172.31.32.208:7000/*"
       ],
       "webOrigins": [
-        "http://localhost:3000",
-        "http://localhost:3001"
+        "http://172.31.32.208:7000"
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
